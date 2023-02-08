@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func ParseFromJson[E any](path string, t E) E {
+func ParseFromJsonToSingleObject[E any](path string, t E) E {
 	// Open json file and print error if any
 	file, fileErr := os.Open(path)
 	util.PrintError(fileErr)
@@ -28,4 +28,19 @@ func ParseFromJson[E any](path string, t E) E {
 	}(file)
 
 	return t
+}
+
+func ParseFromJsonToSlice[E any](path string, t E) []E {
+	// Getting all files in directory
+	files, err := os.ReadDir(path)
+	util.PrintError(err)
+
+	// Creating list and parsing all files in directory
+	var l []E
+	for _, file := range files {
+		toBeAppended := ParseFromJsonToSingleObject(path+file.Name(), &t)
+		l = append(l, *toBeAppended)
+	}
+
+	return l
 }
