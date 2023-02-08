@@ -24,9 +24,7 @@ func ParseFromJson[E any](path string, t E) E {
 	// Defer close on file, and handling any error
 	defer func(file *os.File) {
 		closeErr := file.Close()
-		if closeErr != nil {
-			util.PrintError(closeErr)
-		}
+		util.PrintError(closeErr)
 	}(file)
 
 	return t
