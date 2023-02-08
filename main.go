@@ -1,6 +1,7 @@
 package main
 
 import (
+	"electionguard-verifier-go/core"
 	"electionguard-verifier-go/schema"
 	"electionguard-verifier-go/serialize"
 	"electionguard-verifier-go/util"
@@ -13,17 +14,27 @@ func main() {
 	manifest := serialize.ParseFromJsonToSingleObject(util.SAMPLE_DATA_DIR+"/manifest.json", schema.Manifest{})
 	// cipertextTally := ...
 	electionConstants := serialize.ParseFromJsonToSingleObject(util.SAMPLE_DATA_DIR+"/constants.json", schema.ElectionConstants{})
-	// plaintextTally :=
+	// plaintextTally := ...
 
 	// Non-singleton
 	encryptionDevices := serialize.ParseFromJsonToSlice(util.SAMPLE_DATA_DIR+"/encryption_devices/", schema.EncryptionDevice{})
 	// spoiledBallots := serialize.ParseFromJsonToSlice(util.SAMPLE_DATA_DIR + "/spoiled_ballots/")
 	guardians := serialize.ParseFromJsonToSlice(util.SAMPLE_DATA_DIR+"/guardians/", schema.Guardian{})
 
-	// Test print
-	fmt.Println(cipherTextElectionRecord.Configuration.MaxVotes)
-	fmt.Println(manifest.Type)
-	fmt.Println(electionConstants.SmallPrime)
-	fmt.Println(encryptionDevices[0])
-	fmt.Print(guardians[0].ElectionProofs[0].Commitment)
+	// Verifying election data
+	verifier := *core.MakeVerifier()
+	electionIsValid := verifier.Verify(
+		cipherTextElectionRecord,
+		manifest,
+		electionConstants,
+		encryptionDevices,
+		guardians)
+
+	// Result
+	if electionIsValid {
+		fmt.Println("Election is valid")
+	} else {
+		fmt.Println("Election is invalid")
+	}
+
 }
