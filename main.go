@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "electionguard-verifier-go/serialize"
 
 func main() {
-	fmt.Println("Hello, world!")
+	serialize.ParseContext()
 }
