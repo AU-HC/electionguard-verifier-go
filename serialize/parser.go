@@ -1,27 +1,26 @@
 package serialize
 
 import (
-	"electionguard-verifier-go/util"
+	"electionguard-verifier-go/utility"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 )
 
-func ParseFromJsonToSingleObject[E any](path string, t E) E {
+func ParseFromJsonToSingleObject[E any](path string, typeOfObject E) E {
 	// Open json file and print error if any
 	file, fileErr := os.Open(path)
-	util.PrintError(fileErr)
+	utility.PrintError(fileErr)
 
 	// Turn the file into a byte array, and print error if any
 	jsonByte, byteErr := io.ReadAll(file)
-	util.PrintError(byteErr)
+	utility.PrintError(byteErr)
 
 	// Unmarshal the bytearray into empty instance of variable of type E
 	// and print any error
-	jsonErr := json.Unmarshal(jsonByte, &t)
-	util.PrintError(jsonErr)
-
+	jsonErr := json.Unmarshal(jsonByte, &typeOfObject)
+	utility.PrintError(jsonErr)
 	if jsonErr != nil {
 		fmt.Print(path)
 	}
@@ -29,16 +28,16 @@ func ParseFromJsonToSingleObject[E any](path string, t E) E {
 	// Defer close on file, and handling any error
 	defer func(file *os.File) {
 		closeErr := file.Close()
-		util.PrintError(closeErr)
+		utility.PrintError(closeErr)
 	}(file)
 
-	return t
+	return typeOfObject
 }
 
 func ParseFromJsonToSlice[E any](path string, t E) []E {
 	// Getting all files in directory
 	files, err := os.ReadDir(path)
-	util.PrintError(err)
+	utility.PrintError(err)
 
 	// Creating list and parsing all files in directory
 	var l []E

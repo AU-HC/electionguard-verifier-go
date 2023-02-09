@@ -1,11 +1,11 @@
-package util
+package utility
 
 import "fmt"
 
 // PrintError is used to handle go errors throughout the project
 func PrintError(err error) {
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 	}
 }
 

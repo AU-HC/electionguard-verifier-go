@@ -1,8 +1,6 @@
 package core
 
-import (
-	"electionguard-verifier-go/schema"
-)
+import "electionguard-verifier-go/schema"
 
 type Verifier struct {
 }
@@ -11,6 +9,23 @@ func MakeVerifier() *Verifier {
 	return &Verifier{}
 }
 
-func (v *Verifier) Verify(cipherTextElectionRecord schema.CiphertextElectionRecord, manifest schema.Manifest, electionConstants schema.ElectionConstants, encryptionDevices []schema.EncryptionDevice, guardians []schema.Guardian, encryptedTally schema.EncryptedTally, submittedBallots []schema.SubmittedBallots, spoiledBallots []schema.SpoiledBallot) bool {
+type VerifierArguments struct {
+	CipherTextElectionRecord  schema.CiphertextElectionRecord
+	Manifest                  schema.Manifest
+	ElectionConstants         schema.ElectionConstants
+	EncryptedTally            schema.EncryptedTally
+	PlaintextTally            schema.PlaintextTally
+	CoefficientsValidationSet schema.CoefficientsValidationSet
+	SubmittedBallots          []schema.SubmittedBallots
+	SpoiledBallots            []schema.SpoiledBallot
+	EncryptionDevices         []schema.EncryptionDevice
+	Guardians                 []schema.Guardian
+}
+
+func MakeVerifierArguments() *VerifierArguments {
+	return &VerifierArguments{}
+}
+
+func (v *Verifier) Verify(args VerifierArguments) bool {
 	return true
 }
