@@ -3,6 +3,7 @@ package serialize
 import (
 	"electionguard-verifier-go/util"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 )
@@ -20,6 +21,10 @@ func ParseFromJsonToSingleObject[E any](path string, t E) E {
 	// and print any error
 	jsonErr := json.Unmarshal(jsonByte, &t)
 	util.PrintError(jsonErr)
+
+	if jsonErr != nil {
+		fmt.Print(path)
+	}
 
 	// Defer close on file, and handling any error
 	defer func(file *os.File) {
