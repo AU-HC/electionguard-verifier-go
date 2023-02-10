@@ -2,6 +2,7 @@ package core
 
 import (
 	"electionguard-verifier-go/schema"
+	"go.uber.org/zap"
 )
 
 type Verifier struct {
@@ -12,6 +13,9 @@ func MakeVerifier() *Verifier {
 }
 
 type VerifierArguments struct {
+	// Logger
+	Logger *zap.Logger
+	// Election data fields
 	CiphertextElectionRecord  schema.CiphertextElectionRecord
 	Manifest                  schema.Manifest
 	ElectionConstants         schema.ElectionConstants
@@ -29,8 +33,11 @@ func MakeVerifierArguments() *VerifierArguments {
 }
 
 func (v *Verifier) Verify(args VerifierArguments) bool {
+	// Fetch logger from arguments
+	logger := *args.Logger
+	logger.Info("log from verifier")
+
 	// Validate election parameters
-	// ...
 
 	// Verification was successful
 	return true

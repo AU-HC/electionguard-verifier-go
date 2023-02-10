@@ -9,6 +9,9 @@ import (
 )
 
 func main() {
+	// Logger
+	logger := utility.ConfigureLogger()
+
 	// Singleton files
 	cipherTextElectionRecord := serialize.ParseFromJsonToSingleObject(utility.SAMPLE_DATA_DIR+"/context.json", schema.CiphertextElectionRecord{})
 	manifest := serialize.ParseFromJsonToSingleObject(utility.SAMPLE_DATA_DIR+"/manifest.json", schema.Manifest{})
@@ -35,6 +38,7 @@ func main() {
 	verifierArguments.SpoiledBallots = spoiledBallots
 	verifierArguments.SubmittedBallots = submittedBallots
 	verifierArguments.Guardians = guardians
+	verifierArguments.Logger = logger
 
 	// Creating verifier and verifying election data
 	verifier := *core.MakeVerifier()
