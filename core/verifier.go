@@ -12,7 +12,7 @@ func MakeVerifier() *Verifier {
 }
 
 type VerifierArguments struct {
-	CipherTextElectionRecord  schema.CiphertextElectionRecord
+	CiphertextElectionRecord  schema.CiphertextElectionRecord
 	Manifest                  schema.Manifest
 	ElectionConstants         schema.ElectionConstants
 	EncryptedTally            schema.EncryptedTally

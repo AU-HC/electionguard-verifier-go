@@ -25,7 +25,7 @@ func main() {
 
 	// Create arguments for verifier
 	verifierArguments := *core.MakeVerifierArguments()
-	verifierArguments.CipherTextElectionRecord = cipherTextElectionRecord
+	verifierArguments.CiphertextElectionRecord = cipherTextElectionRecord
 	verifierArguments.Manifest = manifest
 	verifierArguments.EncryptedTally = encryptedTally
 	verifierArguments.ElectionConstants = electionConstants
