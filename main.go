@@ -10,7 +10,7 @@ import (
 
 func main() {
 	// Logger
-	logger := utility.ConfigureLogger()
+	logger := utility.ConfigureLogger(utility.LogDebug)
 
 	// Singleton files
 	cipherTextElectionRecord := serialize.ParseFromJsonToSingleObject(utility.SAMPLE_DATA_DIR+"/context.json", schema.CiphertextElectionRecord{})
