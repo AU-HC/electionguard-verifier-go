@@ -1,8 +1,8 @@
 package schema
 
 type ElectionConstants struct {
-	LargePrime string `json:"large_prime"`
-	SmallPrime string `json:"small_prime"`
-	Cofactor   string `json:"cofactor"`
-	Generator  string `json:"generator"`
+	LargePrime BigInt `json:"large_prime"`
+	SmallPrime BigInt `json:"small_prime"`
+	Cofactor   BigInt `json:"cofactor"`
+	Generator  BigInt `json:"generator"`
 }

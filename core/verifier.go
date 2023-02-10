@@ -2,7 +2,6 @@ package core
 
 import (
 	"electionguard-verifier-go/schema"
-	"fmt"
 )
 
 type Verifier struct {
@@ -30,7 +29,9 @@ func MakeVerifierArguments() *VerifierArguments {
 }
 
 func (v *Verifier) Verify(args VerifierArguments) bool {
-	fmt.Println(args.CoefficientsValidationSet.Coefficients["4"])
+	// Validate election parameters
+	// ...
 
+	// Verification was successful
 	return true
 }

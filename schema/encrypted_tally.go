@@ -20,6 +20,6 @@ type Selections struct {
 }
 
 type Ciphertext struct {
-	Pad  string `json:"pad"`
-	Data string `json:"data"`
+	Pad  BigInt `json:"pad"`
+	Data BigInt `json:"data"`
 }

@@ -16,16 +16,18 @@ type SelectionTally struct {
 	Value    string     `json:"value"`
 	Message  Ciphertext `json:"message"`
 	Shares   []struct {
-		ObjectId   string `json:"object_id"`
-		GuardianId string `json:"guardian_id"`
-		Share      string `json:"share"`
-		Proof      struct {
-			Pad       string `json:"pad"`
-			Data      string `json:"data"`
-			Challenge string `json:"challenge"`
-			Response  string `json:"response"`
-			Usage     string `json:"usage"`
-		} `json:"proof"`
+		ObjectId       string      `json:"object_id"`
+		GuardianId     string      `json:"guardian_id"`
+		Share          string      `json:"share"`
+		Proof          CpProof     `json:"proof"`
 		RecoveredParts interface{} `json:"recovered_parts"`
 	} `json:"shares"`
+}
+
+type CpProof struct {
+	Pad       BigInt `json:"pad"`
+	Data      BigInt `json:"data"`
+	Challenge BigInt `json:"challenge"`
+	Response  BigInt `json:"response"`
+	Usage     string `json:"usage"`
 }
