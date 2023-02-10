@@ -8,4 +8,4 @@ const (
 	LogNone
 )
 
-const SAMPLE_DATA_DIR = "data/hamilton-general/election_record"
+const SampleDataDir = "data/hamilton-general/election_record"

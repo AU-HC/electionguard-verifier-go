@@ -9,35 +9,27 @@ import (
 )
 
 func main() {
-	// Logger
+	// Creating logger
 	logger := utility.ConfigureLogger(utility.LogDebug)
-
-	// Singleton files
-	cipherTextElectionRecord := serialize.ParseFromJsonToSingleObject(utility.SAMPLE_DATA_DIR+"/context.json", schema.CiphertextElectionRecord{})
-	manifest := serialize.ParseFromJsonToSingleObject(utility.SAMPLE_DATA_DIR+"/manifest.json", schema.Manifest{})
-	encryptedTally := serialize.ParseFromJsonToSingleObject(utility.SAMPLE_DATA_DIR+"/encrypted_tally.json", schema.EncryptedTally{})
-	electionConstants := serialize.ParseFromJsonToSingleObject(utility.SAMPLE_DATA_DIR+"/constants.json", schema.ElectionConstants{})
-	plaintextTally := serialize.ParseFromJsonToSingleObject(utility.SAMPLE_DATA_DIR+"/tally.json", schema.PlaintextTally{})
-	coefficients := serialize.ParseFromJsonToSingleObject(utility.SAMPLE_DATA_DIR+"/coefficients.json", schema.CoefficientsValidationSet{})
-
-	// Directory of file(s)
-	encryptionDevices := serialize.ParseFromJsonToSlice(utility.SAMPLE_DATA_DIR+"/encryption_devices/", schema.EncryptionDevice{})
-	spoiledBallots := serialize.ParseFromJsonToSlice(utility.SAMPLE_DATA_DIR+"/spoiled_ballots/", schema.SpoiledBallot{})
-	submittedBallots := serialize.ParseFromJsonToSlice(utility.SAMPLE_DATA_DIR+"/submitted_ballots/", schema.SubmittedBallots{})
-	guardians := serialize.ParseFromJsonToSlice(utility.SAMPLE_DATA_DIR+"/guardians/", schema.Guardian{})
 
 	// Create arguments for verifier
 	verifierArguments := *core.MakeVerifierArguments()
-	verifierArguments.CiphertextElectionRecord = cipherTextElectionRecord
-	verifierArguments.Manifest = manifest
-	verifierArguments.EncryptedTally = encryptedTally
-	verifierArguments.ElectionConstants = electionConstants
-	verifierArguments.PlaintextTally = plaintextTally
-	verifierArguments.CoefficientsValidationSet = coefficients
-	verifierArguments.EncryptionDevices = encryptionDevices
-	verifierArguments.SpoiledBallots = spoiledBallots
-	verifierArguments.SubmittedBallots = submittedBallots
-	verifierArguments.Guardians = guardians
+
+	// Singleton files
+	verifierArguments.CiphertextElectionRecord = serialize.ParseFromJsonToSingleObject(utility.SampleDataDir+"/context.json", schema.CiphertextElectionRecord{})
+	verifierArguments.Manifest = serialize.ParseFromJsonToSingleObject(utility.SampleDataDir+"/manifest.json", schema.Manifest{})
+	verifierArguments.EncryptedTally = serialize.ParseFromJsonToSingleObject(utility.SampleDataDir+"/encrypted_tally.json", schema.EncryptedTally{})
+	verifierArguments.ElectionConstants = serialize.ParseFromJsonToSingleObject(utility.SampleDataDir+"/constants.json", schema.ElectionConstants{})
+	verifierArguments.PlaintextTally = serialize.ParseFromJsonToSingleObject(utility.SampleDataDir+"/tally.json", schema.PlaintextTally{})
+	verifierArguments.CoefficientsValidationSet = serialize.ParseFromJsonToSingleObject(utility.SampleDataDir+"/coefficients.json", schema.CoefficientsValidationSet{})
+
+	// Directory of file(s)
+	verifierArguments.EncryptionDevices = serialize.ParseFromJsonToSlice(utility.SampleDataDir+"/encryption_devices/", schema.EncryptionDevice{})
+	verifierArguments.SpoiledBallots = serialize.ParseFromJsonToSlice(utility.SampleDataDir+"/spoiled_ballots/", schema.SpoiledBallot{})
+	verifierArguments.SubmittedBallots = serialize.ParseFromJsonToSlice(utility.SampleDataDir+"/submitted_ballots/", schema.SubmittedBallots{})
+	verifierArguments.Guardians = serialize.ParseFromJsonToSlice(utility.SampleDataDir+"/guardians/", schema.Guardian{})
+
+	// Adding logger to arguments
 	verifierArguments.Logger = logger
 
 	// Creating verifier and verifying election data
@@ -45,7 +37,6 @@ func main() {
 	electionIsValid := verifier.Verify(verifierArguments)
 
 	// Result of verification of election data
-	fmt.Println()
 	if electionIsValid {
 		fmt.Println("Election is valid")
 	} else {
