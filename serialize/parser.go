@@ -22,7 +22,7 @@ func ParseFromJsonToSingleObject[E any](path string, typeOfObject E) E {
 	jsonErr := json.Unmarshal(jsonByte, &typeOfObject)
 	utility.PrintError(jsonErr)
 	if jsonErr != nil {
-		fmt.Print(path)
+		fmt.Println(path)
 	}
 
 	// Defer close on file, and handling any error

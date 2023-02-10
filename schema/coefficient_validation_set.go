@@ -1,5 +1,5 @@
 package schema
 
 type CoefficientsValidationSet struct {
-	Coefficients map[string]string `json:"coefficients"`
+	Coefficients map[string]BigInt `json:"coefficients"`
 }

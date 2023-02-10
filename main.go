@@ -36,7 +36,7 @@ func main() {
 	verifierArguments.SubmittedBallots = submittedBallots
 	verifierArguments.Guardians = guardians
 
-	// Verifying election data
+	// Creating verifier and verifying election data
 	verifier := *core.MakeVerifier()
 	electionIsValid := verifier.Verify(verifierArguments)
 
