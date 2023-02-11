@@ -3,9 +3,9 @@ package utility
 type LoggingLevel int64
 
 const (
-	LogDebug LoggingLevel = iota
+	LogNone LoggingLevel = iota
 	LogInfo
-	LogNone
+	LogDebug
 )
 
 const SampleDataDir = "data/hamilton-general/election_record"

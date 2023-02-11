@@ -4,9 +4,18 @@ import (
 	"electionguard-verifier-go/utility"
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"io"
 	"os"
 )
+
+type Parser struct {
+	logger zap.Logger
+}
+
+func MakeParser(logger *zap.Logger) *Parser {
+	return &Parser{logger: *logger}
+}
 
 func ParseFromJsonToSingleObject[E any](path string, typeOfObject E) E {
 	// Open json file and print error if any
@@ -34,7 +43,7 @@ func ParseFromJsonToSingleObject[E any](path string, typeOfObject E) E {
 	return typeOfObject
 }
 
-func ParseFromJsonToSlice[E any](path string, t E) []E {
+func ParseFromJsonToSlice[E any](path string, typeOfObject E) []E {
 	// Getting all files in directory
 	files, err := os.ReadDir(path)
 	utility.PrintError(err)
@@ -42,7 +51,7 @@ func ParseFromJsonToSlice[E any](path string, t E) []E {
 	// Creating list and parsing all files in directory
 	var l []E
 	for _, file := range files {
-		toBeAppended := ParseFromJsonToSingleObject(path+file.Name(), &t)
+		toBeAppended := ParseFromJsonToSingleObject(path+file.Name(), &typeOfObject)
 		l = append(l, *toBeAppended)
 	}
 

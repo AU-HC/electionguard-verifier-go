@@ -6,15 +6,14 @@ import (
 )
 
 type Verifier struct {
+	logger zap.Logger
 }
 
-func MakeVerifier() *Verifier {
-	return &Verifier{}
+func MakeVerifier(logger *zap.Logger) *Verifier {
+	return &Verifier{logger: *logger}
 }
 
 type VerifierArguments struct {
-	// Logger
-	Logger *zap.Logger
 	// Election data fields
 	CiphertextElectionRecord  schema.CiphertextElectionRecord
 	Manifest                  schema.Manifest
@@ -33,9 +32,7 @@ func MakeVerifierArguments() *VerifierArguments {
 }
 
 func (v *Verifier) Verify(args VerifierArguments) bool {
-	// Fetch logger from arguments
-	logger := *args.Logger
-	logger.Info("log from verifier")
+	v.logger.Debug("verifying election data")
 
 	// Validate election parameters
 
