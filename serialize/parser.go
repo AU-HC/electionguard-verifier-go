@@ -1,6 +1,8 @@
 package serialize
 
 import (
+	"electionguard-verifier-go/core"
+	"electionguard-verifier-go/schema"
 	"electionguard-verifier-go/utility"
 	"encoding/json"
 	"fmt"
@@ -17,7 +19,30 @@ func MakeParser(logger *zap.Logger) *Parser {
 	return &Parser{logger: *logger}
 }
 
-func ParseFromJsonToSingleObject[E any](path string, typeOfObject E) E {
+func (p *Parser) ConvertJsonDataToGoStruct(path string) core.VerifierArguments {
+	// Creating verifier arguments struct
+	verifierArguments := *core.MakeVerifierArguments()
+
+	// Parsing singleton files
+	verifierArguments.CiphertextElectionRecord = parseJsonStruct(p.logger, path+"/context.json", schema.CiphertextElectionRecord{})
+	verifierArguments.Manifest = parseJsonStruct(p.logger, path+"/manifest.json", schema.Manifest{})
+	verifierArguments.EncryptedTally = parseJsonStruct(p.logger, path+"/encrypted_tally.json", schema.EncryptedTally{})
+	verifierArguments.ElectionConstants = parseJsonStruct(p.logger, path+"/constants.json", schema.ElectionConstants{})
+	verifierArguments.PlaintextTally = parseJsonStruct(p.logger, path+"/tally.json", schema.PlaintextTally{})
+	verifierArguments.CoefficientsValidationSet = parseJsonStruct(p.logger, path+"/coefficients.json", schema.CoefficientsValidationSet{})
+
+	// Directory of file(s)
+	verifierArguments.EncryptionDevices = parseJsonToSlice(p.logger, path+"/encryption_devices/", schema.EncryptionDevice{})
+	verifierArguments.SpoiledBallots = parseJsonToSlice(p.logger, path+"/spoiled_ballots/", schema.SpoiledBallot{})
+	verifierArguments.SubmittedBallots = parseJsonToSlice(p.logger, path+"/submitted_ballots/", schema.SubmittedBallots{})
+	verifierArguments.Guardians = parseJsonToSlice(p.logger, path+"/guardians/", schema.Guardian{})
+
+	return verifierArguments
+}
+
+func parseJsonStruct[E any](logger zap.Logger, path string, typeOfObject E) E {
+	logger.Debug("parsing file: " + path)
+
 	// Open json file and print error if any
 	file, fileErr := os.Open(path)
 	utility.PrintError(fileErr)
@@ -27,7 +52,6 @@ func ParseFromJsonToSingleObject[E any](path string, typeOfObject E) E {
 	utility.PrintError(byteErr)
 
 	// Unmarshal the bytearray into empty instance of variable of type E
-	// and print any error
 	jsonErr := json.Unmarshal(jsonByte, &typeOfObject)
 	utility.PrintError(jsonErr)
 	if jsonErr != nil {
@@ -43,7 +67,7 @@ func ParseFromJsonToSingleObject[E any](path string, typeOfObject E) E {
 	return typeOfObject
 }
 
-func ParseFromJsonToSlice[E any](path string, typeOfObject E) []E {
+func parseJsonToSlice[E any](logger zap.Logger, path string, typeOfObject E) []E {
 	// Getting all files in directory
 	files, err := os.ReadDir(path)
 	utility.PrintError(err)
@@ -51,7 +75,7 @@ func ParseFromJsonToSlice[E any](path string, typeOfObject E) []E {
 	// Creating list and parsing all files in directory
 	var l []E
 	for _, file := range files {
-		toBeAppended := ParseFromJsonToSingleObject(path+file.Name(), &typeOfObject)
+		toBeAppended := parseJsonStruct(logger, path+file.Name(), &typeOfObject)
 		l = append(l, *toBeAppended)
 	}
 
