@@ -21,7 +21,19 @@ func createLogger(level LoggingLevel) (*zap.Logger, error) {
 	case LogDebug:
 		return zap.NewDevelopment()
 	case LogInfo:
-		return zap.NewProduction()
+		xd := zap.Config{
+			Level:       zap.NewAtomicLevelAt(zap.InfoLevel),
+			Development: false,
+			Sampling: &zap.SamplingConfig{
+				Initial:    100,
+				Thereafter: 100,
+			},
+			Encoding:         "console",
+			EncoderConfig:    zap.NewProductionEncoderConfig(),
+			OutputPaths:      []string{"stderr"},
+			ErrorOutputPaths: []string{"stderr"},
+		}
+		return xd.Build()
 	case LogNone:
 		return zap.NewNop(), nil
 	}

@@ -33,8 +33,18 @@ func MakeVerifierArguments() *VerifierArguments {
 
 func (v *Verifier) Verify(args VerifierArguments) bool {
 	v.logger.Debug("verifying election data")
+	// Validate election parameters (Step 1)
+	electionParametersHelper := MakeValidationHelper(&v.logger, "election parameters")
+	electionParametersHelper.Ensure("p is correct", true) // TODO: Fake it
+	electionParametersHelper.Ensure("q is correct", false)
+	electionParametersIsValid := electionParametersHelper.Validate()
+	if !electionParametersIsValid {
+		return false
+	}
 
-	// Validate election parameters
+	// Validate ... (Step 2)
+	// ...
+	// ...
 
 	// Verification was successful
 	return true

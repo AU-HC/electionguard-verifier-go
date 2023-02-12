@@ -41,3 +41,13 @@ func convertByteArrayToStringAndTrim(p []byte) string {
 
 	return s
 }
+
+// Compare Method to make true/false comparisons easier
+func (b *BigInt) Compare(a *BigInt) bool {
+	isEqual := b.Cmp(&a.Int)
+	if isEqual == 0 {
+		return true
+	}
+
+	return false
+}
