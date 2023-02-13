@@ -7,5 +7,3 @@ const (
 	LogInfo
 	LogDebug
 )
-
-const SampleDataDir = "data/hamilton-general/election_record"

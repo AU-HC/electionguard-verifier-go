@@ -6,11 +6,11 @@ import (
 )
 
 type Verifier struct {
-	logger zap.Logger
+	logger *zap.Logger
 }
 
 func MakeVerifier(logger *zap.Logger) *Verifier {
-	return &Verifier{logger: *logger}
+	return &Verifier{logger: logger}
 }
 
 type VerifierArguments struct {
@@ -33,10 +33,19 @@ func MakeVerifierArguments() *VerifierArguments {
 
 func (v *Verifier) Verify(args VerifierArguments) bool {
 	v.logger.Debug("verifying election data")
-	// Validate election parameters (Step 1)
-	electionParametersHelper := MakeValidationHelper(&v.logger, "election parameters")
-	electionParametersHelper.Ensure("p is correct", true) // Fake it
-	electionParametersHelper.Ensure("q is correct", false)
+
+	// Validate election parameters (Step 1):
+	correctConstants := MakeCorrectElectionConstants()
+	electionParametersHelper := MakeValidationHelper(v.logger, "Election parameters (Step 1)")
+	electionParametersHelper.AddCheck("(1.A) The large prime is equal to the large modulus p",
+		correctConstants.P.Compare(&args.ElectionConstants.LargePrime))
+	electionParametersHelper.AddCheck("(1.B) The small prime is equal to the prime q",
+		correctConstants.Q.Compare(&args.ElectionConstants.SmallPrime))
+	electionParametersHelper.AddCheck("(1.C) The cofactor is equal to r = (p − 1)/q",
+		correctConstants.C.Compare(&args.ElectionConstants.Cofactor))
+	electionParametersHelper.AddCheck("(1.D) The generator is equal to the generator g",
+		correctConstants.G.Compare(&args.ElectionConstants.Generator))
+
 	electionParametersIsNotValid := !electionParametersHelper.Validate()
 	if electionParametersIsNotValid {
 		return false
