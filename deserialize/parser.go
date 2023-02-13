@@ -45,15 +45,15 @@ func parseJsonStruct[E any](logger zap.Logger, path string, typeOfObject E) E {
 
 	// Open json file and print error if any
 	file, fileErr := os.Open(path)
-	utility.PrintError(fileErr)
+	utility.PanicError(fileErr)
 
 	// Turn the file into a byte array, and print error if any
 	jsonByte, byteErr := io.ReadAll(file)
-	utility.PrintError(byteErr)
+	utility.PanicError(byteErr)
 
 	// Unmarshal the bytearray into empty instance of variable of type E
 	jsonErr := json.Unmarshal(jsonByte, &typeOfObject)
-	utility.PrintError(jsonErr)
+	utility.PanicError(jsonErr)
 	if jsonErr != nil {
 		fmt.Println(path)
 	}

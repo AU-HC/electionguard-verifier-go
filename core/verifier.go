@@ -32,7 +32,7 @@ func MakeVerifierArguments() *VerifierArguments {
 }
 
 func (v *Verifier) Verify(args VerifierArguments) bool {
-	v.logger.Debug("verifying election data")
+	v.logger.Info("[VALID]: Found election record (Step 0)")
 
 	// Validate election parameters (Step 1):
 	correctConstants := MakeCorrectElectionConstants()
