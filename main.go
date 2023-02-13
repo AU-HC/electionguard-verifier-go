@@ -2,7 +2,7 @@ package main
 
 import (
 	"electionguard-verifier-go/core"
-	"electionguard-verifier-go/serialize"
+	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/utility"
 	"fmt"
 )
@@ -18,7 +18,7 @@ func main() {
 
 	// Create verifier, parser and arguments for verifier
 	verifier := *core.MakeVerifier(logger)
-	parser := *serialize.MakeParser(logger)
+	parser := *deserialize.MakeParser(logger)
 	electionData := parser.ConvertJsonDataToGoStruct(path)
 
 	// Verifying election data

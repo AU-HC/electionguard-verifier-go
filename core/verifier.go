@@ -45,7 +45,6 @@ func (v *Verifier) Verify(args VerifierArguments) bool {
 		correctConstants.C.Compare(&args.ElectionConstants.Cofactor))
 	electionParametersHelper.AddCheck("(1.D) The generator is equal to the generator g",
 		correctConstants.G.Compare(&args.ElectionConstants.Generator))
-
 	electionParametersIsNotValid := !electionParametersHelper.Validate()
 	if electionParametersIsNotValid {
 		return false

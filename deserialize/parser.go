@@ -1,4 +1,4 @@
-package serialize
+package deserialize
 
 import (
 	"electionguard-verifier-go/core"
