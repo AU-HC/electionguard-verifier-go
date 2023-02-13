@@ -1,7 +1,6 @@
 package utility
 
 import (
-	"fmt"
 	"go.uber.org/zap"
 )
 
@@ -20,8 +19,8 @@ func createLogger(level LoggingLevel) (*zap.Logger, error) {
 	switch level {
 	case LogDebug:
 		return zap.NewDevelopment()
-	case LogInfo:
-		xd := zap.Config{
+	case LogInfo: // Changed Config to have same style as development
+		config := zap.Config{
 			Level:       zap.NewAtomicLevelAt(zap.InfoLevel),
 			Development: false,
 			Sampling: &zap.SamplingConfig{
@@ -29,14 +28,12 @@ func createLogger(level LoggingLevel) (*zap.Logger, error) {
 				Thereafter: 100,
 			},
 			Encoding:         "console",
-			EncoderConfig:    zap.NewProductionEncoderConfig(),
+			EncoderConfig:    zap.NewDevelopmentEncoderConfig(),
 			OutputPaths:      []string{"stderr"},
 			ErrorOutputPaths: []string{"stderr"},
 		}
-		return xd.Build()
-	case LogNone:
+		return config.Build()
+	default:
 		return zap.NewNop(), nil
 	}
-
-	return nil, fmt.Errorf("no valid logging level provided")
 }

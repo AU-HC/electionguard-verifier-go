@@ -34,7 +34,7 @@ func (p *Parser) ConvertJsonDataToGoStruct(path string) core.VerifierArguments {
 	// Directory of file(s)
 	verifierArguments.EncryptionDevices = parseJsonToSlice(p.logger, path+"/encryption_devices/", schema.EncryptionDevice{})
 	verifierArguments.SpoiledBallots = parseJsonToSlice(p.logger, path+"/spoiled_ballots/", schema.SpoiledBallot{})
-	verifierArguments.SubmittedBallots = parseJsonToSlice(p.logger, path+"/submitted_ballots/", schema.SubmittedBallots{})
+	verifierArguments.SubmittedBallots = parseJsonToSlice(p.logger, path+"/submitted_ballots/", schema.SubmittedBallot{})
 	verifierArguments.Guardians = parseJsonToSlice(p.logger, path+"/guardians/", schema.Guardian{})
 
 	return verifierArguments

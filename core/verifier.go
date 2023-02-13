@@ -21,7 +21,7 @@ type VerifierArguments struct {
 	EncryptedTally            schema.EncryptedTally
 	PlaintextTally            schema.PlaintextTally
 	CoefficientsValidationSet schema.CoefficientsValidationSet
-	SubmittedBallots          []schema.SubmittedBallots
+	SubmittedBallots          []schema.SubmittedBallot
 	SpoiledBallots            []schema.SpoiledBallot
 	EncryptionDevices         []schema.EncryptionDevice
 	Guardians                 []schema.Guardian
@@ -35,10 +35,10 @@ func (v *Verifier) Verify(args VerifierArguments) bool {
 	v.logger.Debug("verifying election data")
 	// Validate election parameters (Step 1)
 	electionParametersHelper := MakeValidationHelper(&v.logger, "election parameters")
-	electionParametersHelper.Ensure("p is correct", true) // TODO: Fake it
+	electionParametersHelper.Ensure("p is correct", true) // Fake it
 	electionParametersHelper.Ensure("q is correct", false)
-	electionParametersIsValid := electionParametersHelper.Validate()
-	if !electionParametersIsValid {
+	electionParametersIsNotValid := !electionParametersHelper.Validate()
+	if electionParametersIsNotValid {
 		return false
 	}
 

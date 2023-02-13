@@ -1,6 +1,6 @@
 package schema
 
-type SubmittedBallots struct {
+type SubmittedBallot struct {
 	ObjectId     string `json:"object_id"`
 	StyleId      string `json:"style_id"`
 	ManifestHash string `json:"manifest_hash"`
