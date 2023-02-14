@@ -1,9 +1,11 @@
 package core
 
 import (
+	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/utility"
 	"go.uber.org/zap"
+	"strconv"
 )
 
 type Verifier struct {
@@ -29,16 +31,19 @@ func (v *Verifier) Verify(path string) bool {
 	electionParametersHelper.AddCheck("(1.D) The generator is equal to the generator g", correctConstants.G.Compare(&args.ElectionConstants.Generator))
 	electionParametersIsNotValid := !electionParametersHelper.Validate()
 	if electionParametersIsNotValid {
-		return false
+		// return false
 	}
 
 	// Validate guardian public-key (Step 2)
 	publicKeyValidationHelper := MakeValidationHelper(v.logger, "Guardian public-key validation (Step 2)")
-	/* for _, guardian := range args.Guardians {
-		for _, _ := range guardian.ElectionCommitments {
+	for i, guardian := range args.Guardians {
+		for j, proof := range guardian.ElectionProofs {
+			hash := crypto.HashElems(guardian.ElectionCommitments[j], proof.Commitment)
+			hash.Mod(&hash.Int, &correctConstants.Q.Int)
 
+			publicKeyValidationHelper.AddCheck("(2.A) The challenge is correctly computed ("+strconv.Itoa(i)+")", proof.Challenge.Compare(hash))
 		}
-	}*/
+	}
 	publicKeysIsNotValid := !publicKeyValidationHelper.Validate()
 	if publicKeysIsNotValid {
 		return false

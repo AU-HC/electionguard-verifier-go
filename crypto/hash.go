@@ -38,11 +38,12 @@ func (s *SHA256) update(data string) {
 var stringType = reflect.TypeOf("")
 var intType = reflect.TypeOf(1)
 var bigIntType = reflect.TypeOf(schema.BigInt{})
+var bigIntSliceType = reflect.TypeOf(([]schema.BigInt)(nil))
 
 // var intSliceType = reflect.TypeOf(([]int)(nil))
 // var submittedBallotSliceType = reflect.TypeOf(([]schema.SubmittedBallot)(nil))
 
-func HashElems(a ...interface{}) schema.BigInt {
+func HashElems(a ...interface{}) *schema.BigInt {
 	// StringBuilder
 	h := MakeSHA256()
 
@@ -59,6 +60,10 @@ func HashElems(a ...interface{}) schema.BigInt {
 			bigInt := x.(schema.BigInt).Int
 			hex := fmt.Sprintf("%X", &bigInt)    // Convert big.Int to hex
 			hashMe = addLeadingZeroIfNeeded(hex) // add leading zero if amount of digits is odd
+		case bigIntSliceType:
+			bigIntSlice, _ := x.([]interface{})
+			bigIntRes := HashElems(bigIntSlice...)
+			hashMe = fmt.Sprintf("%X", bigIntRes)
 		}
 
 		h.update(hashMe + "|")
@@ -66,7 +71,7 @@ func HashElems(a ...interface{}) schema.BigInt {
 
 	var result big.Int
 	result.SetBytes(h.hash[:])
-	return schema.BigInt{Int: result}
+	return &schema.BigInt{Int: result}
 }
 
 func addLeadingZeroIfNeeded(hex string) string {
