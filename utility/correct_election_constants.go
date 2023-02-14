@@ -1,4 +1,4 @@
-package core
+package utility
 
 import (
 	"electionguard-verifier-go/schema"

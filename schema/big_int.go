@@ -51,3 +51,27 @@ func (b *BigInt) Compare(a *BigInt) bool {
 
 	return false
 }
+
+// ModAddition is used to calculate (b+a) mod n
+// should however consider calculating ((a mod n)+(b mod n)) mod n
+func (b *BigInt) ModAddition(a *BigInt, n *BigInt) *BigInt {
+	// Start by adding the two numbers
+	resultOfAddition := b.Add(&b.Int, &a.Int)
+
+	// Calculate (b+a) mod n
+	resultOfMod := b.Mod(resultOfAddition, &n.Int)
+
+	// Return the BigInt
+	b.Int = *resultOfMod
+	return b
+}
+
+// ModMul is used to calculate (b+a) mod n
+// should however consider calculating ((a mod n)+(b mod n)) mod n
+func (b *BigInt) ModMul(a *BigInt, n *BigInt) *BigInt {
+	return b
+}
+
+func ModularExponentiation(base, exponent, modulus *BigInt) *BigInt {
+	return base
+}

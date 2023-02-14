@@ -2,7 +2,6 @@ package main
 
 import (
 	"electionguard-verifier-go/core"
-	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/utility"
 	"fmt"
 )
@@ -16,13 +15,9 @@ func main() {
 	loggingLevel := applicationArguments.LoggingLevel
 	logger := utility.ConfigureLogger(loggingLevel)
 
-	// Create verifier, parser and arguments for verifier
+	// Create verifier, and verify election data
 	verifier := *core.MakeVerifier(logger)
-	parser := *deserialize.MakeParser(logger)
-	electionData := parser.ConvertJsonDataToGoStruct(path)
-
-	// Verifying election data
-	electionIsValid := verifier.Verify(electionData)
+	electionIsValid := verifier.Verify(path)
 
 	// Result of verification of election data
 	if electionIsValid {

@@ -1,7 +1,6 @@
 package deserialize
 
 import (
-	"electionguard-verifier-go/core"
 	"electionguard-verifier-go/schema"
 	"electionguard-verifier-go/utility"
 	"encoding/json"
@@ -11,6 +10,24 @@ import (
 	"os"
 )
 
+type VerifierArguments struct {
+	// Election data fields
+	CiphertextElectionRecord  schema.CiphertextElectionRecord
+	Manifest                  schema.Manifest
+	ElectionConstants         schema.ElectionConstants
+	EncryptedTally            schema.EncryptedTally
+	PlaintextTally            schema.PlaintextTally
+	CoefficientsValidationSet schema.CoefficientsValidationSet
+	SubmittedBallots          []schema.SubmittedBallot
+	SpoiledBallots            []schema.SpoiledBallot
+	EncryptionDevices         []schema.EncryptionDevice
+	Guardians                 []schema.Guardian
+}
+
+func MakeVerifierArguments() *VerifierArguments {
+	return &VerifierArguments{}
+}
+
 type Parser struct {
 	logger zap.Logger
 }
@@ -19,9 +36,9 @@ func MakeParser(logger *zap.Logger) *Parser {
 	return &Parser{logger: *logger}
 }
 
-func (p *Parser) ConvertJsonDataToGoStruct(path string) core.VerifierArguments {
+func (p *Parser) ConvertJsonDataToGoStruct(path string) VerifierArguments {
 	// Creating verifier arguments struct
-	verifierArguments := *core.MakeVerifierArguments()
+	verifierArguments := *MakeVerifierArguments()
 
 	// Parsing singleton files
 	verifierArguments.CiphertextElectionRecord = parseJsonStruct(p.logger, path+"/context.json", schema.CiphertextElectionRecord{})
@@ -61,7 +78,7 @@ func parseJsonStruct[E any](logger zap.Logger, path string, typeOfObject E) E {
 	// Defer close on file, and handling any error
 	defer func(file *os.File) {
 		closeErr := file.Close()
-		utility.PrintError(closeErr)
+		utility.PanicError(closeErr)
 	}(file)
 
 	return typeOfObject
@@ -70,7 +87,7 @@ func parseJsonStruct[E any](logger zap.Logger, path string, typeOfObject E) E {
 func parseJsonToSlice[E any](logger zap.Logger, path string, typeOfObject E) []E {
 	// Getting all files in directory
 	files, err := os.ReadDir(path)
-	utility.PrintError(err)
+	utility.PanicError(err)
 
 	// Creating list and parsing all files in directory
 	var l []E
