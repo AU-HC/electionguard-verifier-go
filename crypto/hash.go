@@ -11,6 +11,7 @@ import (
 	"strconv"
 )
 
+var nilType = reflect.TypeOf(nil)
 var stringType = reflect.TypeOf("")
 var intType = reflect.TypeOf(1)
 var intSliceType = reflect.TypeOf(([]int)(nil))
@@ -54,6 +55,8 @@ func HashElems(a ...interface{}) *schema.BigInt {
 		var hashMe string
 
 		switch reflect.TypeOf(x) {
+		case nilType:
+			hashMe = "null"
 		case intType:
 			// Type cast and take the string representation of the int
 			xInt, _ := x.(int)
@@ -64,13 +67,14 @@ func HashElems(a ...interface{}) *schema.BigInt {
 		case bigIntType:
 			// Convert big.Int to hex
 			bigInt := x.(schema.BigInt).Int
-			hex := fmt.Sprintf("%X", &bigInt)
+			hashMe = bigInt.Text(10)
 
-			// Add leading zero if amount of digits is odd
-			hashMe = addLeadingZeroIfNeeded(hex)
-		case intSliceType, bigIntSliceType:
+			// Add leading zero if amount of digits is odd // TODO: Might need?
+			// hashMe = addLeadingZeroIfNeeded(hex)
+		default:
 			// Check if slice is empty
 			slice, _ := x.([]interface{})
+
 			sliceIsEmpty := len(slice) == 0
 			if sliceIsEmpty {
 				hashMe = "null"
