@@ -64,8 +64,21 @@ func TestHashBigInt(t *testing.T) {
 	}
 }
 
+func TestHashStringSlice(t *testing.T) {
+	toBeHashed := [3]string{"1", "2", "3"}
+	got := crypto.HashElems(toBeHashed)
+
+	wanted := new(schema.BigInt)
+	wanted.Int.SetString("69616850468205167024114498771676296544077351555488666079379595094599566413508", 10)
+
+	hashIsIncorrect := !got.Compare(wanted)
+	if hashIsIncorrect {
+		t.Error(formatBigIntErrorString(got, wanted))
+	}
+}
+
 func TestHashIntSlice(t *testing.T) {
-	toBeHashed := [3]string{"hej", "med", "dig"}
+	toBeHashed := [3]int{1, 2, 3}
 	got := crypto.HashElems(toBeHashed)
 
 	wanted := new(schema.BigInt)

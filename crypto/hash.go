@@ -41,7 +41,7 @@ func (s *SHA256) digest() *schema.BigInt {
 	intValueForHash := schema.BigInt{Int: big.Int{}}
 	intValueForHash.SetBytes(hash32[:])
 
-	// Taking hash mod q
+	// Taking hash mod q TODO: Should it be q - 1?
 	intValueForHash.Mod(&intValueForHash.Int, &s.q.Int)
 
 	return &intValueForHash
@@ -68,12 +68,15 @@ func HashElems(a ...interface{}) *schema.BigInt {
 			// Convert big.Int to hex
 			bigInt := x.(schema.BigInt).Int
 			hashMe = bigInt.Text(10)
-
 			// Add leading zero if amount of digits is odd // TODO: Might need?
 			// hashMe = addLeadingZeroIfNeeded(hex)
 		default:
-			// Check if slice is empty
-			slice, _ := x.([]interface{})
+			s := reflect.ValueOf(x)
+			var slice = make([]interface{}, s.Len())
+
+			for i := 0; i < s.Len(); i++ {
+				slice[i] = s.Index(i).Interface()
+			}
 
 			sliceIsEmpty := len(slice) == 0
 			if sliceIsEmpty {

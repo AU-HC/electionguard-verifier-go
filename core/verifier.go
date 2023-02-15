@@ -31,7 +31,7 @@ func (v *Verifier) Verify(path string) bool {
 	electionParametersHelper.AddCheck("(1.D) The generator is equal to the generator g", correctConstants.G.Compare(&args.ElectionConstants.Generator))
 	electionParametersIsNotValid := !electionParametersHelper.Validate()
 	if electionParametersIsNotValid {
-		// return false
+		return false
 	}
 
 	// Validate guardian public-key (Step 2)
