@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"electionguard-verifier-go/schema"
 	"electionguard-verifier-go/utility"
@@ -10,9 +11,17 @@ import (
 	"strconv"
 )
 
+var stringType = reflect.TypeOf("")
+var intType = reflect.TypeOf(1)
+var intSliceType = reflect.TypeOf(([]int)(nil))
+var bigIntType = reflect.TypeOf(schema.BigInt{})
+var bigIntSliceType = reflect.TypeOf(([]schema.BigInt)(nil))
+
+// var submittedBallotSliceType = reflect.TypeOf(([]schema.SubmittedBallot)(nil))
+
 type SHA256 struct {
-	hash [32]byte
-	q    schema.BigInt
+	toHash bytes.Buffer
+	q      schema.BigInt // TODO: Probably optimize the way Q is handled
 }
 
 func MakeSHA256() *SHA256 {
@@ -20,58 +29,62 @@ func MakeSHA256() *SHA256 {
 }
 
 func (s *SHA256) update(data string) {
-	// Hashing the new data string and converting it to []byte from [32]byte
-	var hash32 = sha256.Sum256([]byte(data))
-	hash := hash32[:]
-
-	// Creating big.Int for the modular addition
-	intCurrentHash := new(big.Int).SetBytes(hash)
-	intPreviousHash := new(big.Int).SetBytes(s.hash[:])
-	currentHashBigInt := schema.BigInt{Int: *intCurrentHash}
-	previousHashBigInt := schema.BigInt{Int: *intPreviousHash}
-
-	// Creating new bigInt
-	modularAddition := currentHashBigInt.ModAddition(&previousHashBigInt, &s.q)
-	modularAddition.FillBytes(s.hash[:])
+	s.toHash.WriteString(data)
 }
 
-var stringType = reflect.TypeOf("")
-var intType = reflect.TypeOf(1)
-var bigIntType = reflect.TypeOf(schema.BigInt{})
-var bigIntSliceType = reflect.TypeOf(([]schema.BigInt)(nil))
+func (s *SHA256) digest() *schema.BigInt {
+	// Hashing all the data strings
+	var hash32 = sha256.Sum256([]byte(s.toHash.String()))
 
-// var intSliceType = reflect.TypeOf(([]int)(nil))
-// var submittedBallotSliceType = reflect.TypeOf(([]schema.SubmittedBallot)(nil))
+	// Turning byte array into big.Int
+	intValueForHash := schema.BigInt{Int: big.Int{}}
+	intValueForHash.SetBytes(hash32[:])
+
+	// Taking hash mod q
+	intValueForHash.Mod(&intValueForHash.Int, &s.q.Int)
+
+	return &intValueForHash
+}
 
 func HashElems(a ...interface{}) *schema.BigInt {
-	// StringBuilder
 	h := MakeSHA256()
+	h.update("|")
 
 	for _, x := range a {
 		var hashMe string
 
 		switch reflect.TypeOf(x) {
 		case intType:
+			// Type cast and take the string representation of the int
 			xInt, _ := x.(int)
 			hashMe = strconv.Itoa(xInt)
 		case stringType:
-			hashMe, _ = x.(string) // type cast (strings are already utf8-encoded in Golang)
+			// Type cast (strings are already utf8-encoded in Golang)
+			hashMe, _ = x.(string)
 		case bigIntType:
+			// Convert big.Int to hex
 			bigInt := x.(schema.BigInt).Int
-			hex := fmt.Sprintf("%X", &bigInt)    // Convert big.Int to hex
-			hashMe = addLeadingZeroIfNeeded(hex) // add leading zero if amount of digits is odd
-		case bigIntSliceType:
-			bigIntSlice, _ := x.([]interface{})
-			bigIntRes := HashElems(bigIntSlice...)
-			hashMe = fmt.Sprintf("%X", bigIntRes)
-		}
+			hex := fmt.Sprintf("%X", &bigInt)
 
+			// Add leading zero if amount of digits is odd
+			hashMe = addLeadingZeroIfNeeded(hex)
+		case intSliceType, bigIntSliceType:
+			// Check if slice is empty
+			slice, _ := x.([]interface{})
+			sliceIsEmpty := len(slice) == 0
+			if sliceIsEmpty {
+				hashMe = "null"
+			} else {
+				// Else hash the elements and encode to hex
+				bigIntRes := HashElems(slice...)
+				hashMe = fmt.Sprintf("%X", bigIntRes)
+			}
+		}
 		h.update(hashMe + "|")
 	}
 
-	var result big.Int
-	result.SetBytes(h.hash[:])
-	return &schema.BigInt{Int: result}
+	// Digest returns H(strings) mod q
+	return h.digest()
 }
 
 func addLeadingZeroIfNeeded(hex string) string {
