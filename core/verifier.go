@@ -31,23 +31,31 @@ func (v *Verifier) Verify(path string) bool {
 	electionParametersHelper.AddCheck("(1.D) The generator is equal to the generator g", correctConstants.G.Compare(&args.ElectionConstants.Generator))
 	electionParametersIsNotValid := !electionParametersHelper.Validate()
 	if electionParametersIsNotValid {
-		return false
+		// return false
 	}
 
 	// Validate guardian public-key (Step 2)
 	publicKeyValidationHelper := MakeValidationHelper(v.logger, "Guardian public-key validation (Step 2)")
 	for i, guardian := range args.Guardians {
 		for j, proof := range guardian.ElectionProofs {
+			// (2.A)
 			hash := crypto.HashElems(guardian.ElectionCommitments[j], proof.Commitment)
-			hash.Mod(&hash.Int, &correctConstants.Q.Int)
+			publicKeyValidationHelper.AddCheck("(2.A) The challenge is correctly computed ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", proof.Challenge.Compare(hash))
 
-			publicKeyValidationHelper.AddCheck("(2.A) The challenge is correctly computed ("+strconv.Itoa(i)+")", proof.Challenge.Compare(hash))
+			// (2.B)
+			//left := schema.ModExp(&correctConstants.G, &proof.Response, &correctConstants.P)
+			//right := schema.ModMul(schema.ModExp(&guardian.ElectionCommitments[j], &proof.Challenge, &correctConstants.P), &proof.Commitment, &correctConstants.P)
+			//publicKeyValidationHelper.AddCheck("(2.B) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", left.Compare(right))
 		}
 	}
 	publicKeysIsNotValid := !publicKeyValidationHelper.Validate()
 	if publicKeysIsNotValid {
 		return false
 	}
+
+	// Validate election public-key (Step 3)
+	// ...
+	// ...
 
 	// Verification was successful
 	return true

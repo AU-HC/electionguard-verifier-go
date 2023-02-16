@@ -24,6 +24,7 @@ func (v *ValidationHelper) Validate() bool {
 
 	// Looping through each invariant and checking if it holds
 	for description, invariant := range v.invariants {
+		v.logger.Debug("Checked invariant: " + description)
 		if !invariant {
 			errorMessages = append(errorMessages, description)
 			isValid = false
