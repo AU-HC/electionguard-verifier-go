@@ -41,12 +41,12 @@ func (p *Parser) ConvertJsonDataToGoStruct(path string) VerifierArguments {
 	verifierArguments := *MakeVerifierArguments()
 
 	// Parsing singleton files
-	verifierArguments.CiphertextElectionRecord = parseJsonStruct(p.logger, path+"/context.json", schema.CiphertextElectionRecord{})
-	verifierArguments.Manifest = parseJsonStruct(p.logger, path+"/manifest.json", schema.Manifest{})
-	verifierArguments.EncryptedTally = parseJsonStruct(p.logger, path+"/encrypted_tally.json", schema.EncryptedTally{})
-	verifierArguments.ElectionConstants = parseJsonStruct(p.logger, path+"/constants.json", schema.ElectionConstants{})
-	verifierArguments.PlaintextTally = parseJsonStruct(p.logger, path+"/tally.json", schema.PlaintextTally{})
-	verifierArguments.CoefficientsValidationSet = parseJsonStruct(p.logger, path+"/coefficients.json", schema.CoefficientsValidationSet{})
+	verifierArguments.CiphertextElectionRecord = parseJsonToGoStruct(p.logger, path+"/context.json", schema.CiphertextElectionRecord{})
+	verifierArguments.Manifest = parseJsonToGoStruct(p.logger, path+"/manifest.json", schema.Manifest{})
+	verifierArguments.EncryptedTally = parseJsonToGoStruct(p.logger, path+"/encrypted_tally.json", schema.EncryptedTally{})
+	verifierArguments.ElectionConstants = parseJsonToGoStruct(p.logger, path+"/constants.json", schema.ElectionConstants{})
+	verifierArguments.PlaintextTally = parseJsonToGoStruct(p.logger, path+"/tally.json", schema.PlaintextTally{})
+	verifierArguments.CoefficientsValidationSet = parseJsonToGoStruct(p.logger, path+"/coefficients.json", schema.CoefficientsValidationSet{})
 
 	// Directory of file(s)
 	verifierArguments.EncryptionDevices = parseJsonToSlice(p.logger, path+"/encryption_devices/", schema.EncryptionDevice{})
@@ -57,7 +57,7 @@ func (p *Parser) ConvertJsonDataToGoStruct(path string) VerifierArguments {
 	return verifierArguments
 }
 
-func parseJsonStruct[E any](logger zap.Logger, path string, typeOfObject E) E {
+func parseJsonToGoStruct[E any](logger zap.Logger, path string, typeOfObject E) E {
 	logger.Debug("parsing file: " + path)
 
 	// Open json file and print error if any
@@ -92,7 +92,7 @@ func parseJsonToSlice[E any](logger zap.Logger, path string, typeOfObject E) []E
 	// Creating list and parsing all files in directory
 	var l []E
 	for _, file := range files {
-		toBeAppended := parseJsonStruct(logger, path+file.Name(), &typeOfObject)
+		toBeAppended := parseJsonToGoStruct(logger, path+file.Name(), &typeOfObject)
 		l = append(l, *toBeAppended)
 	}
 

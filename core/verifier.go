@@ -3,6 +3,7 @@ package core
 import (
 	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
+	"electionguard-verifier-go/schema"
 	"electionguard-verifier-go/utility"
 	"go.uber.org/zap"
 	"strconv"
@@ -20,7 +21,7 @@ func (v *Verifier) Verify(path string) bool {
 	// Fetch and deserialize election data (Step 0)
 	parser := *deserialize.MakeParser(v.logger)
 	args := parser.ConvertJsonDataToGoStruct(path)
-	v.logger.Info("[VALID]: Loaded election data (Step 0)")
+	v.logger.Info("[VALID]: Election data was formed well (Step 0)")
 
 	// Validate election parameters (Step 1):
 	correctConstants := utility.MakeCorrectElectionConstants()
@@ -34,9 +35,12 @@ func (v *Verifier) Verify(path string) bool {
 		return false
 	}
 
-	// Validate guardian public-key (Step 2)
+	// Validate guardian public-key and election public key (Step 2 & 3)
 	publicKeyValidationHelper := MakeValidationHelper(v.logger, "Guardian public-key validation (Step 2)")
+	electionKeyValidationHelper := MakeValidationHelper(v.logger, "Election public-key validation (Step 3)")
+	k := schema.MakeBigIntFromString("1", 10)
 	for i, guardian := range args.Guardians {
+		k = mulP(k, &guardian.ElectionPublicKey)
 		for j, proof := range guardian.ElectionProofs {
 			// (2.A)
 			hash := crypto.HashElems(guardian.ElectionCommitments[j], proof.Commitment)
@@ -48,8 +52,14 @@ func (v *Verifier) Verify(path string) bool {
 			publicKeyValidationHelper.AddCheck("(2.B) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", left.Compare(right))
 		}
 	}
-	publicKeysIsNotValid := !publicKeyValidationHelper.Validate()
-	if publicKeysIsNotValid {
+	baseHash := schema.MakeBigIntFromByteArray(args.CiphertextElectionRecord.CryptoBaseHash)
+	extendedBaseHashFromData := schema.MakeBigIntFromByteArray(args.CiphertextElectionRecord.CryptoBaseHash)
+	computedExtendedBaseHash := crypto.HashElems(*baseHash, *k) // TODO: Use this key or k?
+	electionKeyValidationHelper.AddCheck("(3.A) The joint public election key is computed correctly", k.Compare(&args.CiphertextElectionRecord.ElgamalPublicKey))
+	electionKeyValidationHelper.AddCheck("(3.B) The extended base hash is computed correctly", extendedBaseHashFromData.Compare(computedExtendedBaseHash))
+
+	publicKeysAreNotValid := !publicKeyValidationHelper.Validate() || !electionKeyValidationHelper.Validate()
+	if publicKeysAreNotValid {
 		return false
 	}
 

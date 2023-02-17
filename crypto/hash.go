@@ -6,7 +6,6 @@ import (
 	"electionguard-verifier-go/schema"
 	"electionguard-verifier-go/utility"
 	"fmt"
-	"math/big"
 	"reflect"
 	"strconv"
 	"strings"
@@ -39,13 +38,12 @@ func (s *SHA256) digest() *schema.BigInt {
 	var hash32 = sha256.Sum256([]byte(s.toHash.String()))
 
 	// Turning byte array into big.Int
-	intValueForHash := schema.BigInt{Int: big.Int{}}
-	intValueForHash.SetBytes(hash32[:])
+	intValueForHash := schema.MakeBigIntFromByteArray(hash32[:])
 
 	// Taking hash mod q TODO: Should it be q - 1?
 	intValueForHash.Mod(&intValueForHash.Int, &s.q.Int)
 
-	return &intValueForHash
+	return intValueForHash
 }
 
 func HashElems(a ...interface{}) *schema.BigInt {

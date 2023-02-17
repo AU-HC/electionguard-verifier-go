@@ -42,6 +42,20 @@ func convertByteArrayToStringAndTrim(p []byte) string {
 	return s
 }
 
+func MakeBigIntFromString(data string, base int) *BigInt {
+	var result BigInt
+	result.SetString(data, base)
+
+	return &result
+}
+
+func MakeBigIntFromByteArray(bytes []byte) *BigInt {
+	var result BigInt
+	result.SetBytes(bytes)
+
+	return &result
+}
+
 // Compare Method to make true/false comparisons easier
 func (b *BigInt) Compare(a *BigInt) bool {
 	isEqual := b.Cmp(&a.Int)
