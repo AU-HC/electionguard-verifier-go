@@ -35,12 +35,12 @@ func (v *Verifier) Verify(path string) bool {
 		return false
 	}
 
-	// Validate guardian public-key and election public key (Step 2 & 3)
+	// Validate guardian public-key (Step 2)
 	publicKeyValidationHelper := MakeValidationHelper(v.logger, "Guardian public-key validation (Step 2)")
 	electionKeyValidationHelper := MakeValidationHelper(v.logger, "Election public-key validation (Step 3)")
-	k := schema.MakeBigIntFromString("1", 10)
+	elgamalPublicKey := schema.MakeBigIntFromString("1", 10)
 	for i, guardian := range args.Guardians {
-		k = mulP(k, &guardian.ElectionPublicKey)
+		elgamalPublicKey = mulP(elgamalPublicKey, &guardian.ElectionPublicKey)
 		for j, proof := range guardian.ElectionProofs {
 			// (2.A)
 			hash := crypto.HashElems(guardian.ElectionCommitments[j], proof.Commitment)
@@ -52,18 +52,24 @@ func (v *Verifier) Verify(path string) bool {
 			publicKeyValidationHelper.AddCheck("(2.B) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", left.Compare(right))
 		}
 	}
-	baseHash := schema.MakeBigIntFromByteArray(args.CiphertextElectionRecord.CryptoBaseHash)
-	extendedBaseHashFromData := schema.MakeBigIntFromByteArray(args.CiphertextElectionRecord.CryptoBaseHash)
-	computedExtendedBaseHash := crypto.HashElems(*baseHash, *k) // TODO: Use this key or k?
-	electionKeyValidationHelper.AddCheck("(3.A) The joint public election key is computed correctly", k.Compare(&args.CiphertextElectionRecord.ElgamalPublicKey))
-	electionKeyValidationHelper.AddCheck("(3.B) The extended base hash is computed correctly", extendedBaseHashFromData.Compare(computedExtendedBaseHash))
-
-	publicKeysAreNotValid := !publicKeyValidationHelper.Validate() || !electionKeyValidationHelper.Validate()
+	publicKeysAreNotValid := !publicKeyValidationHelper.Validate()
 	if publicKeysAreNotValid {
 		return false
 	}
 
-	// Validate election public-key (Step 3)
+	// Validate election public key (Step 3) [ERROR IN SPEC SHEET FOR (3.B)]
+	extendedBaseHash := args.CiphertextElectionRecord.CryptoExtendedBaseHash
+	computedExtendedBaseHash := crypto.HashElems(args.CiphertextElectionRecord.CryptoBaseHash, args.CiphertextElectionRecord.CommitmentHash)
+
+	electionKeyValidationHelper.AddCheck("(3.A) The joint public election key is computed correctly", elgamalPublicKey.Compare(&args.CiphertextElectionRecord.ElgamalPublicKey))
+	electionKeyValidationHelper.AddCheck("(3.B) The extended base hash is computed correctly", extendedBaseHash.Compare(computedExtendedBaseHash))
+
+	jointElectionKeyIsNotValid := !electionKeyValidationHelper.Validate()
+	if jointElectionKeyIsNotValid {
+		return false
+	}
+
+	// Correctness of selection encryptions (Step 4)
 	// ...
 	// ...
 

@@ -38,7 +38,7 @@ func (s *SHA256) digest() *schema.BigInt {
 	var hash32 = sha256.Sum256([]byte(s.toHash.String()))
 
 	// Turning byte array into big.Int
-	intValueForHash := schema.MakeBigIntFromByteArray(hash32[:])
+	intValueForHash := schema.MakeBigIntFromByteArrayModQ(hash32[:])
 
 	// Taking hash mod q TODO: Should it be q - 1?
 	intValueForHash.Mod(&intValueForHash.Int, &s.q.Int)

@@ -49,7 +49,8 @@ func MakeBigIntFromString(data string, base int) *BigInt {
 	return &result
 }
 
-func MakeBigIntFromByteArray(bytes []byte) *BigInt {
+// TODO: Fix so it takes mod q of the result
+func MakeBigIntFromByteArrayModQ(bytes []byte) *BigInt {
 	var result BigInt
 	result.SetBytes(bytes)
 
