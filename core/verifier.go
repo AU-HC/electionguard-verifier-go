@@ -43,9 +43,9 @@ func (v *Verifier) Verify(path string) bool {
 			publicKeyValidationHelper.AddCheck("(2.A) The challenge is correctly computed ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", proof.Challenge.Compare(hash))
 
 			// (2.B)
-			//left := schema.ModExp(&correctConstants.G, &proof.Response, &correctConstants.P)
-			//right := schema.ModMul(schema.ModExp(&guardian.ElectionCommitments[j], &proof.Challenge, &correctConstants.P), &proof.Commitment, &correctConstants.P)
-			//publicKeyValidationHelper.AddCheck("(2.B) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", left.Compare(right))
+			left := powP(&correctConstants.G, &proof.Response)
+			right := mulP(powP(&guardian.ElectionCommitments[j], &proof.Challenge), &proof.Commitment)
+			publicKeyValidationHelper.AddCheck("(2.B) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", left.Compare(right))
 		}
 	}
 	publicKeysIsNotValid := !publicKeyValidationHelper.Validate()
