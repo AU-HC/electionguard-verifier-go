@@ -50,13 +50,27 @@ func TestHashNil(t *testing.T) {
 	}
 }
 
-func TestHashBigInt(t *testing.T) {
+func TestHashBigIntEven(t *testing.T) {
 	toBeHashed := new(schema.BigInt)
 	toBeHashed.SetString("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF43", 16)
 	got := crypto.HashElems(*toBeHashed) // Import, cannot pass pointer, must dereference
 
 	wanted := new(schema.BigInt)
-	wanted.Int.SetString("81214711932601036140639252629910130067642288172673877624082744215981851250268", 10)
+	wanted.Int.SetString("51225707380998196340220773244194501536874806031786789393846173502397472870985", 10)
+
+	hashIsIncorrect := !got.Compare(wanted)
+	if hashIsIncorrect {
+		t.Error(formatBigIntErrorString(got, wanted))
+	}
+}
+
+func TestHashBigIntOdd(t *testing.T) {
+	toBeHashed := new(schema.BigInt)
+	toBeHashed.SetString("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF43", 16)
+	got := crypto.HashElems(*toBeHashed)
+
+	wanted := new(schema.BigInt)
+	wanted.Int.SetString("84524068589429641186007204348884490418457651888968932609273620552893072735868", 10)
 
 	hashIsIncorrect := !got.Compare(wanted)
 	if hashIsIncorrect {

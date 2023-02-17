@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 var nilType = reflect.TypeOf(nil)
@@ -67,9 +68,9 @@ func HashElems(a ...interface{}) *schema.BigInt {
 		case bigIntType:
 			// Convert big.Int to hex
 			bigInt := x.(schema.BigInt).Int
-			hashMe = bigInt.Text(10)
-			// Add leading zero if amount of digits is odd // TODO: Might need?
-			// hashMe = addLeadingZeroIfNeeded(hex)
+			hex := strings.ToUpper(bigInt.Text(16))
+			// Add leading zero if amount of digits is odd
+			hashMe = addLeadingZeroIfNeeded(hex)
 		default:
 			s := reflect.ValueOf(x)
 			var slice = make([]interface{}, s.Len())
@@ -95,10 +96,10 @@ func HashElems(a ...interface{}) *schema.BigInt {
 }
 
 func addLeadingZeroIfNeeded(hex string) string {
-	stringLengthIsOdd := len(hex)%2 != 0
+	stringLengthIsOdd := len(hex)%2 == 1
 	if stringLengthIsOdd {
-		return hex
+		return "0" + hex
 	}
 
-	return "0" + hex
+	return hex
 }
