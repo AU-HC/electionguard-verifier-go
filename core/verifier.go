@@ -24,12 +24,12 @@ func (v *Verifier) Verify(path string) bool {
 	v.logger.Info("[VALID]: Election data was formed well (Step 0)")
 
 	// Validate election parameters (Step 1):
-	correctConstants := utility.MakeCorrectElectionConstants()
+	constants := utility.MakeCorrectElectionConstants()
 	electionParametersHelper := MakeValidationHelper(v.logger, "Election parameters (Step 1)")
-	electionParametersHelper.AddCheck("(1.A) The large prime is equal to the large modulus p", correctConstants.P.Compare(&args.ElectionConstants.LargePrime))
-	electionParametersHelper.AddCheck("(1.B) The small prime is equal to the prime q", correctConstants.Q.Compare(&args.ElectionConstants.SmallPrime))
-	electionParametersHelper.AddCheck("(1.C) The cofactor is equal to r = (p − 1)/q", correctConstants.C.Compare(&args.ElectionConstants.Cofactor))
-	electionParametersHelper.AddCheck("(1.D) The generator is equal to the generator g", correctConstants.G.Compare(&args.ElectionConstants.Generator))
+	electionParametersHelper.AddCheck("(1.A) The large prime is equal to the large modulus p", constants.P.Compare(&args.ElectionConstants.LargePrime))
+	electionParametersHelper.AddCheck("(1.B) The small prime is equal to the prime q", constants.Q.Compare(&args.ElectionConstants.SmallPrime))
+	electionParametersHelper.AddCheck("(1.C) The cofactor is equal to r = (p − 1)/q", constants.C.Compare(&args.ElectionConstants.Cofactor))
+	electionParametersHelper.AddCheck("(1.D) The generator is equal to the generator g", constants.G.Compare(&args.ElectionConstants.Generator))
 	electionParametersIsNotValid := !electionParametersHelper.Validate()
 	if electionParametersIsNotValid {
 		return false
@@ -47,7 +47,7 @@ func (v *Verifier) Verify(path string) bool {
 			publicKeyValidationHelper.AddCheck("(2.A) The challenge is correctly computed ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", proof.Challenge.Compare(hash))
 
 			// (2.B)
-			left := powP(&correctConstants.G, &proof.Response)
+			left := powP(&constants.G, &proof.Response)
 			right := mulP(powP(&guardian.ElectionCommitments[j], &proof.Challenge), &proof.Commitment)
 			publicKeyValidationHelper.AddCheck("(2.B) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", left.Compare(right))
 		}
@@ -69,7 +69,7 @@ func (v *Verifier) Verify(path string) bool {
 		return false
 	}
 
-	// Correctness of selection encryptions (Step 4)
+	// Validate correctness of selection encryptions (Step 4)
 	selectionEncryptionValidationHelper := MakeValidationHelper(v.logger, "Correctness of selection encryptions (Step 4)")
 	for i, ballot := range args.SubmittedBallots {
 		for j, contest := range ballot.Contests {
@@ -99,10 +99,10 @@ func (v *Verifier) Verify(path string) bool {
 				selectionEncryptionValidationHelper.AddCheck("(4.C) v0 is in Zq for ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isInRange(v0))
 				selectionEncryptionValidationHelper.AddCheck("(4.C) v1 is in Zq for ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isInRange(v1))
 				selectionEncryptionValidationHelper.AddCheck("(4.D) The equation c=(c0+c1) mod q is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", c.Compare(addQ(&c0, &c1)))
-				selectionEncryptionValidationHelper.AddCheck("(4.E) The equation g^v0=a0*a^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(&correctConstants.G, &v0).Compare(mulP(&a0, powP(&a, &c0))))
-				selectionEncryptionValidationHelper.AddCheck("(4.F) The equation g^v1=a1*a^c1 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(&correctConstants.G, &v1).Compare(mulP(&a1, powP(&a, &c1))))
+				selectionEncryptionValidationHelper.AddCheck("(4.E) The equation g^v0=a0*a^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(&constants.G, &v0).Compare(mulP(&a0, powP(&a, &c0))))
+				selectionEncryptionValidationHelper.AddCheck("(4.F) The equation g^v1=a1*a^c1 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(&constants.G, &v1).Compare(mulP(&a1, powP(&a, &c1))))
 				selectionEncryptionValidationHelper.AddCheck("(4.G) The equation K^v0=b0*b^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(elgamalPublicKey, &v0).Compare(mulP(&b0, powP(&b, &c0))))
-				selectionEncryptionValidationHelper.AddCheck("(4.H) The equation g^c1=b0*b^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", mulP(powP(&correctConstants.G, &c1), powP(elgamalPublicKey, &v1)).Compare(mulP(&b1, powP(&b, &c1))))
+				selectionEncryptionValidationHelper.AddCheck("(4.H) The equation g^c1=b0*b^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", mulP(powP(&constants.G, &c1), powP(elgamalPublicKey, &v1)).Compare(mulP(&b1, powP(&b, &c1))))
 			}
 		}
 	}
@@ -112,9 +112,66 @@ func (v *Verifier) Verify(path string) bool {
 	}
 
 	// Validate adherence to vote limits (Step 5)
+	voteLimitsValidationHelper := MakeValidationHelper(v.logger, "Adherence to vote limits (Step 5)")
+	for i, ballot := range args.SubmittedBallots {
+		for j, contest := range ballot.Contests {
+			contestInManifest := findContestFromObjectID(contest.ObjectId, args.Manifest.Contests)
+			votesAllowed := contestInManifest.VotesAllowed
+			numberOfSelections := 0
+			calculatedAHat := schema.MakeBigIntFromString("1", 10)
+			calculatedBHat := schema.MakeBigIntFromString("1", 10)
+
+			for _, selection := range contest.BallotSelections {
+				if selection.IsPlaceholderSelection {
+					numberOfSelections++
+				}
+				calculatedAHat = mulP(calculatedAHat, &selection.Ciphertext.Pad)
+				calculatedBHat = mulP(calculatedBHat, &selection.Ciphertext.Data)
+			}
+			// Unwrap arguments for easier use
+			aHat := contest.CiphertextAccumulation.Pad
+			bHat := contest.CiphertextAccumulation.Data
+			a := contest.Proof.Pad
+			b := contest.Proof.Data
+			v := contest.Proof.Response
+
+			// Compute challenge and equations TODO: Should probably refactor
+			c := crypto.HashElems(extendedBaseHash, aHat, bHat, a, b)
+			equationFLeft := powP(&constants.G, &v)
+			equationFRight := mulP(&a, powP(&aHat, c))
+			equationGLeft := mulP(powP(&constants.G, mulP(schema.MakeBigIntFromString(strconv.Itoa(votesAllowed), 10), c)), powP(elgamalPublicKey, &v))
+			equationGRight := mulP(&b, powP(&bHat, c))
+
+			voteLimitsValidationHelper.AddCheck("(5.A) The number of placeholder positions matches the selection limit ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", votesAllowed == numberOfSelections)
+			voteLimitsValidationHelper.AddCheck("(5.B) The a hat is computed correctly ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", aHat.Compare(calculatedAHat))
+			voteLimitsValidationHelper.AddCheck("(5.B) The b hat is computed correctly ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", bHat.Compare(calculatedBHat))
+			voteLimitsValidationHelper.AddCheck("(5.C) The given value V is in Zq ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", isInRange(v))
+			voteLimitsValidationHelper.AddCheck("(5.D) The given value a are in Zp^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", isValidResidue(contest.Proof.Pad))
+			voteLimitsValidationHelper.AddCheck("(5.D) The given values b are in Zp^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", isValidResidue(contest.Proof.Data))
+			voteLimitsValidationHelper.AddCheck("(5.E) The challenge value is correctly computed ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", contest.Proof.Challenge.Compare(c))
+			voteLimitsValidationHelper.AddCheck("(5.F) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", equationFLeft.Compare(equationFRight))
+			voteLimitsValidationHelper.AddCheck("(5.E) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", equationGLeft.Compare(equationGRight))
+		}
+	}
+	voteLimitsNotValid := !voteLimitsValidationHelper.Validate()
+	if voteLimitsNotValid {
+		return false
+	}
+
+	// Validate confirmation codes (Step 6)
 	// ...
 	// ...
 
 	// Verification was successful
 	return true
+}
+
+func findContestFromObjectID(objectID string, contests []schema.Contest) schema.Contest {
+	for _, contest := range contests {
+		if objectID == contest.ObjectID {
+			return contest
+		}
+	}
+
+	return schema.Contest{}
 }

@@ -47,32 +47,7 @@ type Manifest struct {
 		ImageURI  interface{} `json:"image_uri"`
 		IsWriteIn interface{} `json:"is_write_in"`
 	} `json:"candidates"`
-	Contests []struct {
-		ObjectID            string `json:"object_id"`
-		SequenceOrder       int    `json:"sequence_order"`
-		ElectoralDistrictID string `json:"electoral_district_id"`
-		VoteVariation       string `json:"vote_variation"`
-		NumberElected       int    `json:"number_elected"`
-		VotesAllowed        int    `json:"votes_allowed"`
-		Name                string `json:"name"`
-		BallotSelections    []struct {
-			ObjectID      string `json:"object_id"`
-			SequenceOrder int    `json:"sequence_order"`
-			CandidateID   string `json:"candidate_id"`
-		} `json:"ballot_selections"`
-		BallotTitle struct {
-			Text []struct {
-				Value    string `json:"value"`
-				Language string `json:"language"`
-			} `json:"text"`
-		} `json:"ballot_title"`
-		BallotSubtitle struct {
-			Text []struct {
-				Value    string `json:"value"`
-				Language string `json:"language"`
-			} `json:"text"`
-		} `json:"ballot_subtitle"`
-	} `json:"contests"`
+	Contests     []Contest `json:"contests"`
 	BallotStyles []struct {
 		ObjectID            string      `json:"object_id"`
 		GeopoliticalUnitIds []string    `json:"geopolitical_unit_ids"`
@@ -97,4 +72,31 @@ type Manifest struct {
 		} `json:"phone"`
 		Name string `json:"name"`
 	} `json:"contact_information"`
+}
+
+type Contest struct {
+	ObjectID            string `json:"object_id"`
+	SequenceOrder       int    `json:"sequence_order"`
+	ElectoralDistrictID string `json:"electoral_district_id"`
+	VoteVariation       string `json:"vote_variation"`
+	NumberElected       int    `json:"number_elected"`
+	VotesAllowed        int    `json:"votes_allowed"`
+	Name                string `json:"name"`
+	BallotSelections    []struct {
+		ObjectID      string `json:"object_id"`
+		SequenceOrder int    `json:"sequence_order"`
+		CandidateID   string `json:"candidate_id"`
+	} `json:"ballot_selections"`
+	BallotTitle struct {
+		Text []struct {
+			Value    string `json:"value"`
+			Language string `json:"language"`
+		} `json:"text"`
+	} `json:"ballot_title"`
+	BallotSubtitle struct {
+		Text []struct {
+			Value    string `json:"value"`
+			Language string `json:"language"`
+		} `json:"text"`
+	} `json:"ballot_subtitle"`
 }
