@@ -14,9 +14,8 @@ import (
 var nilType = reflect.TypeOf(nil)
 var stringType = reflect.TypeOf("")
 var intType = reflect.TypeOf(1)
-var intSliceType = reflect.TypeOf(([]int)(nil))
 var bigIntType = reflect.TypeOf(schema.BigInt{})
-var bigIntSliceType = reflect.TypeOf(([]schema.BigInt)(nil))
+var ciphertextType = reflect.TypeOf(schema.Ciphertext{})
 
 // var submittedBallotSliceType = reflect.TypeOf(([]schema.SubmittedBallot)(nil))
 
@@ -68,6 +67,11 @@ func HashElems(a ...interface{}) *schema.BigInt {
 			bigInt := x.(schema.BigInt).Int
 			hex := strings.ToUpper(bigInt.Text(16))
 			// Add leading zero if amount of digits is odd
+			hashMe = addLeadingZeroIfNeeded(hex)
+		case ciphertextType:
+			ciphertext := x.(schema.Ciphertext)
+			hash := HashElems(ciphertext.Pad, ciphertext.Data)
+			hex := strings.ToUpper(hash.Text(16))
 			hashMe = addLeadingZeroIfNeeded(hex)
 		default:
 			s := reflect.ValueOf(x)

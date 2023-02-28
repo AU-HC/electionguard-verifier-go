@@ -3,6 +3,7 @@ package schema
 import (
 	"fmt"
 	"math/big"
+	"strconv"
 	"strings"
 )
 
@@ -45,6 +46,14 @@ func convertByteArrayToStringAndTrim(p []byte) string {
 func MakeBigIntFromString(data string, base int) *BigInt {
 	var result BigInt
 	result.SetString(data, base)
+
+	return &result
+}
+
+func MakeBigIntFromInt(data int) *BigInt {
+	var result BigInt
+	stringOfData := strconv.Itoa(data)
+	result.SetString(stringOfData, 10)
 
 	return &result
 }

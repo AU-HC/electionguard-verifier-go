@@ -14,11 +14,11 @@ func MakeValidationHelper(logger *zap.Logger, description string) *ValidationHel
 	return &ValidationHelper{logger: logger, invariants: make(map[string]bool), description: description}
 }
 
-func (v *ValidationHelper) AddCheck(invariantDescription string, invariant bool) {
+func (v *ValidationHelper) addCheck(invariantDescription string, invariant bool) {
 	v.invariants[invariantDescription] = invariant
 }
 
-func (v *ValidationHelper) Validate() bool {
+func (v *ValidationHelper) validate() bool {
 	isValid := true
 	errorMessages := make([]string, len(v.invariants))
 
@@ -29,6 +29,10 @@ func (v *ValidationHelper) Validate() bool {
 			errorMessages = append(errorMessages, description)
 			isValid = false
 		}
+	}
+
+	if len(v.invariants) == 0 {
+		v.logger.Debug("No invariants for: " + v.description)
 	}
 
 	if isValid {

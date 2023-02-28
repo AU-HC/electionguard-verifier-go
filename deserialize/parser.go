@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-type VerifierArguments struct {
+type ElectionRecord struct {
 	// Election data fields
 	CiphertextElectionRecord  schema.CiphertextElectionRecord
 	Manifest                  schema.Manifest
@@ -24,8 +24,8 @@ type VerifierArguments struct {
 	Guardians                 []schema.Guardian
 }
 
-func MakeVerifierArguments() *VerifierArguments {
-	return &VerifierArguments{}
+func MakeElectionRecord() *ElectionRecord {
+	return &ElectionRecord{}
 }
 
 type Parser struct {
@@ -36,9 +36,9 @@ func MakeParser(logger *zap.Logger) *Parser {
 	return &Parser{logger: *logger}
 }
 
-func (p *Parser) ConvertJsonDataToGoStruct(path string) VerifierArguments {
+func (p *Parser) ConvertJsonDataToGoStruct(path string) ElectionRecord {
 	// Creating verifier arguments struct
-	verifierArguments := *MakeVerifierArguments()
+	verifierArguments := *MakeElectionRecord()
 
 	// Parsing singleton files
 	verifierArguments.CiphertextElectionRecord = parseJsonToGoStruct(p.logger, path+"/context.json", schema.CiphertextElectionRecord{})

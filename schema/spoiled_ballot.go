@@ -10,31 +10,20 @@ type SpoiledBallot struct {
 type DecryptedContest struct {
 	ObjectId    string                        `json:"object_id"`
 	Selections  map[string]DecryptedSelection `json:"selections"`
-	ContestData struct {
-		ObjectId string `json:"object_id"`
-		Data     string `json:"data"`
-	}
+	ContestData ContestData                   `json:"contest data"`
+}
+
+type ContestData struct {
+	ObjectId      string           `json:"object_id"`
+	DecryptedData BigInt           `json:"data"`
+	Ciphertext    ExtendedData     `json:"ciphertext_extended_data"`
+	Shares        []SelectionShare `json:"shares"`
 }
 
 type DecryptedSelection struct {
-	ObjectId string `json:"object_id"`
-	Tally    int    `json:"tally"`
-	Value    string `json:"value"`
-	Message  struct {
-		Pad  string `json:"pad"`
-		Data string `json:"data"`
-	} `json:"message"`
-	Shares []struct {
-		ObjectId   string `json:"object_id"`
-		GuardianId string `json:"guardian_id"`
-		Share      string `json:"share"`
-		Proof      struct {
-			Pad       string `json:"pad"`
-			Data      string `json:"data"`
-			Challenge string `json:"challenge"`
-			Response  string `json:"response"`
-			Usage     string `json:"usage"`
-		} `json:"proof"`
-		RecoveredParts interface{} `json:"recovered_parts"`
-	} `json:"shares"`
+	ObjectId string           `json:"object_id"`
+	Tally    int              `json:"tally"`
+	Value    BigInt           `json:"value"`
+	Message  Ciphertext       `json:"message"`
+	Shares   []SelectionShare `json:"shares"`
 }

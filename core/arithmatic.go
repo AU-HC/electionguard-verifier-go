@@ -11,15 +11,16 @@ func isValidResidue(a schema.BigInt) bool {
 	cons := utility.MakeCorrectElectionConstants()
 	p := cons.P
 	q := cons.Q
-	zero := big.NewInt(0)
-	var one schema.BigInt
-	one.SetString("1", 10)
+	zero := schema.MakeBigIntFromString("0", 10)
+	one := schema.MakeBigIntFromString("1", 10)
 
 	valueIsAboveOrEqualToZero := zero.Cmp(&a.Int) <= 0
 	valueIsSmallerThanP := p.Cmp(&a.Int) == 1
-	validResidue := (powP(&a, &q)).Compare(&one)
+	valueIsInRange := valueIsSmallerThanP && valueIsAboveOrEqualToZero // a is in [0, P)
 
-	return valueIsAboveOrEqualToZero && valueIsSmallerThanP && validResidue
+	validResidue := (powP(&a, &q)).Compare(one) // a^q mod p == 1
+
+	return valueIsInRange && validResidue
 }
 
 func isInRange(a schema.BigInt) bool {
@@ -49,8 +50,8 @@ func mulP(a, b *schema.BigInt) *schema.BigInt {
 	modOfB := b.Mod(&b.Int, &p)
 
 	// Multiply the two numbers mod n
-	resultOfMultiplication := modOfA.Mul(modOfA, modOfB)
-	result.Mod(resultOfMultiplication, &p)
+	result.Mul(modOfA, modOfB)
+	result.Mod(&result.Int, &p)
 
 	return &result
 }

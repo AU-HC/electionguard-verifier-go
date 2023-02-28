@@ -1,21 +1,21 @@
 package schema
 
 type EncryptedTally struct {
-	ObjectId string              `json:"object_id"`
-	Contests map[string]Contests `json:"contests"`
+	ObjectId string                            `json:"object_id"`
+	Contests map[string]EncryptedContestsTally `json:"contests"`
 }
 
-type Contests struct {
-	ObjectId        string                `json:"object_id"`
-	SequenceOrder   int                   `json:"sequence_order"`
-	DescriptionHash string                `json:"description_hash"`
-	Selections      map[string]Selections `json:"selections"`
+type EncryptedContestsTally struct {
+	ObjectId        string                             `json:"object_id"`
+	SequenceOrder   int                                `json:"sequence_order"`
+	DescriptionHash BigInt                             `json:"description_hash"`
+	Selections      map[string]EncryptedSelectionTally `json:"selections"`
 }
 
-type Selections struct {
+type EncryptedSelectionTally struct {
 	ObjectId        string     `json:"object_id"`
 	SequenceOrder   int        `json:"sequence_order"`
-	DescriptionHash string     `json:"description_hash"`
+	DescriptionHash BigInt     `json:"description_hash"`
 	Ciphertext      Ciphertext `json:"ciphertext"`
 }
 
