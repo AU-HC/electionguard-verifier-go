@@ -34,7 +34,7 @@ type BallotSelections struct {
 	IsPlaceholderSelection bool             `json:"is_placeholder_selection"`
 	Nonce                  interface{}      `json:"nonce"`
 	Proof                  DisjunctiveProof `json:"proof"`
-	ExtendedData           interface{}      `json:"extended_data"`
+	ExtendedData           ExtendedData     `json:"extended_data"`
 }
 
 type DisjunctiveProof struct {

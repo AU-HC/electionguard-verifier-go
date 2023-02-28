@@ -1,8 +1,8 @@
 ## Backlog
 - [x] Verify step 14
 - [ ] Verify step 16C to 16E
-- [ ] Verify step 18
-- [ ] Verify step 19
+- [x] Verify step 18
+- [x] Verify step 19
 - [ ] Verify step 6
 - [ ] Verify step 7
 - [ ] Refactor validation helper in core/validate_utility.go

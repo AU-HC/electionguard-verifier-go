@@ -210,7 +210,7 @@ func (v *Verifier) Verify(path string) bool {
 					partialDecryptionsValidationHelper.addCheck("(8.A) The value v is in the set Zq for "+share.ObjectId+" "+strconv.Itoa(k), isInRange(v))
 					partialDecryptionsValidationHelper.addCheck("(8.B) The value a is in the set Zqr for "+share.ObjectId+" "+strconv.Itoa(k), isValidResidue(share.Proof.Pad))
 					partialDecryptionsValidationHelper.addCheck("(8.B) The value b is in the set Zqr for "+share.ObjectId+" "+strconv.Itoa(k), isValidResidue(share.Proof.Data))
-					partialDecryptionsValidationHelper.addCheck("(8.B) The challenge is computed correctly "+share.ObjectId+" "+strconv.Itoa(k), c.Compare(crypto.HashElems(extendedBaseHash, A, B, ai, bi, m)))
+					partialDecryptionsValidationHelper.addCheck("(8.C) The challenge is computed correctly "+share.ObjectId+" "+strconv.Itoa(k), c.Compare(crypto.HashElems(extendedBaseHash, A, B, ai, bi, m)))
 					partialDecryptionsValidationHelper.addCheck("(8.D) The equation is satisfied "+share.ObjectId+" "+strconv.Itoa(k), powP(&constants.G, &v).Compare(mulP(&ai, powP(&er.Guardians[k].ElectionPublicKey, &c))))
 					partialDecryptionsValidationHelper.addCheck("(8.E) The equation is satisfied "+share.ObjectId+" "+strconv.Itoa(k), powP(&A, &v).Compare(mulP(&bi, powP(&m, &c))))
 				}
@@ -450,8 +450,54 @@ func (v *Verifier) Verify(path string) bool {
 			}
 		}
 	}
-	correctContestDataPartialDecryptionsForSpoiledBallotIsInvalid := !correctContestDataValidationHelper.validate()
-	if correctContestDataPartialDecryptionsForSpoiledBallotIsInvalid {
+	contestDataPartialDecryptionsForSpoiledBallotIsInvalid := !correctContestDataValidationHelper.validate()
+	if contestDataPartialDecryptionsForSpoiledBallotIsInvalid {
+		return false
+	}
+
+	// Validating correctness of substitute contest data for spoiled ballots (Step 18)
+	// and validating the correctness of contest replacement decryptions for spoiled ballots (Step 19)
+	substituteContestDataValidationHelper := MakeValidationHelper(v.logger, "Correctness of substitute contest data for spoiled ballots (Step 18)")
+	contestReplacementDecryptionValidationHelper := MakeValidationHelper(v.logger, "Correctness of contest replacement decryptions for spoiled ballots (Step 19)")
+	for _, ballot := range er.SpoiledBallots {
+		for _, contest := range ballot.Contests {
+			c0 := contest.ContestData.Ciphertext.Generator
+			c1 := contest.ContestData.Ciphertext.EncryptedMessage
+			c2 := contest.ContestData.Ciphertext.MessageAuthenticationCode
+
+			for k, share := range contest.ContestData.Shares {
+				mi := share.Share
+				product := schema.MakeBigIntFromInt(1)
+
+				for _, part := range share.RecoveredParts {
+					v := part.Proof.Response
+					c := part.Proof.Challenge
+					a := part.Proof.Pad
+					b := part.Proof.Data
+					m := part.PartialDecryption
+
+					partialDecryptionsValidationHelper.addCheck("(18.A) The value v is in the set Zq", isInRange(v))
+					partialDecryptionsValidationHelper.addCheck("(18.B) The value a is in the set Zqr", isValidResidue(a))
+					partialDecryptionsValidationHelper.addCheck("(18.B) The value b is in the set Zqr", isValidResidue(b))
+					partialDecryptionsValidationHelper.addCheck("(18.C) The challenge is computed correctly", c.Compare(crypto.HashElems(extendedBaseHash, c0, c1, c2, a, b, m)))
+					partialDecryptionsValidationHelper.addCheck("(18.D) The equation is satisfied", powP(&constants.G, &v).Compare(mulP(&a, powP(&er.Guardians[k].ElectionPublicKey, &c))))
+					partialDecryptionsValidationHelper.addCheck("(18.E) The equation is satisfied", powP(&c0, &v).Compare(mulP(&b, powP(&m, &c))))
+
+					coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]
+					product = mulP(product, powP(&m, &coefficient))
+				}
+
+				contestReplacementDecryptionValidationHelper.addCheck("(19.A) The equation is satisfied", mi.Compare(product))
+			}
+		}
+	}
+	substituteContestDataForSpoiledBallotIsInvalid := !substituteContestDataValidationHelper.validate()
+	if substituteContestDataForSpoiledBallotIsInvalid {
+		return false
+	}
+
+	contestReplacementDecryptionsIsInvalid := !contestReplacementDecryptionValidationHelper.validate()
+	if contestReplacementDecryptionsIsInvalid {
 		return false
 	}
 
