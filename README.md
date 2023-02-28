@@ -5,12 +5,12 @@
 - [x] Verify step 19
 - [ ] Verify step 6
 - [ ] Verify step 7
-- [ ] Refactor validation helper in core/validate_utility.go
+- [ ] Refactor validation helper in `core/validate_utility.go`
 - [ ] Confirm step 17 works according to spec sheet
-- [x] Refactor schema/manifest.go :puke:
+- [x] Refactor `schema/manifest.go`
 - [ ] Check 11C to 11F
 - [ ] Do proper error handling when parsing JSON data
-- [ ] General refactor of core/verifier.go
+- [ ] General refactor of `core/verifier.go`
 - [ ] Add parallelization
-- [ ] Write a README
-- [ ] Double check schema/manifest.go
+- [ ] Finish `README.md`
+- [ ] Double check `schema/manifest.go`
