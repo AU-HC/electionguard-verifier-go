@@ -69,11 +69,7 @@ func MakeBigIntFromByteArrayModQ(bytes []byte) *BigInt {
 // Compare Method to make true/false comparisons easier
 func (b *BigInt) Compare(a *BigInt) bool {
 	isEqual := b.Cmp(&a.Int)
-	if isEqual == 0 {
-		return true
-	}
-
-	return false
+	return isEqual == 0
 }
 
 // ModAddition is used to calculate (b+a) mod n

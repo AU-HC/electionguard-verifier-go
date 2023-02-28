@@ -33,6 +33,29 @@ func isInRange(a schema.BigInt) bool {
 	return valueIsAboveOrEqualToZero && valueIsSmallerThanP
 }
 
+// sub returns a-b
+func sub(a, b *schema.BigInt) *schema.BigInt {
+	var result schema.BigInt
+	result.Sub(&a.Int, &b.Int)
+
+	return &result
+}
+
+func mul(a, b *schema.BigInt) *schema.BigInt {
+	var result schema.BigInt
+	result.Mul(&a.Int, &b.Int)
+
+	return &result
+}
+
+func modQ(a *schema.BigInt) *schema.BigInt {
+	var result schema.BigInt
+	q := utility.MakeCorrectElectionConstants().Q.Int
+
+	result.Mod(&a.Int, &q)
+	return &result
+}
+
 func powP(b, e *schema.BigInt) *schema.BigInt {
 	var result schema.BigInt
 	p := utility.MakeCorrectElectionConstants().P.Int

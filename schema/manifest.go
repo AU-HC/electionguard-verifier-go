@@ -1,5 +1,7 @@
 package schema
 
+// TODO: Refactor this
+
 type Manifest struct {
 	ElectionScopeID   string `json:"election_scope_id"`
 	SpecVersion       string `json:"spec_version"`

@@ -23,7 +23,7 @@ func (v *Verifier) Verify(path string) bool {
 	er := parser.ConvertJsonDataToGoStruct(path)
 	v.logger.Info("[VALID]: Election data was well formed (Step 0)")
 
-	// validate election parameters (Step 1):
+	// Validate election parameters (Step 1):
 	constants := utility.MakeCorrectElectionConstants()
 	electionParametersHelper := MakeValidationHelper(v.logger, "Election parameters are correct (Step 1)")
 	electionParametersHelper.addCheck("(1.A) The large prime is equal to the large modulus p", constants.P.Compare(&er.ElectionConstants.LargePrime))
@@ -35,7 +35,7 @@ func (v *Verifier) Verify(path string) bool {
 		return false
 	}
 
-	// validate guardian public-key (Step 2)
+	// Validate guardian public-key (Step 2)
 	publicKeyValidationHelper := MakeValidationHelper(v.logger, "Guardian public-key validation (Step 2)")
 	electionKeyValidationHelper := MakeValidationHelper(v.logger, "Election public-key validation (Step 3)")
 	elgamalPublicKey := schema.MakeBigIntFromString("1", 10)
@@ -275,6 +275,25 @@ func (v *Verifier) Verify(path string) bool {
 			}
 		}
 	}
+
+	// 10.A TODO: Refactor
+	for l, wl := range er.CoefficientsValidationSet.Coefficients {
+		productJ := schema.MakeBigIntFromInt(1)
+		productJMinusL := schema.MakeBigIntFromInt(1)
+
+		for j, _ := range er.CoefficientsValidationSet.Coefficients {
+			if j != l {
+				jInt := schema.MakeBigIntFromString(j, 10)
+				lInt := schema.MakeBigIntFromString(l, 10)
+				productJ = mul(productJ, jInt)
+				productJMinusL = mul(productJMinusL, sub(jInt, lInt))
+			}
+		}
+		productJ = modQ(productJ)
+		productJMinusL = modQ(mul(&wl, productJMinusL))
+		replacementDecryptionsValidationHelper.addCheck("(10.A) Coefficient check for guardian "+l, productJ.Compare(productJMinusL))
+	}
+
 	replacementPartialDecryptionsAreInvalid := !replacementDecryptionsValidationHelper.validate()
 	if replacementPartialDecryptionsAreInvalid {
 		return false
