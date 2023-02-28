@@ -1,4 +1,4 @@
-## Backlog List
+## Backlog
 - [x] Verify step 14
 - [ ] Verify step 16C to 16E
 - [ ] Verify step 18
