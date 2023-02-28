@@ -1,5 +1,5 @@
 ## Backlog List
-1. Verify step 14
+1. ~~Verify step 14~~
 2. Verify step 16C to 16E
 3. Verify step 18
 4. Verify step 19

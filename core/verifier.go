@@ -267,7 +267,6 @@ func (v *Verifier) Verify(path string) bool {
 			for _, share := range selection.Shares {
 				product := schema.MakeBigIntFromString("1", 10)
 				for _, part := range share.RecoveredParts {
-					// TODO: Validate (10.A)?
 					coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]
 					product = mulP(product, powP(&part.PartialDecryption, &coefficient))
 				}
@@ -322,8 +321,10 @@ func (v *Verifier) Verify(path string) bool {
 
 	// Validate correctness of partial decryption for spoiled ballots (Step 12)
 	// and validating correctness of substitute data for spoiled ballots (Step 13)
+	// and validating correctness of replacement partial decryptions for spoiled ballots (Step 14)
 	spoiledBallotsDecryptionValidationHelper := MakeValidationHelper(v.logger, "Correctness of partial decryption for spoiled ballots (Step 12)")
 	substituteDataForBallotsValidationHelper := MakeValidationHelper(v.logger, "Correctness of substitute data for spoiled ballots (Step 13)")
+	replacementDecryptionForBallotsValidationHelper := MakeValidationHelper(v.logger, "Correctness of replacement partial decryptions for spoiled ballots (Step 14)")
 	for _, ballot := range er.SpoiledBallots {
 		for _, contest := range ballot.Contests {
 			for _, selection := range contest.Selections {
@@ -344,7 +345,8 @@ func (v *Verifier) Verify(path string) bool {
 						spoiledBallotsDecryptionValidationHelper.addCheck("(12.D) The equation is satisfied", powP(&constants.G, &v).Compare(mulP(&a, powP(getGuardianPublicKey(share.GuardianId, er.Guardians), &c))))
 						spoiledBallotsDecryptionValidationHelper.addCheck("(12.E) The equation is satisfied", powP(&alpha, &v).Compare(mulP(&b, powP(&m, &c))))
 
-						// Step 13
+						product := schema.MakeBigIntFromInt(1)
+						// Step 13 (Only needed if guardians are missing during decryption of spoiled ballots.
 						for _, part := range share.RecoveredParts {
 							mil := part.PartialDecryption
 							ai := part.Proof.Pad
@@ -359,6 +361,12 @@ func (v *Verifier) Verify(path string) bool {
 							spoiledBallotsDecryptionValidationHelper.addCheck("(13.D) The equation is satisfied", powP(&constants.G, &vi).Compare(powP(mulP(&ai, &part.RecoveryPublicKey), &ci)))
 							spoiledBallotsDecryptionValidationHelper.addCheck("(13.E) The equation is satisfied", powP(&ai, &vi).Compare(mulP(&bi, powP(&mil, &ci))))
 
+							// Step 14.B
+							coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]
+							product = mulP(product, powP(&part.PartialDecryption, &coefficient))
+						}
+						if len(share.RecoveredParts) > 0 {
+							replacementDecryptionForBallotsValidationHelper.addCheck("(14.B) Correct missing decryption share", m.Compare(product))
 						}
 					}
 				}
@@ -376,8 +384,10 @@ func (v *Verifier) Verify(path string) bool {
 	}
 
 	// Validation of correct replacement partial decryptions for spoiled ballots (Step 14)
-	// ...
-	// ...
+	replacementDataForPartialDecryptionsForBallotsIsInvalid := !replacementDecryptionForBallotsValidationHelper.validate()
+	if replacementDataForPartialDecryptionsForBallotsIsInvalid {
+		return false
+	}
 
 	// Validation of correct decryption of spoiled ballots (Step 15)
 	// and validation of correctness of spoiled ballots (Step 16)
