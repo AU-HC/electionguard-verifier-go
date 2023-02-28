@@ -4,7 +4,7 @@
 - [x] Verify step 18
 - [x] Verify step 19
 - [ ] Verify step 6
-- [ ] Verify step 7
+- [x] Verify step 7
 - [ ] Refactor validation helper in `core/validate_utility.go`
 - [ ] Confirm step 17 works according to spec sheet
 - [x] Refactor `schema/manifest.go`

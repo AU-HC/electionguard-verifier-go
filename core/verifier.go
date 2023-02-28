@@ -184,8 +184,8 @@ func (v *Verifier) Verify(path string) bool {
 	partialDecryptionsValidationHelper := MakeValidationHelper(v.logger, "Correctness of partial decryptions (Step 8)")
 	for _, contest := range er.PlaintextTally.Contests {
 		for _, selection := range contest.Selections {
-			a := schema.MakeBigIntFromString("1", 10)
-			b := schema.MakeBigIntFromString("1", 10)
+			a := schema.MakeBigIntFromInt(1)
+			b := schema.MakeBigIntFromInt(1)
 			for _, ballot := range er.SubmittedBallots {
 				ballotWasCast := ballot.State == 1
 				if ballotWasCast {
@@ -196,8 +196,8 @@ func (v *Verifier) Verify(path string) bool {
 			}
 			A := selection.Message.Pad
 			B := selection.Message.Data
-			//ballotAggregationValidationHelper.addCheck("(7.A) A is calculated correctly for "+i+j, A.Compare(a)) // TODO: Doesn't work
-			//ballotAggregationValidationHelper.addCheck("(7.B) B is calculated correctly for "+i+j, B.Compare(b))
+			ballotAggregationValidationHelper.addCheck("(7.A) A is calculated correctly", A.Compare(modP(a))) // TODO: Doesn't work
+			ballotAggregationValidationHelper.addCheck("(7.B) B is calculated correctly", B.Compare(modP(b)))
 
 			for k, share := range selection.Shares {
 				if !share.Proof.Pad.Compare(schema.MakeBigIntFromString("0", 10)) { // Comparing with zero, will need better way of determining this TODO: Fix

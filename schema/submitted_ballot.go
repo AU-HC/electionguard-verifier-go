@@ -14,18 +14,18 @@ type SubmittedBallot struct {
 }
 
 type BallotContest struct {
-	ObjectId               string             `json:"object_id"`
-	SequenceOrder          int                `json:"sequence_order"`
-	DescriptionHash        BigInt             `json:"description_hash"`
-	BallotSelections       []BallotSelections `json:"ballot_selections"`
-	CiphertextAccumulation Ciphertext         `json:"ciphertext_accumulation"`
-	CryptoHash             BigInt             `json:"crypto_hash"`
-	Nonce                  interface{}        `json:"nonce"`
-	Proof                  ConstantProof      `json:"proof"`
-	ExtendedData           ExtendedData       `json:"extended_data"`
+	ObjectId               string            `json:"object_id"`
+	SequenceOrder          int               `json:"sequence_order"`
+	DescriptionHash        BigInt            `json:"description_hash"`
+	BallotSelections       []BallotSelection `json:"ballot_selections"`
+	CiphertextAccumulation Ciphertext        `json:"ciphertext_accumulation"`
+	CryptoHash             BigInt            `json:"crypto_hash"`
+	Nonce                  interface{}       `json:"nonce"`
+	Proof                  ConstantProof     `json:"proof"`
+	ExtendedData           ExtendedData      `json:"extended_data"`
 }
 
-type BallotSelections struct {
+type BallotSelection struct {
 	ObjectId               string           `json:"object_id"`
 	SequenceOrder          int              `json:"sequence_order"`
 	DescriptionHash        BigInt           `json:"description_hash"`
@@ -34,7 +34,6 @@ type BallotSelections struct {
 	IsPlaceholderSelection bool             `json:"is_placeholder_selection"`
 	Nonce                  interface{}      `json:"nonce"`
 	Proof                  DisjunctiveProof `json:"proof"`
-	ExtendedData           ExtendedData     `json:"extended_data"`
 }
 
 type DisjunctiveProof struct {

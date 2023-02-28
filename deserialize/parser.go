@@ -92,7 +92,8 @@ func parseJsonToSlice[E any](logger zap.Logger, path string, typeOfObject E) []E
 	// Creating list and parsing all files in directory
 	var l []E
 	for _, file := range files {
-		toBeAppended := parseJsonToGoStruct(logger, path+file.Name(), &typeOfObject)
+		var xd E
+		toBeAppended := parseJsonToGoStruct(logger, path+file.Name(), &xd)
 		l = append(l, *toBeAppended)
 	}
 

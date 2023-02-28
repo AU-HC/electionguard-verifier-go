@@ -48,6 +48,14 @@ func mul(a, b *schema.BigInt) *schema.BigInt {
 	return &result
 }
 
+func modP(a *schema.BigInt) *schema.BigInt {
+	var result schema.BigInt
+	p := utility.MakeCorrectElectionConstants().P.Int
+
+	result.Mod(&a.Int, &p)
+	return &result
+}
+
 func modQ(a *schema.BigInt) *schema.BigInt {
 	var result schema.BigInt
 	q := utility.MakeCorrectElectionConstants().Q.Int

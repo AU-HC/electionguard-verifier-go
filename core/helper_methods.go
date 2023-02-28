@@ -37,9 +37,7 @@ func getSelection(ballot schema.SubmittedBallot, contestId string, selectionId s
 	contest := getBallotContest(contestId, ballot)
 	for _, selection := range contest.BallotSelections {
 		if selection.ObjectId == selectionId {
-			if selection.IsPlaceholderSelection {
-				return makeOneCiphertext()
-			} else {
+			if !selection.IsPlaceholderSelection {
 				return selection.Ciphertext
 			}
 		}
