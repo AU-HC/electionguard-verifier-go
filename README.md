@@ -1,5 +1,5 @@
 ## Backlog List
-- [x] ~~Verify step 14~~
+- [x] Verify step 14
 - [ ] Verify step 16C to 16E
 - [ ] Verify step 18
 - [ ] Verify step 19
@@ -11,4 +11,5 @@
 - [ ] Check 11C to 11F
 - [ ] Do proper error handling when parsing JSON data
 - [ ] General refactor of core/verifier.go
-- [ ] Add parallelization- 14. [ ] Write a README
+- [ ] Add parallelization
+- [ ] Write a README
