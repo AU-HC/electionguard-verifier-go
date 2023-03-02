@@ -196,8 +196,8 @@ func (v *Verifier) Verify(path string) bool {
 			}
 			A := selection.Message.Pad
 			B := selection.Message.Data
-			ballotAggregationValidationHelper.addCheck("(7.A) A is calculated correctly", A.Compare(modP(a))) // TODO: Doesn't work
-			ballotAggregationValidationHelper.addCheck("(7.B) B is calculated correctly", B.Compare(modP(b)))
+			ballotAggregationValidationHelper.addCheck("(7.A) A is calculated correctly", A.Compare(a))
+			ballotAggregationValidationHelper.addCheck("(7.B) B is calculated correctly", B.Compare(b))
 
 			for k, share := range selection.Shares {
 				if !share.Proof.Pad.Compare(schema.MakeBigIntFromString("0", 10)) { // Comparing with zero, will need better way of determining this TODO: Fix

@@ -1,6 +1,7 @@
 ## Backlog
 - [x] Verify step 14
 - [ ] Verify step 16C to 16E
+- [ ] Verify step 11C to 11F
 - [x] Verify step 18
 - [x] Verify step 19
 - [ ] Verify step 6
@@ -8,7 +9,6 @@
 - [ ] Refactor validation helper in `core/validate_utility.go`
 - [ ] Confirm step 17 works according to spec sheet
 - [x] Refactor `schema/manifest.go`
-- [ ] Check 11C to 11F
 - [ ] Do proper error handling when parsing JSON data
 - [ ] General refactor of `core/verifier.go`
 - [ ] Add parallelization
