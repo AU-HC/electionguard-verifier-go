@@ -516,41 +516,6 @@ func (v *Verifier) validatePartialDecryptionForSpoiledBallots(er *deserialize.El
 	return helper
 }
 
-func (v *Verifier) validateReplacementPartialDecryptionForSpoiledBallots(er *deserialize.ElectionRecord) *ValidationHelper {
-	// Validation of correct replacement partial decryptions for spoiled ballots (Step 14)
-	helper := MakeValidationHelper(v.logger, "Correctness of substitute data for spoiled ballots (Step 13)")
-	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
-
-	for _, ballot := range er.SpoiledBallots {
-		for _, contest := range ballot.Contests {
-			for _, selection := range contest.Selections {
-				alpha := selection.Message.Pad
-				beta := selection.Message.Data
-				for _, share := range selection.Shares {
-					if !share.Proof.Pad.Compare(schema.MakeBigIntFromInt(0)) { // Comparing with zero, will need better way of determining this TODO: Fix
-						for _, part := range share.RecoveredParts {
-							mil := part.PartialDecryption
-							ai := part.Proof.Pad
-							bi := part.Proof.Data
-							ci := part.Proof.Challenge
-							vi := part.Proof.Response
-
-							helper.addCheck("(13.A) The given value v is in Zq", isInRange(vi))
-							helper.addCheck("(13.B) The given value a is in the set Zpr", isValidResidue(ai))
-							helper.addCheck("(13.B) The given value b is in the set Zpr", isValidResidue(bi))
-							helper.addCheck("(13.C) The challenge is computed correctly", ci.Compare(crypto.HashElems(extendedBaseHash, alpha, beta, ai, bi, mil)))
-							helper.addCheck("(13.D) The equation is satisfied", powP(v.constants.G, &vi).Compare(powP(mulP(&ai, &part.RecoveryPublicKey), &ci)))
-							helper.addCheck("(13.E) The equation is satisfied", powP(&ai, &vi).Compare(mulP(&bi, powP(&mil, &ci))))
-						}
-					}
-				}
-			}
-		}
-	}
-
-	return helper
-}
-
 func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.ElectionRecord) *ValidationHelper {
 	// Validating correctness of substitute data for spoiled ballots (Step 13)
 	helper := MakeValidationHelper(v.logger, "Correctness of substitute data for spoiled ballots (Step 13)")
@@ -561,6 +526,35 @@ func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.Elect
 				for _, share := range selection.Shares {
 					if !share.Proof.Pad.Compare(schema.MakeBigIntFromInt(0)) {
 						m := share.Share
+						product := schema.MakeBigIntFromInt(1)
+
+						for _, part := range share.RecoveredParts {
+							coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]
+							product = mulP(product, powP(&part.PartialDecryption, &coefficient))
+						}
+						if len(share.RecoveredParts) > 0 {
+							helper.addCheck("(14.B) Correct missing decryption share", m.Compare(product))
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return helper
+}
+
+func (v *Verifier) validateReplacementPartialDecryptionForSpoiledBallots(er *deserialize.ElectionRecord) *ValidationHelper {
+	// Validation of correct replacement partial decryptions for spoiled ballots (Step 14)
+	helper := MakeValidationHelper(v.logger, "Correctness of replacement partial decryptions for spoiled ballots (Step 14)")
+
+	for _, ballot := range er.SpoiledBallots {
+		for _, contest := range ballot.Contests {
+			for _, selection := range contest.Selections {
+				for _, share := range selection.Shares {
+					m := share.Share
+
+					if !share.Proof.Pad.Compare(schema.MakeBigIntFromString("0", 10)) { // Comparing with zero, will need better way of determining this TODO: Fix {
 						product := schema.MakeBigIntFromInt(1)
 
 						for _, part := range share.RecoveredParts {
