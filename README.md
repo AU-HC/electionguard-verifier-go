@@ -2,6 +2,7 @@
 - [x] Verify step 14
 - [ ] Verify step 16C to 16E
 - [ ] Verify step 11C to 11F
+- [ ] Check 16.B
 - [x] Verify step 18
 - [x] Verify step 19
 - [ ] Verify step 6

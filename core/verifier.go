@@ -139,7 +139,7 @@ func (v *Verifier) Verify(path string) bool {
 			c := crypto.HashElems(extendedBaseHash, aHat, bHat, a, b)
 			equationFLeft := powP(&constants.G, &v)
 			equationFRight := mulP(&a, powP(&aHat, c))
-			equationGLeft := mulP(powP(&constants.G, mulP(schema.MakeBigIntFromString(strconv.Itoa(votesAllowed), 10), c)), powP(elgamalPublicKey, &v))
+			equationGLeft := mulP(powP(&constants.G, mulP(schema.MakeBigIntFromInt(votesAllowed), c)), powP(elgamalPublicKey, &v))
 			equationGRight := mulP(&b, powP(&bHat, c))
 
 			voteLimitsValidationHelper.addCheck("(5.A) The number of placeholder positions matches the selection limit ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", votesAllowed == numberOfSelections)
@@ -150,7 +150,7 @@ func (v *Verifier) Verify(path string) bool {
 			voteLimitsValidationHelper.addCheck("(5.D) The given values b are in Zp^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", isValidResidue(contest.Proof.Data))
 			voteLimitsValidationHelper.addCheck("(5.E) The challenge value is correctly computed ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", contest.Proof.Challenge.Compare(c))
 			voteLimitsValidationHelper.addCheck("(5.F) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", equationFLeft.Compare(equationFRight))
-			voteLimitsValidationHelper.addCheck("(5.E) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", equationGLeft.Compare(equationGRight))
+			voteLimitsValidationHelper.addCheck("(5.G) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", equationGLeft.Compare(equationGRight))
 		}
 	}
 	voteLimitsNotValid := !voteLimitsValidationHelper.validate()
@@ -179,7 +179,7 @@ func (v *Verifier) Verify(path string) bool {
 		return false
 	}
 
-	// validate correctness of ballot aggregation (Step 7)
+	// Validate correctness of ballot aggregation (Step 7)
 	ballotAggregationValidationHelper := MakeValidationHelper(v.logger, "Correctness of ballot aggregation (Step 7)")
 	partialDecryptionsValidationHelper := MakeValidationHelper(v.logger, "Correctness of partial decryptions (Step 8)")
 	for _, contest := range er.PlaintextTally.Contests {
@@ -301,6 +301,7 @@ func (v *Verifier) Verify(path string) bool {
 	// Validate correctness of tally decryption (Step 11)
 	tallyDecryptionValidationHelper := MakeValidationHelper(v.logger, "Correct decryption of tallies (Step 11)")
 	for _, contest := range er.PlaintextTally.Contests {
+		tallyDecryptionValidationHelper.addCheck("Tally label exists in election manifest", contains(er.Manifest.Contests, contest.ObjectId))
 		// TODO: Check 11.C to 11.F
 		for _, selection := range contest.Selections {
 			b := selection.Message.Data
@@ -412,7 +413,7 @@ func (v *Verifier) Verify(path string) bool {
 				correctnessOfSpoiledBallotsValidationHelper.addCheck("(16.A) For each option in the contest, the selection V is either a 0 or a 1", selection.Tally == 0 || selection.Tally == 1)
 
 			}
-			correctnessOfSpoiledBallotsValidationHelper.addCheck("(16.B) The sum of all selections in the contest is at most the selection limit L for that contest.", sumOfAllSelections <= getContest(contest.ObjectId, er.Manifest.Contests).VotesAllowed)
+			correctnessOfSpoiledBallotsValidationHelper.addCheck("(16.B) The sum of all selections in the contest is at most the selection limit L for that contest.", sumOfAllSelections <= getContest(contest.ObjectId, er.Manifest.Contests).VotesAllowed) // TODO: Check
 			// TODO: 16.C -> 16.E
 		}
 	}

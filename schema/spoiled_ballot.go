@@ -10,7 +10,7 @@ type SpoiledBallot struct {
 type DecryptedContest struct {
 	ObjectId    string                        `json:"object_id"`
 	Selections  map[string]DecryptedSelection `json:"selections"`
-	ContestData ContestData                   `json:"contest data"`
+	ContestData ContestData                   `json:"contest_data"`
 }
 
 type ContestData struct {

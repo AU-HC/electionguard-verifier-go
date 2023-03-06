@@ -4,6 +4,15 @@ import (
 	"electionguard-verifier-go/schema"
 )
 
+func contains(slice []schema.Contest, s string) bool {
+	for _, con := range slice {
+		if s == con.ObjectID {
+			return true
+		}
+	}
+	return false
+}
+
 func getGuardianPublicKey(id string, guardians []schema.Guardian) *schema.BigInt {
 	for _, guardian := range guardians {
 		if guardian.GuardianId == id {
