@@ -10,7 +10,8 @@ import (
 )
 
 type Verifier struct {
-	logger *zap.Logger
+	logger    *zap.Logger
+	constants utility.CorrectElectionConstants
 }
 
 func MakeVerifier(logger *zap.Logger) *Verifier {
@@ -18,94 +19,38 @@ func MakeVerifier(logger *zap.Logger) *Verifier {
 }
 
 func (v *Verifier) Verify(path string) bool {
-	// Fetch and deserialize election data (Step 0)
-	parser := *deserialize.MakeParser(v.logger)
-	er := parser.ConvertJsonDataToGoStruct(path)
-	v.logger.Info("[VALID]: Election data was well formed (Step 0)")
+	// Deserialize election record and fetch correct constants (Step 0)
+	er := v.getElectionRecord(path)
+	constants := utility.MakeCorrectElectionConstants()
+	v.constants = utility.MakeCorrectElectionConstants()
+
+	// TODO: Delete this
+	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
+	elgamalPublicKey := &er.CiphertextElectionRecord.ElgamalPublicKey
 
 	// Validate election parameters (Step 1):
-	constants := utility.MakeCorrectElectionConstants()
-	electionParametersHelper := MakeValidationHelper(v.logger, "Election parameters are correct (Step 1)")
-	electionParametersHelper.addCheck("(1.A) The large prime is equal to the large modulus p", constants.P.Compare(&er.ElectionConstants.LargePrime))
-	electionParametersHelper.addCheck("(1.B) The small prime is equal to the prime q", constants.Q.Compare(&er.ElectionConstants.SmallPrime))
-	electionParametersHelper.addCheck("(1.C) The cofactor is equal to r = (p − 1)/q", constants.C.Compare(&er.ElectionConstants.Cofactor))
-	electionParametersHelper.addCheck("(1.D) The generator is equal to the generator g", constants.G.Compare(&er.ElectionConstants.Generator))
+	electionParametersHelper := v.validateElectionConstants(er)
 	electionParametersIsNotValid := !electionParametersHelper.validate()
 	if electionParametersIsNotValid {
 		return false
 	}
 
 	// Validate guardian public-key (Step 2)
-	publicKeyValidationHelper := MakeValidationHelper(v.logger, "Guardian public-key validation (Step 2)")
-	electionKeyValidationHelper := MakeValidationHelper(v.logger, "Election public-key validation (Step 3)")
-	elgamalPublicKey := schema.MakeBigIntFromString("1", 10)
-	for i, guardian := range er.Guardians {
-		elgamalPublicKey = mulP(elgamalPublicKey, &guardian.ElectionPublicKey)
-		for j, proof := range guardian.ElectionProofs {
-			// (2.A)
-			hash := crypto.HashElems(guardian.ElectionCommitments[j], proof.Commitment)
-			publicKeyValidationHelper.addCheck("(2.A) The challenge is correctly computed ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", proof.Challenge.Compare(hash))
-
-			// (2.B)
-			left := powP(&constants.G, &proof.Response)
-			right := mulP(powP(&guardian.ElectionCommitments[j], &proof.Challenge), &proof.Commitment)
-			publicKeyValidationHelper.addCheck("(2.B) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", left.Compare(right))
-		}
-	}
+	publicKeyValidationHelper := v.validateGuardianPublicKeys(er)
 	publicKeysAreNotValid := !publicKeyValidationHelper.validate()
 	if publicKeysAreNotValid {
 		return false
 	}
 
-	// Validate election public key (Step 3) [ERROR IN SPEC SHEET FOR (3.B)]
-	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
-	computedExtendedBaseHash := crypto.HashElems(er.CiphertextElectionRecord.CryptoBaseHash, er.CiphertextElectionRecord.CommitmentHash)
-
-	electionKeyValidationHelper.addCheck("(3.A) The joint public election key is computed correctly", elgamalPublicKey.Compare(&er.CiphertextElectionRecord.ElgamalPublicKey))
-	electionKeyValidationHelper.addCheck("(3.B) The extended base hash is computed correctly", extendedBaseHash.Compare(computedExtendedBaseHash))
-
+	// Validation election public-key (Step 3)
+	electionKeyValidationHelper := v.validateJointPublicKey(er)
 	jointElectionKeyIsNotValid := !electionKeyValidationHelper.validate()
 	if jointElectionKeyIsNotValid {
 		return false
 	}
 
-	// validate correctness of selection encryptions (Step 4)
-	selectionEncryptionValidationHelper := MakeValidationHelper(v.logger, "Correctness of selection encryptions (Step 4)")
-	for i, ballot := range er.SubmittedBallots {
-		for j, contest := range ballot.Contests {
-			for k, ballotSelection := range contest.BallotSelections {
-				a := ballotSelection.Ciphertext.Pad
-				b := ballotSelection.Ciphertext.Data
-				a0 := ballotSelection.Proof.ProofZeroPad
-				b0 := ballotSelection.Proof.ProofZeroData
-				a1 := ballotSelection.Proof.ProofOnePad
-				b1 := ballotSelection.Proof.ProofOneData
-				c := ballotSelection.Proof.Challenge
-				c0 := ballotSelection.Proof.ProofZeroChallenge
-				c1 := ballotSelection.Proof.ProofOneChallenge
-				v0 := ballotSelection.Proof.ProofZeroResponse
-				v1 := ballotSelection.Proof.ProofOneResponse
-
-				// TODO: Refactor at some point
-				selectionEncryptionValidationHelper.addCheck("(4.A) a is in the set Z_p^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isValidResidue(a))
-				selectionEncryptionValidationHelper.addCheck("(4.A) b is in the set Z_p^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isValidResidue(b))
-				selectionEncryptionValidationHelper.addCheck("(4.A) a0 is in the set Z_p^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isValidResidue(a0))
-				selectionEncryptionValidationHelper.addCheck("(4.A) b0 is in the set Z_p^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isValidResidue(b0))
-				selectionEncryptionValidationHelper.addCheck("(4.A) a1 is in the set Z_p^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isValidResidue(a1))
-				selectionEncryptionValidationHelper.addCheck("(4.A) b1 is in the set Z_p^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isValidResidue(b1))
-				selectionEncryptionValidationHelper.addCheck("(4.B) The challenge value c is computed correctly ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", c.Compare(crypto.HashElems(extendedBaseHash, a, b, a0, b0, a1, b1)))
-				selectionEncryptionValidationHelper.addCheck("(4.C) c0 is in Zq for ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isInRange(c0))
-				selectionEncryptionValidationHelper.addCheck("(4.C) c1 is in Zq for ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isInRange(c1))
-				selectionEncryptionValidationHelper.addCheck("(4.C) v0 is in Zq for ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isInRange(v0))
-				selectionEncryptionValidationHelper.addCheck("(4.C) v1 is in Zq for ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isInRange(v1))
-				selectionEncryptionValidationHelper.addCheck("(4.D) The equation c=(c0+c1) mod q is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", c.Compare(addQ(&c0, &c1)))
-				selectionEncryptionValidationHelper.addCheck("(4.E) The equation g^v0=a0*a^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(&constants.G, &v0).Compare(mulP(&a0, powP(&a, &c0))))
-				selectionEncryptionValidationHelper.addCheck("(4.F) The equation g^v1=a1*a^c1 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(&constants.G, &v1).Compare(mulP(&a1, powP(&a, &c1))))
-				selectionEncryptionValidationHelper.addCheck("(4.G) The equation K^v0=b0*b^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(elgamalPublicKey, &v0).Compare(mulP(&b0, powP(&b, &c0))))
-				selectionEncryptionValidationHelper.addCheck("(4.H) The equation g^c1=b0*b^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", mulP(powP(&constants.G, &c1), powP(elgamalPublicKey, &v1)).Compare(mulP(&b1, powP(&b, &c1))))
-			}
-		}
-	}
+	// Validate correctness of selection encryptions (Step 4)
+	selectionEncryptionValidationHelper := v.validateSelectionEncryptions(er)
 	correctnessOfSelectionsIsNotValid := !selectionEncryptionValidationHelper.validate()
 	if correctnessOfSelectionsIsNotValid {
 		return false
@@ -137,9 +82,9 @@ func (v *Verifier) Verify(path string) bool {
 
 			// Compute challenge and equations TODO: Should probably refactor
 			c := crypto.HashElems(extendedBaseHash, aHat, bHat, a, b)
-			equationFLeft := powP(&constants.G, &v)
+			equationFLeft := powP(constants.G, &v)
 			equationFRight := mulP(&a, powP(&aHat, c))
-			equationGLeft := mulP(powP(&constants.G, mulP(schema.MakeBigIntFromInt(votesAllowed), c)), powP(elgamalPublicKey, &v))
+			equationGLeft := mulP(powP(constants.G, mulP(schema.MakeBigIntFromInt(votesAllowed), c)), powP(elgamalPublicKey, &v))
 			equationGRight := mulP(&b, powP(&bHat, c))
 
 			voteLimitsValidationHelper.addCheck("(5.A) The number of placeholder positions matches the selection limit ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", votesAllowed == numberOfSelections)
@@ -211,7 +156,7 @@ func (v *Verifier) Verify(path string) bool {
 					partialDecryptionsValidationHelper.addCheck("(8.B) The value a is in the set Zqr for "+share.ObjectId+" "+strconv.Itoa(k), isValidResidue(share.Proof.Pad))
 					partialDecryptionsValidationHelper.addCheck("(8.B) The value b is in the set Zqr for "+share.ObjectId+" "+strconv.Itoa(k), isValidResidue(share.Proof.Data))
 					partialDecryptionsValidationHelper.addCheck("(8.C) The challenge is computed correctly "+share.ObjectId+" "+strconv.Itoa(k), c.Compare(crypto.HashElems(extendedBaseHash, A, B, ai, bi, m)))
-					partialDecryptionsValidationHelper.addCheck("(8.D) The equation is satisfied "+share.ObjectId+" "+strconv.Itoa(k), powP(&constants.G, &v).Compare(mulP(&ai, powP(&er.Guardians[k].ElectionPublicKey, &c))))
+					partialDecryptionsValidationHelper.addCheck("(8.D) The equation is satisfied "+share.ObjectId+" "+strconv.Itoa(k), powP(constants.G, &v).Compare(mulP(&ai, powP(&er.Guardians[k].ElectionPublicKey, &c))))
 					partialDecryptionsValidationHelper.addCheck("(8.E) The equation is satisfied "+share.ObjectId+" "+strconv.Itoa(k), powP(&A, &v).Compare(mulP(&bi, powP(&m, &c))))
 				}
 			}
@@ -248,7 +193,7 @@ func (v *Verifier) Verify(path string) bool {
 						substituteDataValidationHelper.addCheck("(9.B) The given value a is in Zp^r", isValidResidue(a))
 						substituteDataValidationHelper.addCheck("(9.B) The given value a is in Zp^r", isValidResidue(b))
 						substituteDataValidationHelper.addCheck("(9.C) The challenge value c is correct", c.Compare(crypto.HashElems(extendedBaseHash, A, B, a, b, m)))
-						substituteDataValidationHelper.addCheck("(9.D) The equation is satisfied", powP(&constants.G, &v).Compare(mulP(&a, powP(&part.RecoveryPublicKey, &c))))
+						substituteDataValidationHelper.addCheck("(9.D) The equation is satisfied", powP(constants.G, &v).Compare(mulP(&a, powP(&part.RecoveryPublicKey, &c))))
 						substituteDataValidationHelper.addCheck("(9.E) The equation is satisfied", powP(&A, &v).Compare(mulP(&b, powP(&m, &c))))
 					}
 				}
@@ -280,7 +225,7 @@ func (v *Verifier) Verify(path string) bool {
 		productJ := schema.MakeBigIntFromInt(1)
 		productJMinusL := schema.MakeBigIntFromInt(1)
 
-		for j, _ := range er.CoefficientsValidationSet.Coefficients {
+		for j := range er.CoefficientsValidationSet.Coefficients {
 			if j != l {
 				jInt := schema.MakeBigIntFromString(j, 10)
 				lInt := schema.MakeBigIntFromString(l, 10)
@@ -312,7 +257,7 @@ func (v *Verifier) Verify(path string) bool {
 				mi = mulP(mi, &share.Share)
 			}
 			tallyDecryptionValidationHelper.addCheck("(11.A) The equation is satisfied", b.Compare(mulP(&m, mi)))
-			tallyDecryptionValidationHelper.addCheck("(11.B) The equation is satisfied", m.Compare(powP(&constants.G, t)))
+			tallyDecryptionValidationHelper.addCheck("(11.B) The equation is satisfied", m.Compare(powP(constants.G, t)))
 		}
 	}
 	tallyDecryptionIsInvalid := !tallyDecryptionValidationHelper.validate()
@@ -343,11 +288,11 @@ func (v *Verifier) Verify(path string) bool {
 						spoiledBallotsDecryptionValidationHelper.addCheck("(12.B) The given value a is in the set Zpr", isValidResidue(a))
 						spoiledBallotsDecryptionValidationHelper.addCheck("(12.B) The given value b is in the set Zpr", isValidResidue(b))
 						spoiledBallotsDecryptionValidationHelper.addCheck("(12.C) The challenge is computed correctly", c.Compare(crypto.HashElems(extendedBaseHash, alpha, beta, a, b, m)))
-						spoiledBallotsDecryptionValidationHelper.addCheck("(12.D) The equation is satisfied", powP(&constants.G, &v).Compare(mulP(&a, powP(getGuardianPublicKey(share.GuardianId, er.Guardians), &c))))
+						spoiledBallotsDecryptionValidationHelper.addCheck("(12.D) The equation is satisfied", powP(constants.G, &v).Compare(mulP(&a, powP(getGuardianPublicKey(share.GuardianId, er.Guardians), &c))))
 						spoiledBallotsDecryptionValidationHelper.addCheck("(12.E) The equation is satisfied", powP(&alpha, &v).Compare(mulP(&b, powP(&m, &c))))
 
 						product := schema.MakeBigIntFromInt(1)
-						// Step 13 (Only needed if guardians are missing during decryption of spoiled ballots.
+						// Step 13 (Only needed if guardians are missing during decryption of spoiled ballots)
 						for _, part := range share.RecoveredParts {
 							mil := part.PartialDecryption
 							ai := part.Proof.Pad
@@ -359,7 +304,7 @@ func (v *Verifier) Verify(path string) bool {
 							spoiledBallotsDecryptionValidationHelper.addCheck("(13.B) The given value a is in the set Zpr", isValidResidue(ai))
 							spoiledBallotsDecryptionValidationHelper.addCheck("(13.B) The given value b is in the set Zpr", isValidResidue(bi))
 							spoiledBallotsDecryptionValidationHelper.addCheck("(13.C) The challenge is computed correctly", ci.Compare(crypto.HashElems(extendedBaseHash, alpha, beta, ai, bi, mil)))
-							spoiledBallotsDecryptionValidationHelper.addCheck("(13.D) The equation is satisfied", powP(&constants.G, &vi).Compare(powP(mulP(&ai, &part.RecoveryPublicKey), &ci)))
+							spoiledBallotsDecryptionValidationHelper.addCheck("(13.D) The equation is satisfied", powP(constants.G, &vi).Compare(powP(mulP(&ai, &part.RecoveryPublicKey), &ci)))
 							spoiledBallotsDecryptionValidationHelper.addCheck("(13.E) The equation is satisfied", powP(&ai, &vi).Compare(mulP(&bi, powP(&mil, &ci))))
 
 							// Step 14.B
@@ -408,7 +353,7 @@ func (v *Verifier) Verify(path string) bool {
 				}
 
 				decryptionOfSpoiledBallotsValidationHelper.addCheck("(15.A) The equation is satisfied", beta.Compare(mulP(&m, mi)))
-				decryptionOfSpoiledBallotsValidationHelper.addCheck("(15.B) The equation is satisfied", m.Compare(powP(&constants.G, V)))
+				decryptionOfSpoiledBallotsValidationHelper.addCheck("(15.B) The equation is satisfied", m.Compare(powP(constants.G, V)))
 
 				correctnessOfSpoiledBallotsValidationHelper.addCheck("(16.A) For each option in the contest, the selection V is either a 0 or a 1", selection.Tally == 0 || selection.Tally == 1)
 
@@ -446,7 +391,7 @@ func (v *Verifier) Verify(path string) bool {
 				correctContestDataValidationHelper.addCheck("(17.B) The given value a is in the set Zqr", isValidResidue(ai))
 				correctContestDataValidationHelper.addCheck("(17.B) The given value b is in the set Zqr", isValidResidue(bi))
 				correctContestDataValidationHelper.addCheck("(17.C) The challenge is correctly computed", ci.Compare(crypto.HashElems(extendedBaseHash, c0, c1, c2, ai, bi, mi)))
-				correctContestDataValidationHelper.addCheck("(17.D) The equation is satisfied", powP(&constants.G, &vi).Compare(mulP(&ai, powP(getGuardianPublicKey(share.GuardianId, er.Guardians), &ci))))
+				correctContestDataValidationHelper.addCheck("(17.D) The equation is satisfied", powP(constants.G, &vi).Compare(mulP(&ai, powP(getGuardianPublicKey(share.GuardianId, er.Guardians), &ci))))
 				correctContestDataValidationHelper.addCheck("(17.E) The equation is satisfied", powP(&c0, &vi).Compare(mulP(&bi, powP(&mi, &ci))))
 			}
 		}
@@ -481,7 +426,7 @@ func (v *Verifier) Verify(path string) bool {
 					partialDecryptionsValidationHelper.addCheck("(18.B) The value a is in the set Zqr", isValidResidue(a))
 					partialDecryptionsValidationHelper.addCheck("(18.B) The value b is in the set Zqr", isValidResidue(b))
 					partialDecryptionsValidationHelper.addCheck("(18.C) The challenge is computed correctly", c.Compare(crypto.HashElems(extendedBaseHash, c0, c1, c2, a, b, m)))
-					partialDecryptionsValidationHelper.addCheck("(18.D) The equation is satisfied", powP(&constants.G, &v).Compare(mulP(&a, powP(&er.Guardians[k].ElectionPublicKey, &c))))
+					partialDecryptionsValidationHelper.addCheck("(18.D) The equation is satisfied", powP(constants.G, &v).Compare(mulP(&a, powP(&er.Guardians[k].ElectionPublicKey, &c))))
 					partialDecryptionsValidationHelper.addCheck("(18.E) The equation is satisfied", powP(&c0, &v).Compare(mulP(&b, powP(&m, &c))))
 
 					coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]
@@ -504,4 +449,106 @@ func (v *Verifier) Verify(path string) bool {
 
 	// Verification was successful
 	return true
+}
+
+func (v *Verifier) getElectionRecord(path string) *deserialize.ElectionRecord {
+	// Fetch and deserialize election data (Step 0)
+	parser := *deserialize.MakeParser(v.logger)
+	er := parser.ParseElectionRecord(path)
+	v.logger.Info("[VALID]: Election data was well formed (Step 0)")
+
+	return er
+}
+
+func (v *Verifier) validateElectionConstants(er *deserialize.ElectionRecord) *ValidationHelper {
+	constants := utility.MakeCorrectElectionConstants()
+	helper := MakeValidationHelper(v.logger, "Election parameters are correct (Step 1)")
+
+	helper.addCheck("(1.A) The large prime is equal to the large modulus p", constants.P.Compare(&er.ElectionConstants.LargePrime))
+	helper.addCheck("(1.B) The small prime is equal to the prime q", constants.Q.Compare(&er.ElectionConstants.SmallPrime))
+	helper.addCheck("(1.C) The cofactor is equal to r = (p − 1)/q", constants.C.Compare(&er.ElectionConstants.Cofactor))
+	helper.addCheck("(1.D) The generator is equal to the generator g", constants.G.Compare(&er.ElectionConstants.Generator))
+
+	return helper
+}
+
+func (v *Verifier) validateGuardianPublicKeys(er *deserialize.ElectionRecord) *ValidationHelper {
+	helper := MakeValidationHelper(v.logger, "Guardian public-key validation (Step 2)")
+
+	for i, guardian := range er.Guardians {
+		for j, proof := range guardian.ElectionProofs {
+			// (2.A)
+			hash := crypto.HashElems(guardian.ElectionCommitments[j], proof.Commitment)
+			helper.addCheck("(2.A) The challenge is correctly computed ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", proof.Challenge.Compare(hash))
+
+			// (2.B)
+			left := powP(v.constants.G, &proof.Response)
+			right := mulP(powP(&guardian.ElectionCommitments[j], &proof.Challenge), &proof.Commitment)
+			helper.addCheck("(2.B) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", left.Compare(right))
+		}
+	}
+
+	return helper
+}
+
+func (v *Verifier) validateJointPublicKey(er *deserialize.ElectionRecord) *ValidationHelper {
+	// Validate election public-key (Step 3) [ERROR IN SPEC SHEET FOR (3.B)]
+	helper := MakeValidationHelper(v.logger, "Election public-key validation (Step 3)")
+
+	elgamalPublicKey := schema.MakeBigIntFromString("1", 10)
+	for _, guardian := range er.Guardians {
+		elgamalPublicKey = mulP(elgamalPublicKey, &guardian.ElectionPublicKey)
+	}
+
+	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
+	computedExtendedBaseHash := crypto.HashElems(er.CiphertextElectionRecord.CryptoBaseHash, er.CiphertextElectionRecord.CommitmentHash)
+
+	helper.addCheck("(3.A) The joint public election key is computed correctly", elgamalPublicKey.Compare(&er.CiphertextElectionRecord.ElgamalPublicKey))
+	helper.addCheck("(3.B) The extended base hash is computed correctly", extendedBaseHash.Compare(computedExtendedBaseHash))
+
+	return helper
+}
+
+func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) *ValidationHelper {
+	// Validate correctness of selection encryptions (Step 4)
+	helper := MakeValidationHelper(v.logger, "Correctness of selection encryptions (Step 4)")
+	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
+	elgamalPublicKey := &er.CiphertextElectionRecord.ElgamalPublicKey
+
+	for i, ballot := range er.SubmittedBallots {
+		for j, contest := range ballot.Contests {
+			for k, ballotSelection := range contest.BallotSelections {
+				a := ballotSelection.Ciphertext.Pad
+				b := ballotSelection.Ciphertext.Data
+				a0 := ballotSelection.Proof.ProofZeroPad
+				b0 := ballotSelection.Proof.ProofZeroData
+				a1 := ballotSelection.Proof.ProofOnePad
+				b1 := ballotSelection.Proof.ProofOneData
+				c := ballotSelection.Proof.Challenge
+				c0 := ballotSelection.Proof.ProofZeroChallenge
+				c1 := ballotSelection.Proof.ProofOneChallenge
+				v0 := ballotSelection.Proof.ProofZeroResponse
+				v1 := ballotSelection.Proof.ProofOneResponse
+
+				helper.addCheck("(4.A) a is in the set Z_p^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isValidResidue(a))
+				helper.addCheck("(4.A) b is in the set Z_p^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isValidResidue(b))
+				helper.addCheck("(4.A) a0 is in the set Z_p^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isValidResidue(a0))
+				helper.addCheck("(4.A) b0 is in the set Z_p^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isValidResidue(b0))
+				helper.addCheck("(4.A) a1 is in the set Z_p^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isValidResidue(a1))
+				helper.addCheck("(4.A) b1 is in the set Z_p^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isValidResidue(b1))
+				helper.addCheck("(4.B) The challenge value c is computed correctly ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", c.Compare(crypto.HashElems(extendedBaseHash, a, b, a0, b0, a1, b1)))
+				helper.addCheck("(4.C) c0 is in Zq for ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isInRange(c0))
+				helper.addCheck("(4.C) c1 is in Zq for ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isInRange(c1))
+				helper.addCheck("(4.C) v0 is in Zq for ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isInRange(v0))
+				helper.addCheck("(4.C) v1 is in Zq for ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", isInRange(v1))
+				helper.addCheck("(4.D) The equation c=(c0+c1) mod q is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", c.Compare(addQ(&c0, &c1)))
+				helper.addCheck("(4.E) The equation g^v0=a0*a^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(v.constants.G, &v0).Compare(mulP(&a0, powP(&a, &c0))))
+				helper.addCheck("(4.F) The equation g^v1=a1*a^c1 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(v.constants.G, &v1).Compare(mulP(&a1, powP(&a, &c1))))
+				helper.addCheck("(4.G) The equation K^v0=b0*b^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(elgamalPublicKey, &v0).Compare(mulP(&b0, powP(&b, &c0))))
+				helper.addCheck("(4.H) The equation g^c1=b0*b^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", mulP(powP(v.constants.G, &c1), powP(elgamalPublicKey, &v1)).Compare(mulP(&b1, powP(&b, &c1))))
+			}
+		}
+	}
+
+	return helper
 }

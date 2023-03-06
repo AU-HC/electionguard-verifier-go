@@ -18,7 +18,7 @@ func isValidResidue(a schema.BigInt) bool {
 	valueIsSmallerThanP := p.Cmp(&a.Int) == 1
 	valueIsInRange := valueIsSmallerThanP && valueIsAboveOrEqualToZero // a is in [0, P)
 
-	validResidue := powP(&a, &q).Compare(one) // a^q mod p == 1
+	validResidue := powP(&a, q).Compare(one) // a^q mod p == 1
 
 	return valueIsInRange && validResidue
 }

@@ -36,7 +36,7 @@ func MakeParser(logger *zap.Logger) *Parser {
 	return &Parser{logger: *logger}
 }
 
-func (p *Parser) ConvertJsonDataToGoStruct(path string) ElectionRecord {
+func (p *Parser) ParseElectionRecord(path string) *ElectionRecord {
 	// Creating verifier arguments struct
 	verifierArguments := *MakeElectionRecord()
 
@@ -54,7 +54,7 @@ func (p *Parser) ConvertJsonDataToGoStruct(path string) ElectionRecord {
 	verifierArguments.SubmittedBallots = parseJsonToSlice(p.logger, path+"/submitted_ballots/", schema.SubmittedBallot{})
 	verifierArguments.Guardians = parseJsonToSlice(p.logger, path+"/guardians/", schema.Guardian{})
 
-	return verifierArguments
+	return &verifierArguments
 }
 
 func parseJsonToGoStruct[E any](logger zap.Logger, path string, typeOfObject E) E {
