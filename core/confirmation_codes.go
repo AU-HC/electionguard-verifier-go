@@ -1,6 +1,8 @@
 package core
 
-import "electionguard-verifier-go/deserialize"
+import (
+	"electionguard-verifier-go/deserialize"
+)
 
 func (v *Verifier) validateConfirmationCodes(er *deserialize.ElectionRecord) *ValidationHelper {
 	// Validate confirmation codes (Step 6)

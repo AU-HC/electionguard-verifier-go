@@ -5,7 +5,8 @@
 - [x] Verify step 18
 - [x] Verify step 19
 - [x] Verify step 7
-- [ ] General refactor of `core/verifier.go`
+- [x] General refactor of `core/verifier.go`
+- [x] Do proper error handling when parsing JSON data
 - [ ] Refactor validation helper in `core/validate_utility.go`
 - [ ] Add parallelization
 - [ ] Check 16.B
@@ -13,6 +14,5 @@
 - [ ] Verify step 11C to 11F
 - [ ] Verify step 6
 - [ ] Confirm step 17 works according to spec sheet
-- [ ] Do proper error handling when parsing JSON data
 - [ ] Finish `README.md`
 - [ ] Is `schema/manifest.go`supposed to be bricked? Does it even matter?

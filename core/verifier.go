@@ -17,10 +17,13 @@ func MakeVerifier(logger *zap.Logger) *Verifier {
 
 func (v *Verifier) Verify(path string) bool {
 	// Deserialize election record and fetch correct constants (Step 0)
-	er := v.getElectionRecord(path)
-	v.constants = utility.MakeCorrectElectionConstants()
+	er, electionRecordIsValid := v.getElectionRecord(path)
+	if !electionRecordIsValid {
+		return false
+	}
 
-	// Validate election parameters (Step 1):
+	// Validate election parameters (Step 1)
+	v.constants = utility.MakeCorrectElectionConstants()
 	electionParametersHelper := v.validateElectionConstants(er)
 	electionParametersIsNotValid := !electionParametersHelper.validate()
 	if electionParametersIsNotValid {
@@ -157,11 +160,18 @@ func (v *Verifier) Verify(path string) bool {
 	return true
 }
 
-func (v *Verifier) getElectionRecord(path string) *deserialize.ElectionRecord {
+func (v *Verifier) getElectionRecord(path string) (*deserialize.ElectionRecord, bool) {
 	// Fetch and deserialize election data (Step 0)
 	parser := *deserialize.MakeParser(v.logger)
-	er := parser.ParseElectionRecord(path)
-	v.logger.Info("[VALID]: Election data was well formed (Step 0)")
+	er, err := parser.ParseElectionRecord(path)
 
-	return er
+	if err != "" {
+		v.logger.Info("[INVALID]: Election data was well formed (Step 0)")
+		v.logger.Debug(err)
+	} else {
+		v.logger.Info("[VALID]: Election data was well formed (Step 0)")
+	}
+
+	// If length of error message is 0, no errors were reported
+	return er, len(err) == 0
 }
