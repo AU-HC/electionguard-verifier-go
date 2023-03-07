@@ -30,12 +30,16 @@ func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *de
 	for _, contest := range er.PlaintextTally.Contests {
 		for _, selection := range contest.Selections {
 			for _, share := range selection.Shares {
-				product := schema.MakeBigIntFromString("1", 10)
-				for _, part := range share.RecoveredParts {
-					coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]
-					product = mulP(product, powP(&part.PartialDecryption, &coefficient))
+				if share.Proof.Usage == "" { // TODO: Need better way of checking for nil
+					product := schema.MakeBigIntFromInt(1)
+
+					for _, part := range share.RecoveredParts {
+						coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]
+						product = mulP(product, powP(&part.Share, &coefficient))
+					}
+
+					helper.addCheck("(10.B) Correct tally share ", share.Share.Compare(product))
 				}
-				helper.addCheck("(10.B) Correct tally share?", share.Share.Compare(product))
 			}
 		}
 	}

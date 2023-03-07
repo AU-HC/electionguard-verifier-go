@@ -22,7 +22,7 @@ func (v *Verifier) validateSubstituteContestDataForSpoiledBallots(er *deserializ
 					c := part.Proof.Challenge
 					a := part.Proof.Pad
 					b := part.Proof.Data
-					m := part.PartialDecryption
+					m := part.Share
 
 					helper.addCheck("(18.A) The value v is in the set Zq", isInRange(V))
 					helper.addCheck("(18.B) The value a is in the set Zqr", isValidResidue(a))

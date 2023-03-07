@@ -24,3 +24,11 @@ func MakeCorrectElectionConstants() CorrectElectionConstants {
 		G: schema.MakeBigIntFromString(GHexString, 16),
 	}
 }
+
+func GetP() *schema.BigInt {
+	return schema.MakeBigIntFromString(PHexString, 16)
+}
+
+func GetQ() *schema.BigInt {
+	return schema.MakeBigIntFromString(QHexString, 16)
+}

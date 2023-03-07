@@ -21,7 +21,7 @@ func (v *Verifier) validateSubstituteDataForMissingGuardians(er *deserialize.Ele
 						c := part.Proof.Challenge
 						a := part.Proof.Pad
 						b := part.Proof.Data
-						m := part.PartialDecryption
+						m := part.Share
 
 						helper.addCheck("(9.A) The given value v is in Zq", isInRange(V))
 						helper.addCheck("(9.B) The given value a is in Zp^r", isValidResidue(a))

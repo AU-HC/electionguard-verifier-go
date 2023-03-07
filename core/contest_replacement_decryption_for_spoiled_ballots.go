@@ -14,7 +14,7 @@ func (v *Verifier) validateContestReplacementDecryptionForSpoiledBallots(er *des
 				mi := share.Share
 				product := schema.MakeBigIntFromInt(1)
 				for _, part := range share.RecoveredParts {
-					m := part.PartialDecryption
+					m := part.Share
 
 					coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]
 					product = mulP(product, powP(&m, &coefficient))

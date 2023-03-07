@@ -25,8 +25,8 @@ func (v *Verifier) Verify(path string) bool {
 	// Validate election parameters (Step 1)
 	v.constants = utility.MakeCorrectElectionConstants()
 	electionParametersHelper := v.validateElectionConstants(er)
-	electionParametersIsNotValid := !electionParametersHelper.validate()
-	if electionParametersIsNotValid {
+	electionParametersAreNotValid := !electionParametersHelper.validate()
+	if electionParametersAreNotValid {
 		return false
 	}
 
@@ -163,7 +163,7 @@ func (v *Verifier) Verify(path string) bool {
 func (v *Verifier) getElectionRecord(path string) (*deserialize.ElectionRecord, bool) {
 	// Fetch and deserialize election data (Step 0)
 	parser := *deserialize.MakeParser(v.logger)
-	er, err := parser.ParseElectionRecord(path)
+	electionRecord, err := parser.ParseElectionRecord(path)
 
 	if err != "" {
 		v.logger.Info("[INVALID]: Election data was well formed (Step 0)")
@@ -172,6 +172,6 @@ func (v *Verifier) getElectionRecord(path string) (*deserialize.ElectionRecord, 
 		v.logger.Info("[VALID]: Election data was well formed (Step 0)")
 	}
 
-	// If length of error message is 0, no errors were reported
-	return er, len(err) == 0
+	// If length of error message is 0, no errors were reported and thus return electionRecord, true
+	return electionRecord, len(err) == 0
 }

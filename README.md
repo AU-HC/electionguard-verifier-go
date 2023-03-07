@@ -7,12 +7,13 @@
 - [x] Verify step 7
 - [x] General refactor of `core/verifier.go`
 - [x] Do proper error handling when parsing JSON data
+- [x] Confirm step 17 works according to spec sheet
 - [ ] Refactor validation helper in `core/validate_utility.go`
 - [ ] Add parallelization
+- [ ] Make it possible to get output as a file with information (such as amount of checked invariants for each step, etc.)
 - [ ] Check 16.B
 - [ ] Verify step 16C to 16E
 - [ ] Verify step 11C to 11F
-- [ ] Verify step 6
-- [ ] Confirm step 17 works according to spec sheet
+- [ ] Verify step 6A
 - [ ] Finish `README.md`
-- [ ] Is `schema/manifest.go`supposed to be bricked? Does it even matter?
+- [ ] Is `schema/manifest.go` supposed to be bricked? Does it even matter?
