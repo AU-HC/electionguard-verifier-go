@@ -7,9 +7,10 @@ import (
 	"strconv"
 )
 
-func (v *Verifier) validateVoteLimits(er *deserialize.ElectionRecord) *ValidationHelper {
+func (v *Verifier) validateVoteLimits(er *deserialize.ElectionRecord) {
 	// Validate adherence to vote limits (Step 5)
-	helper := MakeValidationHelper(v.logger, "Adherence to vote limits (Step 5)")
+	defer v.wg.Done()
+	helper := MakeValidationHelper(v.logger, 5, "Adherence to vote limits")
 
 	for i, ballot := range er.SubmittedBallots {
 		for j, contest := range ballot.Contests {
@@ -51,5 +52,5 @@ func (v *Verifier) validateVoteLimits(er *deserialize.ElectionRecord) *Validatio
 		}
 	}
 
-	return helper
+	v.helpers[helper.verificationStep] = helper
 }

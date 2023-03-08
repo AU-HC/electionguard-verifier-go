@@ -6,8 +6,9 @@ import (
 	"strconv"
 )
 
-func (v *Verifier) validateGuardianPublicKeys(er *deserialize.ElectionRecord) *ValidationHelper {
-	helper := MakeValidationHelper(v.logger, "Guardian public-key validation (Step 2)")
+func (v *Verifier) validateGuardianPublicKeys(er *deserialize.ElectionRecord) {
+	defer v.wg.Done()
+	helper := MakeValidationHelper(v.logger, 2, "Guardian public-key validation")
 
 	for i, guardian := range er.Guardians {
 		for j, proof := range guardian.ElectionProofs {
@@ -22,5 +23,5 @@ func (v *Verifier) validateGuardianPublicKeys(er *deserialize.ElectionRecord) *V
 		}
 	}
 
-	return helper
+	v.helpers[helper.verificationStep] = helper
 }

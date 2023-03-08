@@ -7,11 +7,12 @@ import (
 	"strconv"
 )
 
-func (v *Verifier) validatePartialDecryptions(er *deserialize.ElectionRecord) *ValidationHelper {
+func (v *Verifier) validatePartialDecryptions(er *deserialize.ElectionRecord) {
 	// Validate correctness of partial decryptions (Step 8)
-	helper := MakeValidationHelper(v.logger, "Correctness of partial decryptions (Step 8)")
-	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
+	defer v.wg.Done()
+	helper := MakeValidationHelper(v.logger, 8, "Correctness of partial decryptions")
 
+	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
 	for _, contest := range er.PlaintextTally.Contests {
 		for _, selection := range contest.Selections {
 			A := selection.Message.Pad
@@ -36,5 +37,5 @@ func (v *Verifier) validatePartialDecryptions(er *deserialize.ElectionRecord) *V
 		}
 	}
 
-	return helper
+	v.helpers[helper.verificationStep] = helper
 }

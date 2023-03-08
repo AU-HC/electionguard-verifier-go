@@ -2,9 +2,10 @@ package core
 
 import "electionguard-verifier-go/deserialize"
 
-func (v *Verifier) validateCorrectnessOfSpoiledBallots(er *deserialize.ElectionRecord) *ValidationHelper {
+func (v *Verifier) validateCorrectnessOfSpoiledBallots(er *deserialize.ElectionRecord) {
 	// Validation of correctness of spoiled ballots (Step 16)
-	helper := MakeValidationHelper(v.logger, "Correctness of spoiled ballots (Step 16)")
+	defer v.wg.Done()
+	helper := MakeValidationHelper(v.logger, 16, "Correctness of spoiled ballots")
 
 	for _, ballot := range er.SpoiledBallots {
 		for _, contest := range ballot.Contests {
@@ -18,5 +19,5 @@ func (v *Verifier) validateCorrectnessOfSpoiledBallots(er *deserialize.ElectionR
 		}
 	}
 
-	return helper
+	v.helpers[helper.verificationStep] = helper
 }

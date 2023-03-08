@@ -5,11 +5,12 @@ import (
 	"electionguard-verifier-go/deserialize"
 )
 
-func (v *Verifier) validateSubstituteDataForMissingGuardians(er *deserialize.ElectionRecord) *ValidationHelper {
+func (v *Verifier) validateSubstituteDataForMissingGuardians(er *deserialize.ElectionRecord) {
 	// Validate correctness of substitute data for missing guardians (Step 9)
-	helper := MakeValidationHelper(v.logger, "Correctness of substitute data for missing guardians (Step 9)")
-	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
+	defer v.wg.Done()
+	helper := MakeValidationHelper(v.logger, 9, "Correctness of substitute data for missing guardians")
 
+	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
 	for _, contest := range er.PlaintextTally.Contests {
 		for _, selection := range contest.Selections {
 			A := selection.Message.Pad
@@ -35,5 +36,5 @@ func (v *Verifier) validateSubstituteDataForMissingGuardians(er *deserialize.Ele
 		}
 	}
 
-	return helper
+	v.helpers[helper.verificationStep] = helper
 }

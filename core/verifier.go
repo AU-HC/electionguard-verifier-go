@@ -4,160 +4,112 @@ import (
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/utility"
 	"go.uber.org/zap"
+	"sync"
 )
 
 type Verifier struct {
-	logger    *zap.Logger
-	constants utility.CorrectElectionConstants
+	logger    *zap.Logger                      // logger used to log information
+	constants utility.CorrectElectionConstants // constants is election constants (p, q, r, g)
+	wg        *sync.WaitGroup                  // wg is used to sync goroutines for each step
+	helpers   []*ValidationHelper              // helpers are used to store result of each verification step
 }
 
 func MakeVerifier(logger *zap.Logger) *Verifier {
-	return &Verifier{logger: logger}
+	return &Verifier{logger: logger, wg: &sync.WaitGroup{}, helpers: make([]*ValidationHelper, 20)}
 }
 
 func (v *Verifier) Verify(path string) bool {
-	// Deserialize election record and fetch correct constants (Step 0)
+	// Deserialize election record and fetching correct election constants (Step 0)
 	er, electionRecordIsValid := v.getElectionRecord(path)
+	v.constants = utility.MakeCorrectElectionConstants()
 	if !electionRecordIsValid {
 		return false
 	}
 
+	// Setting up synchronization
+	v.wg.Add(19)
+
 	// Validate election parameters (Step 1)
-	v.constants = utility.MakeCorrectElectionConstants()
-	electionParametersHelper := v.validateElectionConstants(er)
-	electionParametersAreNotValid := !electionParametersHelper.validate()
-	if electionParametersAreNotValid {
-		return false
-	}
+	go v.validateElectionConstants(er)
 
 	// Validate guardian public-key (Step 2)
-	publicKeyValidationHelper := v.validateGuardianPublicKeys(er)
-	publicKeysAreNotValid := !publicKeyValidationHelper.validate()
-	if publicKeysAreNotValid {
-		return false
-	}
+	go v.validateGuardianPublicKeys(er)
 
 	// Validation election public-key (Step 3)
-	electionKeyValidationHelper := v.validateJointPublicKey(er)
-	jointElectionKeyIsNotValid := !electionKeyValidationHelper.validate()
-	if jointElectionKeyIsNotValid {
-		return false
-	}
+	go v.validateJointPublicKey(er)
 
 	// Validate correctness of selection encryptions (Step 4)
-	selectionEncryptionValidationHelper := v.validateSelectionEncryptions(er)
-	correctnessOfSelectionsIsNotValid := !selectionEncryptionValidationHelper.validate()
-	if correctnessOfSelectionsIsNotValid {
-		return false
-	}
+	go v.validateSelectionEncryptions(er)
 
 	// Validate adherence to vote limits (Step 5)
-	voteLimitsValidationHelper := v.validateVoteLimits(er)
-	voteLimitsNotValid := !voteLimitsValidationHelper.validate()
-	if voteLimitsNotValid {
-		return false
-	}
+	go v.validateVoteLimits(er)
 
 	// Validate confirmation codes (Step 6)
-	confirmationCodesValidationHelper := v.validateConfirmationCodes(er)
-	confirmationCodesAreNotValid := !confirmationCodesValidationHelper.validate()
-	if confirmationCodesAreNotValid {
-		return false
-	}
+	go v.validateConfirmationCodes(er)
 
 	// Validate correctness of ballot aggregation (Step 7)
-	ballotAggregationValidationHelper := v.validateBallotAggregation(er)
-	ballotAggregationIsNotValid := !ballotAggregationValidationHelper.validate()
-	if ballotAggregationIsNotValid {
-		return false
-	}
+	go v.validateBallotAggregation(er)
 
 	// Validate correctness of partial decryptions (Step 8)
-	partialDecryptionsValidationHelper := v.validatePartialDecryptions(er)
-	partialDecryptionsAreNotValid := !partialDecryptionsValidationHelper.validate()
-	if partialDecryptionsAreNotValid {
-		return false
-	}
+	go v.validatePartialDecryptions(er)
 
 	// Validate correctness of substitute data for missing guardians (Step 9)
-	substituteDataValidationHelper := v.validateSubstituteDataForMissingGuardians(er)
-	substituteDataForMissingGuardiansIsNotValid := !substituteDataValidationHelper.validate()
-	if substituteDataForMissingGuardiansIsNotValid {
-		return false
-	}
+	go v.validateSubstituteDataForMissingGuardians(er)
 
 	// Validate correctness of construction of replacement partial decryptions (Step 10)
-	replacementDecryptionsValidationHelper := v.validateConstructionOfReplacementForPartialDecryptions(er)
-	replacementPartialDecryptionsAreInvalid := !replacementDecryptionsValidationHelper.validate()
-	if replacementPartialDecryptionsAreInvalid {
-		return false
-	}
+	go v.validateConstructionOfReplacementForPartialDecryptions(er)
 
 	// Validate correctness of tally decryption (Step 11)
-	tallyDecryptionValidationHelper := v.validateTallyDecryption(er)
-	tallyDecryptionIsInvalid := !tallyDecryptionValidationHelper.validate()
-	if tallyDecryptionIsInvalid {
-		return false
-	}
+	go v.validateTallyDecryption(er)
 
 	// Validate correctness of partial decryption for spoiled ballots (Step 12)
-	spoiledBallotsDecryptionValidationHelper := v.validatePartialDecryptionForSpoiledBallots(er)
-	spoiledBallotsPartialDecryptionIsInvalid := !spoiledBallotsDecryptionValidationHelper.validate()
-	if spoiledBallotsPartialDecryptionIsInvalid {
-		return false
-	}
+	go v.validatePartialDecryptionForSpoiledBallots(er)
 
 	// Validate correctness of substitute data for spoiled ballots (Step 13)
-	substituteDataForBallotsValidationHelper := v.validateSubstituteDataForSpoiledBallots(er)
-	substituteDataForSpoiledBallotsIsInvalid := !substituteDataForBallotsValidationHelper.validate()
-	if substituteDataForSpoiledBallotsIsInvalid {
-		return false
-	}
+	go v.validateSubstituteDataForSpoiledBallots(er)
 
 	// Validate of correct replacement partial decryptions for spoiled ballots (Step 14)
-	replacementDecryptionForBallotsValidationHelper := v.validateReplacementPartialDecryptionForSpoiledBallots(er)
-	replacementDataForPartialDecryptionsForBallotsIsInvalid := !replacementDecryptionForBallotsValidationHelper.validate()
-	if replacementDataForPartialDecryptionsForBallotsIsInvalid {
-		return false
-	}
+	go v.validateReplacementPartialDecryptionForSpoiledBallots(er)
 
 	// Validation of correct decryption of spoiled ballots (Step 15)
-	decryptionOfSpoiledBallotsValidationHelper := v.validateDecryptionOfSpoiledBallots(er)
-	decryptionOfSpoiledBallotsIsInvalid := !decryptionOfSpoiledBallotsValidationHelper.validate()
-	if decryptionOfSpoiledBallotsIsInvalid {
-		return false
-	}
+	go v.validateDecryptionOfSpoiledBallots(er)
 
 	// and validation of correctness of spoiled ballots (Step 16)
-	correctnessOfSpoiledBallotsValidationHelper := v.validateCorrectnessOfSpoiledBallots(er)
-	correctnessSpoiledBallotsIsInvalid := !correctnessOfSpoiledBallotsValidationHelper.validate()
-	if correctnessSpoiledBallotsIsInvalid {
-		return false
-	}
+	go v.validateCorrectnessOfSpoiledBallots(er)
 
 	// Verifying correctness of contest data partial decryptions for spoiled ballots (Step 17)
-	correctContestDataValidationHelper := v.validateContestDataPartialDecryptionsForSpoiledBallots(er)
-	contestDataPartialDecryptionsForSpoiledBallotIsInvalid := !correctContestDataValidationHelper.validate()
-	if contestDataPartialDecryptionsForSpoiledBallotIsInvalid {
-		return false
-	}
+	go v.validateContestDataPartialDecryptionsForSpoiledBallots(er)
 
 	// Validating correctness of substitute contest data for spoiled ballots (Step 18)
-	substituteContestDataValidationHelper := v.validateSubstituteContestDataForSpoiledBallots(er)
-	substituteContestDataForSpoiledBallotIsInvalid := !substituteContestDataValidationHelper.validate()
-	if substituteContestDataForSpoiledBallotIsInvalid {
-		return false
-	}
+	go v.validateSubstituteContestDataForSpoiledBallots(er)
 
 	// Validating the correctness of contest replacement decryptions for spoiled ballots (Step 19)
-	contestReplacementDecryptionValidationHelper := v.validateContestReplacementDecryptionForSpoiledBallots(er)
-	contestReplacementDecryptionsIsInvalid := !contestReplacementDecryptionValidationHelper.validate()
-	if contestReplacementDecryptionsIsInvalid {
-		return false
+	go v.validateContestReplacementDecryptionForSpoiledBallots(er)
+
+	// Waiting for all goroutines to finish
+	electionIsValid := v.validateAllVerificationSteps()
+
+	// Output validation results to file using specific strategy
+
+	return electionIsValid
+}
+
+func (v *Verifier) validateAllVerificationSteps() bool {
+	// Waiting for all goroutines to finish
+	v.wg.Wait()
+
+	// Checking each step
+	electionIsValid := true
+	for i, result := range v.helpers {
+		if i != 0 {
+			verificationStepIsNotValid := !result.validate()
+			if verificationStepIsNotValid {
+				electionIsValid = false
+			}
+		}
 	}
 
-	// Verification was successful
-	return true
+	return electionIsValid
 }
 
 func (v *Verifier) getElectionRecord(path string) (*deserialize.ElectionRecord, bool) {

@@ -5,9 +5,10 @@ import (
 	"electionguard-verifier-go/schema"
 )
 
-func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *deserialize.ElectionRecord) *ValidationHelper {
+func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *deserialize.ElectionRecord) {
 	// Validate correctness of construction of replacement partial decryptions (Step 10)
-	helper := MakeValidationHelper(v.logger, "Correctness of construction of replacement partial decryptions (Step 10)")
+	defer v.wg.Done()
+	helper := MakeValidationHelper(v.logger, 10, "Correctness of construction of replacement partial decryptions")
 
 	// 10.A TODO: Refactor
 	for l, wl := range er.CoefficientsValidationSet.Coefficients {
@@ -44,5 +45,5 @@ func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *de
 		}
 	}
 
-	return helper
+	v.helpers[helper.verificationStep] = helper
 }

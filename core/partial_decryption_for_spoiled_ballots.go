@@ -6,11 +6,12 @@ import (
 	"electionguard-verifier-go/schema"
 )
 
-func (v *Verifier) validatePartialDecryptionForSpoiledBallots(er *deserialize.ElectionRecord) *ValidationHelper {
+func (v *Verifier) validatePartialDecryptionForSpoiledBallots(er *deserialize.ElectionRecord) {
 	// Validate correctness of partial decryption for spoiled ballots (Step 12)
-	helper := MakeValidationHelper(v.logger, "Correctness of partial decryption for spoiled ballots (Step 12)")
-	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
+	defer v.wg.Done()
+	helper := MakeValidationHelper(v.logger, 12, "Correctness of partial decryption for spoiled ballots")
 
+	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
 	for _, ballot := range er.SpoiledBallots {
 		for _, contest := range ballot.Contests {
 			for _, selection := range contest.Selections {
@@ -36,5 +37,5 @@ func (v *Verifier) validatePartialDecryptionForSpoiledBallots(er *deserialize.El
 		}
 	}
 
-	return helper
+	v.helpers[helper.verificationStep] = helper
 }

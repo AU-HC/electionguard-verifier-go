@@ -5,9 +5,10 @@ import (
 	"electionguard-verifier-go/schema"
 )
 
-func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.ElectionRecord) *ValidationHelper {
+func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.ElectionRecord) {
 	// Validating correctness of substitute data for spoiled ballots (Step 13)
-	helper := MakeValidationHelper(v.logger, "Correctness of substitute data for spoiled ballots (Step 13)")
+	defer v.wg.Done()
+	helper := MakeValidationHelper(v.logger, 13, "Correctness of substitute data for spoiled ballots")
 
 	for _, ballot := range er.SpoiledBallots {
 		for _, contest := range ballot.Contests {
@@ -30,5 +31,5 @@ func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.Elect
 		}
 	}
 
-	return helper
+	v.helpers[helper.verificationStep] = helper
 }

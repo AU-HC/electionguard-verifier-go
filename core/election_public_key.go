@@ -6,9 +6,10 @@ import (
 	"electionguard-verifier-go/schema"
 )
 
-func (v *Verifier) validateJointPublicKey(er *deserialize.ElectionRecord) *ValidationHelper {
+func (v *Verifier) validateJointPublicKey(er *deserialize.ElectionRecord) {
 	// Validate election public-key (Step 3) [ERROR IN SPEC SHEET FOR (3.B)]
-	helper := MakeValidationHelper(v.logger, "Election public-key validation (Step 3)")
+	defer v.wg.Done()
+	helper := MakeValidationHelper(v.logger, 3, "Election public-key validation")
 
 	elgamalPublicKey := schema.MakeBigIntFromString("1", 10)
 	for _, guardian := range er.Guardians {
@@ -21,5 +22,5 @@ func (v *Verifier) validateJointPublicKey(er *deserialize.ElectionRecord) *Valid
 	helper.addCheck("(3.A) The joint public election key is computed correctly", elgamalPublicKey.Compare(&er.CiphertextElectionRecord.ElgamalPublicKey))
 	helper.addCheck("(3.B) The extended base hash is computed correctly", extendedBaseHash.Compare(computedExtendedBaseHash))
 
-	return helper
+	v.helpers[helper.verificationStep] = helper
 }

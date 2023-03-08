@@ -5,9 +5,10 @@ import (
 	"electionguard-verifier-go/schema"
 )
 
-func (v *Verifier) validateBallotAggregation(er *deserialize.ElectionRecord) *ValidationHelper {
+func (v *Verifier) validateBallotAggregation(er *deserialize.ElectionRecord) {
 	// Validate correctness of ballot aggregation (Step 7)
-	helper := MakeValidationHelper(v.logger, "Correctness of ballot aggregation (Step 7)")
+	defer v.wg.Done()
+	helper := MakeValidationHelper(v.logger, 7, "Correctness of ballot aggregation")
 
 	for _, contest := range er.PlaintextTally.Contests {
 		for _, selection := range contest.Selections {
@@ -28,5 +29,5 @@ func (v *Verifier) validateBallotAggregation(er *deserialize.ElectionRecord) *Va
 		}
 	}
 
-	return helper
+	v.helpers[helper.verificationStep] = helper
 }

@@ -4,9 +4,10 @@ import (
 	"electionguard-verifier-go/deserialize"
 )
 
-func (v *Verifier) validateConfirmationCodes(er *deserialize.ElectionRecord) *ValidationHelper {
+func (v *Verifier) validateConfirmationCodes(er *deserialize.ElectionRecord) {
 	// Validate confirmation codes (Step 6)
-	helper := MakeValidationHelper(v.logger, "Validation of confirmation codes (Step 6)")
+	defer v.wg.Done()
+	helper := MakeValidationHelper(v.logger, 6, "Validation of confirmation codes")
 
 	hasSeen := make(map[string]bool)
 	noDuplicateConfirmationCodesFound := true
@@ -23,5 +24,5 @@ func (v *Verifier) validateConfirmationCodes(er *deserialize.ElectionRecord) *Va
 	}
 	helper.addCheck("(6.B) No duplicate confirmation codes found", noDuplicateConfirmationCodesFound)
 
-	return helper
+	v.helpers[helper.verificationStep] = helper
 }

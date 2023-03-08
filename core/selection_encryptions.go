@@ -6,12 +6,13 @@ import (
 	"strconv"
 )
 
-func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) *ValidationHelper {
+func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) {
 	// Validate correctness of selection encryptions (Step 4)
-	helper := MakeValidationHelper(v.logger, "Correctness of selection encryptions (Step 4)")
+	defer v.wg.Done()
+	helper := MakeValidationHelper(v.logger, 4, "Correctness of selection encryptions")
+
 	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
 	elgamalPublicKey := &er.CiphertextElectionRecord.ElgamalPublicKey
-
 	for i, ballot := range er.SubmittedBallots {
 		for j, contest := range ballot.Contests {
 			for k, ballotSelection := range contest.BallotSelections {
@@ -47,5 +48,5 @@ func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) 
 		}
 	}
 
-	return helper
+	v.helpers[helper.verificationStep] = helper
 }
