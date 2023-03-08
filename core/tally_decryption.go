@@ -26,5 +26,5 @@ func (v *Verifier) validateTallyDecryption(er *deserialize.ElectionRecord) {
 		}
 	}
 
-	v.helpers[helper.verificationStep] = helper
+	v.helpers[helper.VerificationStep] = helper
 }

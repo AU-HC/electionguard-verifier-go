@@ -22,5 +22,5 @@ func (v *Verifier) validateJointPublicKey(er *deserialize.ElectionRecord) {
 	helper.addCheck("(3.A) The joint public election key is computed correctly", elgamalPublicKey.Compare(&er.CiphertextElectionRecord.ElgamalPublicKey))
 	helper.addCheck("(3.B) The extended base hash is computed correctly", extendedBaseHash.Compare(computedExtendedBaseHash))
 
-	v.helpers[helper.verificationStep] = helper
+	v.helpers[helper.VerificationStep] = helper
 }

@@ -8,10 +8,11 @@ import (
 )
 
 type Verifier struct {
-	logger    *zap.Logger                      // logger used to log information
-	constants utility.CorrectElectionConstants // constants is election constants (p, q, r, g)
-	wg        *sync.WaitGroup                  // wg is used to sync goroutines for each step
-	helpers   []*ValidationHelper              // helpers are used to store result of each verification step
+	logger         *zap.Logger                      // logger used to log information
+	constants      utility.CorrectElectionConstants // constants is election constants (p, q, r, g)
+	wg             *sync.WaitGroup                  // wg is used to sync goroutines for each step
+	helpers        []*ValidationHelper              // helpers are used to store result of each verification step
+	outputStrategy Strategy                         // outputStrategy is used to output the verification results
 }
 
 func MakeVerifier(logger *zap.Logger) *Verifier {
@@ -87,17 +88,16 @@ func (v *Verifier) Verify(path string) bool {
 	go v.validateContestReplacementDecryptionForSpoiledBallots(er)
 
 	// Waiting for all goroutines to finish
+	v.wg.Wait()
 	electionIsValid := v.validateAllVerificationSteps()
 
 	// Output validation results to file using specific strategy
+	v.outputStrategy.Output(*er, v.helpers)
 
 	return electionIsValid
 }
 
 func (v *Verifier) validateAllVerificationSteps() bool {
-	// Waiting for all goroutines to finish
-	v.wg.Wait()
-
 	// Checking each step
 	electionIsValid := true
 	for i, result := range v.helpers {
@@ -126,4 +126,8 @@ func (v *Verifier) getElectionRecord(path string) (*deserialize.ElectionRecord, 
 
 	// If length of error message is 0, no errors were reported and thus return electionRecord, true
 	return electionRecord, len(err) == 0
+}
+
+func (v *Verifier) SetOutputStrategy(strategy Strategy) {
+	v.outputStrategy = strategy
 }

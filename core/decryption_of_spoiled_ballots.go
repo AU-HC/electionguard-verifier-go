@@ -29,5 +29,5 @@ func (v *Verifier) validateDecryptionOfSpoiledBallots(er *deserialize.ElectionRe
 		}
 	}
 
-	v.helpers[helper.verificationStep] = helper
+	v.helpers[helper.VerificationStep] = helper
 }

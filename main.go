@@ -12,11 +12,12 @@ func main() {
 	path := applicationArguments.ElectionArtifactsPath
 
 	// Fetching logging level and creating logger
-	loggingLevel := applicationArguments.LoggingLevel
-	logger := utility.ConfigureLogger(loggingLevel)
+	logger := utility.ConfigureLogger(applicationArguments.LoggingLevel)
+	outputStrategy := core.MakeOutputStrategy(applicationArguments.OutputPath)
 
-	// Create verifier, and verify election data
+	// Create verifier, set strategy, and verify election data
 	verifier := *core.MakeVerifier(logger)
+	verifier.SetOutputStrategy(outputStrategy)
 	electionIsValid := verifier.Verify(path)
 
 	// Result of verification of election data

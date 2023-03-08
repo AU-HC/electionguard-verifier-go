@@ -45,5 +45,5 @@ func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *de
 		}
 	}
 
-	v.helpers[helper.verificationStep] = helper
+	v.helpers[helper.VerificationStep] = helper
 }

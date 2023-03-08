@@ -24,5 +24,5 @@ func (v *Verifier) validateConfirmationCodes(er *deserialize.ElectionRecord) {
 	}
 	helper.addCheck("(6.B) No duplicate confirmation codes found", noDuplicateConfirmationCodesFound)
 
-	v.helpers[helper.verificationStep] = helper
+	v.helpers[helper.VerificationStep] = helper
 }

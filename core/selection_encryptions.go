@@ -48,5 +48,5 @@ func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) 
 		}
 	}
 
-	v.helpers[helper.verificationStep] = helper
+	v.helpers[helper.VerificationStep] = helper
 }

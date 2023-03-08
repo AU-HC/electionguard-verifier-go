@@ -31,5 +31,5 @@ func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.Elect
 		}
 	}
 
-	v.helpers[helper.verificationStep] = helper
+	v.helpers[helper.VerificationStep] = helper
 }

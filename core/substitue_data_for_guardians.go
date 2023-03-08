@@ -36,5 +36,5 @@ func (v *Verifier) validateSubstituteDataForMissingGuardians(er *deserialize.Ele
 		}
 	}
 
-	v.helpers[helper.verificationStep] = helper
+	v.helpers[helper.VerificationStep] = helper
 }
