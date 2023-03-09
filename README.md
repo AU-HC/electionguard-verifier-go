@@ -10,6 +10,8 @@
 - [x] Confirm step 17 works according to spec sheet
 - [x] Add parallelization
 - [x] Make it possible to get output as a file with information (such as amount of checked invariants for each step, etc.)
+- [x] Add parallelization for step 4, 5, 9 (Split slice into n bits)
+- [ ] Refactor WaitGroup in `core/verifier.go` to not have add in goroutines
 - [ ] Refactor validation helper in `core/validate_utility.go`
 - [ ] Check 16.B
 - [ ] Verify step 16C to 16E

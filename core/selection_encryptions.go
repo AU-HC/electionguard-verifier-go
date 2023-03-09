@@ -3,6 +3,7 @@ package core
 import (
 	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
+	"electionguard-verifier-go/schema"
 	"strconv"
 )
 
@@ -13,7 +14,28 @@ func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) 
 
 	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
 	elgamalPublicKey := &er.CiphertextElectionRecord.ElgamalPublicKey
-	for i, ballot := range er.SubmittedBallots {
+	ballots := er.SubmittedBallots
+
+	// Split the slice of ballots into multiple slices
+	chunkSize := len(ballots) / 2
+	for i := 0; i < len(ballots); i += chunkSize {
+		end := i + chunkSize
+
+		if end > len(ballots) {
+			end = len(ballots)
+		}
+
+		go v.validateSelectionEncryptionForSlice(helper, ballots[i:end], extendedBaseHash, *elgamalPublicKey)
+	}
+
+	v.helpers[helper.VerificationStep] = helper
+}
+
+func (v *Verifier) validateSelectionEncryptionForSlice(helper *ValidationHelper, ballots []schema.SubmittedBallot, extendedBaseHash, elgamalPublicKey schema.BigInt) {
+	v.wg.Add(1)
+	defer v.wg.Done()
+
+	for i, ballot := range ballots {
 		for j, contest := range ballot.Contests {
 			for k, ballotSelection := range contest.BallotSelections {
 				a := ballotSelection.Ciphertext.Pad
@@ -42,11 +64,9 @@ func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) 
 				helper.addCheck("(4.D) The equation c=(c0+c1) mod q is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", c.Compare(addQ(&c0, &c1)))
 				helper.addCheck("(4.E) The equation g^v0=a0*a^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(v.constants.G, &v0).Compare(mulP(&a0, powP(&a, &c0))))
 				helper.addCheck("(4.F) The equation g^v1=a1*a^c1 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(v.constants.G, &v1).Compare(mulP(&a1, powP(&a, &c1))))
-				helper.addCheck("(4.G) The equation K^v0=b0*b^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(elgamalPublicKey, &v0).Compare(mulP(&b0, powP(&b, &c0))))
-				helper.addCheck("(4.H) The equation g^c1=b0*b^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", mulP(powP(v.constants.G, &c1), powP(elgamalPublicKey, &v1)).Compare(mulP(&b1, powP(&b, &c1))))
+				helper.addCheck("(4.G) The equation K^v0=b0*b^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", powP(&elgamalPublicKey, &v0).Compare(mulP(&b0, powP(&b, &c0))))
+				helper.addCheck("(4.H) The equation g^c1=b0*b^c0 is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+","+strconv.Itoa(k)+")", mulP(powP(v.constants.G, &c1), powP(&elgamalPublicKey, &v1)).Compare(mulP(&b1, powP(&b, &c1))))
 			}
 		}
 	}
-
-	v.helpers[helper.VerificationStep] = helper
 }

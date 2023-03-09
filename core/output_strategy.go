@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func MakeOutputStrategy(outputPath string) Strategy {
+func MakeOutputStrategy(outputPath string) OutputStrategy {
 	if outputPath == "" {
 		return NoOutputStrategy{}
 	}
@@ -19,7 +19,7 @@ type VerificationRecord struct {
 	VerificationSteps []ValidationHelper
 }
 
-type Strategy interface {
+type OutputStrategy interface {
 	Output(record deserialize.ElectionRecord, results []*ValidationHelper)
 }
 
@@ -42,7 +42,7 @@ func (s ToFileStrategy) Output(record deserialize.ElectionRecord, results []*Val
 		}
 	}
 	vr := VerificationRecord{ElectionName: record.Manifest.ElectionScopeID, VerificationSteps: xd}
-	jsonBytes, err := json.MarshalIndent(vr, "", " ")
+	jsonBytes, err := json.MarshalIndent(vr, "", "  ")
 	if err != nil {
 		panic(err)
 	}

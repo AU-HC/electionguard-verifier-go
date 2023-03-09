@@ -3,15 +3,41 @@ package core
 import (
 	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
+	"electionguard-verifier-go/schema"
 )
 
 func (v *Verifier) validateSubstituteDataForMissingGuardians(er *deserialize.ElectionRecord) {
 	// Validate correctness of substitute data for missing guardians (Step 9)
 	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 9, "Correctness of substitute data for missing guardians")
-
 	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
+
+	// Mapping map to slice
+	var contests []schema.ContestTally
 	for _, contest := range er.PlaintextTally.Contests {
+		contests = append(contests, contest)
+	}
+
+	// Split the slice of contests into multiple slices (namely 2)
+	chunkSize := len(contests) / 2
+	for i := 0; i < len(contests); i += chunkSize {
+		end := i + chunkSize
+
+		if end > len(contests) {
+			end = len(contests)
+		}
+
+		go v.validateSubstituteDataForMissingGuardiansForSlice(helper, contests[i:end], extendedBaseHash)
+	}
+
+	v.helpers[helper.VerificationStep] = helper
+}
+
+func (v *Verifier) validateSubstituteDataForMissingGuardiansForSlice(helper *ValidationHelper, contests []schema.ContestTally, extendedBaseHash schema.BigInt) {
+	v.wg.Add(1)
+	defer v.wg.Done()
+
+	for _, contest := range contests {
 		for _, selection := range contest.Selections {
 			A := selection.Message.Pad
 			B := selection.Message.Data
@@ -35,6 +61,4 @@ func (v *Verifier) validateSubstituteDataForMissingGuardians(er *deserialize.Ele
 			}
 		}
 	}
-
-	v.helpers[helper.VerificationStep] = helper
 }

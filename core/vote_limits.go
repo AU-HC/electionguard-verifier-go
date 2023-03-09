@@ -12,7 +12,27 @@ func (v *Verifier) validateVoteLimits(er *deserialize.ElectionRecord) {
 	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 5, "Adherence to vote limits")
 
-	for i, ballot := range er.SubmittedBallots {
+	// Split the slice of ballots into multiple slices
+	ballots := er.SubmittedBallots
+	chunkSize := len(ballots) / 2
+	for i := 0; i < len(ballots); i += chunkSize {
+		end := i + chunkSize
+
+		if end > len(ballots) {
+			end = len(ballots)
+		}
+
+		go v.validateVoteLimitsForSlice(helper, ballots[i:end], er)
+	}
+
+	v.helpers[helper.VerificationStep] = helper
+}
+
+func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots []schema.SubmittedBallot, er *deserialize.ElectionRecord) {
+	v.wg.Add(1)
+	defer v.wg.Done()
+
+	for i, ballot := range ballots {
 		for j, contest := range ballot.Contests {
 			contestInManifest := getContest(contest.ObjectId, er.Manifest.Contests)
 			votesAllowed := contestInManifest.VotesAllowed
@@ -51,6 +71,4 @@ func (v *Verifier) validateVoteLimits(er *deserialize.ElectionRecord) {
 			helper.addCheck("(5.G) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", equationGLeft.Compare(equationGRight))
 		}
 	}
-
-	v.helpers[helper.VerificationStep] = helper
 }

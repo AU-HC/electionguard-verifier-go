@@ -4,22 +4,34 @@ import (
 	"go.uber.org/zap"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type ValidationHelper struct {
 	VerificationStep int
 	Description      string
-	logger           *zap.Logger
-	errorMsg         *strings.Builder
 	Checked, Failed  int
 	isValid          bool
+	logger           *zap.Logger
+	errorMsg         *strings.Builder
+	mu               sync.Mutex
 }
 
 func MakeValidationHelper(logger *zap.Logger, step int, description string) *ValidationHelper {
-	return &ValidationHelper{logger: logger, Description: description, errorMsg: &strings.Builder{}, VerificationStep: step, isValid: true}
+	return &ValidationHelper{
+		logger:           logger,
+		Description:      description,
+		errorMsg:         &strings.Builder{},
+		VerificationStep: step,
+		isValid:          true,
+		mu:               sync.Mutex{},
+	}
 }
 
 func (v *ValidationHelper) addCheck(invariantDescription string, invariant bool) {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+
 	// If invariant is true, do nothing
 	v.logger.Debug("Checked invariant: " + invariantDescription)
 	v.Checked += 1

@@ -12,7 +12,7 @@ type Verifier struct {
 	constants      utility.CorrectElectionConstants // constants is election constants (p, q, r, g)
 	wg             *sync.WaitGroup                  // wg is used to sync goroutines for each step
 	helpers        []*ValidationHelper              // helpers are used to store result of each verification step
-	outputStrategy Strategy                         // outputStrategy is used to output the verification results
+	outputStrategy OutputStrategy                   // outputStrategy is used to output the verification results
 }
 
 func MakeVerifier(logger *zap.Logger) *Verifier {
@@ -128,6 +128,6 @@ func (v *Verifier) getElectionRecord(path string) (*deserialize.ElectionRecord, 
 	return electionRecord, len(err) == 0
 }
 
-func (v *Verifier) SetOutputStrategy(strategy Strategy) {
+func (v *Verifier) SetOutputStrategy(strategy OutputStrategy) {
 	v.outputStrategy = strategy
 }
