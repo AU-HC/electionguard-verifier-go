@@ -93,9 +93,9 @@ func (v *Verifier) Verify(path string) bool {
 	// Waiting for all goroutines to finish
 	v.wg.Wait()
 	elapsed := time.Since(start).String()
-	v.logger.Info("Validation took " + elapsed)
-
 	electionIsValid := v.validateAllVerificationSteps()
+
+	v.logger.Info("Validation of election took: " + elapsed)
 
 	// Output validation results to file using specific strategy
 	v.outputStrategy.Output(*er, v.helpers)

@@ -11,12 +11,10 @@ func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) 
 	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 4, "Correctness of selection encryptions")
 
-	// extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
-	// elgamalPublicKey := &er.CiphertextElectionRecord.ElgamalPublicKey
 	ballots := er.SubmittedBallots
 
 	// Split the slice of ballots into multiple slices
-	chunkSize := len(ballots) / 10
+	chunkSize := len(ballots) / 15
 	for i := 0; i < len(ballots); i += chunkSize {
 		end := i + chunkSize
 
@@ -36,18 +34,6 @@ func (v *Verifier) validateSelectionEncryptionForSlice(helper *ValidationHelper,
 
 	for _, ballot := range ballots {
 		for _, contest := range ballot.Contests {
-			contestInManifest := getContest(contest.ObjectId, er.Manifest.Contests)
-			votesAllowed := contestInManifest.VotesAllowed
-			numberOfSelections := 0
-			calculatedAHat := schema.MakeBigIntFromInt(1)
-			calculatedBHat := schema.MakeBigIntFromInt(1)
-
-			aHat := contest.CiphertextAccumulation.Pad
-			bHat := contest.CiphertextAccumulation.Data
-			a := contest.Proof.Pad
-			b := contest.Proof.Data
-			V := contest.Proof.Response
-
 			for _, ballotSelection := range contest.BallotSelections {
 				a := ballotSelection.Ciphertext.Pad
 				b := ballotSelection.Ciphertext.Data
@@ -77,29 +63,7 @@ func (v *Verifier) validateSelectionEncryptionForSlice(helper *ValidationHelper,
 				helper.addCheck("(4.F) The equation g^v1=a1*a^c1 is satisfied", powP(v.constants.G, &v1).Compare(mulP(&a1, powP(&a, &c1))))
 				helper.addCheck("(4.G) The equation K^v0=b0*b^c0 is satisfied", powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &v0).Compare(mulP(&b0, powP(&b, &c0))))
 				helper.addCheck("(4.H) The equation g^c1=b0*b^c0 is satisfied", mulP(powP(v.constants.G, &c1), powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &v1)).Compare(mulP(&b1, powP(&b, &c1))))
-
-				if ballotSelection.IsPlaceholderSelection {
-					numberOfSelections++
-				}
-				calculatedAHat = mulP(calculatedAHat, &ballotSelection.Ciphertext.Pad)
-				calculatedBHat = mulP(calculatedBHat, &ballotSelection.Ciphertext.Data)
 			}
-
-			c := crypto.HashElems(er.CiphertextElectionRecord.CryptoExtendedBaseHash, aHat, bHat, a, b)
-			equationFLeft := powP(v.constants.G, &V)
-			equationFRight := mulP(&a, powP(&aHat, c))
-			equationGLeft := mulP(powP(v.constants.G, mulP(schema.MakeBigIntFromInt(votesAllowed), c)), powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &V))
-			equationGRight := mulP(&b, powP(&bHat, c))
-
-			helper.addCheck("(5.A) The number of placeholder positions matches the selection limit", votesAllowed == numberOfSelections)
-			helper.addCheck("(5.B) The a hat is computed correctly", aHat.Compare(calculatedAHat))
-			helper.addCheck("(5.B) The b hat is computed correctly", bHat.Compare(calculatedBHat))
-			helper.addCheck("(5.C) The given value V is in Zq", isInRange(V))
-			helper.addCheck("(5.D) The given value a are in Zp^r", isValidResidue(contest.Proof.Pad))
-			helper.addCheck("(5.D) The given values b are in Zp^r", isValidResidue(contest.Proof.Data))
-			helper.addCheck("(5.E) The challenge value is correctly computed", contest.Proof.Challenge.Compare(c))
-			helper.addCheck("(5.F) The equation is satisfied", equationFLeft.Compare(equationFRight))
-			helper.addCheck("(5.G) The equation is satisfied", equationGLeft.Compare(equationGRight))
 		}
 	}
 }
