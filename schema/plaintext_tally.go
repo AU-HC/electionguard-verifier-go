@@ -38,7 +38,7 @@ type RecoveredPart struct {
 	ObjectId                  string  `json:"object_id"`
 	GuardianIdentifier        string  `json:"guardian_id"`
 	MissingGuardianIdentifier string  `json:"missing_guardian_id"`
-	PartialDecryption         BigInt  `json:"share"`
+	Share                     BigInt  `json:"share"`
 	RecoveryPublicKey         BigInt  `json:"recovery_key"`
 	Proof                     CpProof `json:"proof"`
 }

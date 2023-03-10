@@ -25,7 +25,7 @@ type SHA256 struct {
 }
 
 func MakeSHA256() *SHA256 {
-	return &SHA256{q: utility.MakeCorrectElectionConstants().Q}
+	return &SHA256{q: *utility.MakeCorrectElectionConstants().Q}
 }
 
 func (s *SHA256) update(data string) {
