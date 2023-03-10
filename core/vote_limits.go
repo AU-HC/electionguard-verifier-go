@@ -14,6 +14,10 @@ func (v *Verifier) validateVoteLimits(er *deserialize.ElectionRecord) {
 	// Split the slice of ballots into multiple slices
 	ballots := er.SubmittedBallots
 	chunkSize := len(ballots) / 15
+	if chunkSize == 0 {
+		chunkSize = len(ballots) / 3
+	}
+
 	for i := 0; i < len(ballots); i += chunkSize {
 		end := i + chunkSize
 
