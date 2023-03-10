@@ -5,6 +5,7 @@ import (
 	"electionguard-verifier-go/utility"
 	"go.uber.org/zap"
 	"sync"
+	"time"
 )
 
 type Verifier struct {
@@ -29,6 +30,8 @@ func (v *Verifier) Verify(path string) bool {
 
 	// Setting up synchronization
 	v.wg.Add(19)
+
+	start := time.Now()
 
 	// Validate election parameters (Step 1)
 	go v.validateElectionConstants(er)
@@ -89,6 +92,9 @@ func (v *Verifier) Verify(path string) bool {
 
 	// Waiting for all goroutines to finish
 	v.wg.Wait()
+	elapsed := time.Since(start).String()
+	v.logger.Info("Validation took " + elapsed)
+
 	electionIsValid := v.validateAllVerificationSteps()
 
 	// Output validation results to file using specific strategy
