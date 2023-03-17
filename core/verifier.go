@@ -30,7 +30,6 @@ func (v *Verifier) Verify(path string) bool {
 
 	// Setting up synchronization
 	v.wg.Add(19)
-
 	start := time.Now()
 
 	// Validate election parameters (Step 1)

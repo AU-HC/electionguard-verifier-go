@@ -3,12 +3,14 @@ package core
 import (
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
+	"time"
 )
 
 func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.ElectionRecord) {
 	// Validating correctness of substitute data for spoiled ballots (Step 13)
 	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 13, "Correctness of substitute data for spoiled ballots")
+	start := time.Now()
 
 	for _, ballot := range er.SpoiledBallots {
 		for _, contest := range ballot.Contests {
@@ -32,4 +34,5 @@ func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.Elect
 	}
 
 	v.helpers[helper.VerificationStep] = helper
+	v.logger.Info("Validation of step ?? took: " + time.Since(start).String())
 }

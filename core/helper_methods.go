@@ -23,6 +23,49 @@ func getGuardianPublicKey(id string, guardians []schema.Guardian) *schema.BigInt
 	return &schema.BigInt{}
 }
 
+func doesContestExistInManifest(objectID string, contests []schema.Contest) bool {
+	for _, contest := range contests {
+		if objectID == contest.ObjectID {
+			return true
+		}
+	}
+
+	return false
+}
+
+func getSpoiledBallot(objectID string, ballots []schema.SpoiledBallot) schema.SpoiledBallot {
+	for _, ballot := range ballots {
+		if ballot.ObjectId == objectID {
+			return ballot
+		}
+	}
+
+	return schema.SpoiledBallot{}
+}
+
+func isPlaceholderSelection(ballot schema.SubmittedBallot, objectID string) bool {
+	for _, contest := range ballot.Contests {
+		for _, selection := range contest.BallotSelections {
+			if selection.ObjectId == objectID {
+				return selection.IsPlaceholderSelection
+			}
+		}
+	}
+
+	// TODO: Log error
+	return false
+}
+
+func doesManifestSelectionExist(objectID string, selections []schema.ManifestBallotSelection) bool {
+	for _, selection := range selections {
+		if selection.ObjectID == objectID {
+			return true
+		}
+	}
+
+	return false
+}
+
 // TODO: Fix these to return nothing if two of the same exist, and log a message (Also move them somewhere else -> helper_methods.go)
 func getContest(objectID string, contests []schema.Contest) schema.Contest {
 	for _, contest := range contests {

@@ -4,12 +4,16 @@ import (
 	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
+	"sync"
+	"time"
 )
 
 func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) {
 	// Validate correctness of selection encryptions (Step 4)
 	defer v.wg.Done()
+	start := time.Now()
 	helper := MakeValidationHelper(v.logger, 4, "Correctness of selection encryptions")
+	var step4Wg sync.WaitGroup
 
 	ballots := er.SubmittedBallots
 
@@ -26,15 +30,17 @@ func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) 
 			end = len(ballots)
 		}
 
-		go v.validateSelectionEncryptionForSlice(helper, ballots[i:end], er)
+		step4Wg.Add(1)
+		go v.validateSelectionEncryptionForSlice(helper, &step4Wg, ballots[i:end], er)
 	}
 
+	step4Wg.Wait()
 	v.helpers[helper.VerificationStep] = helper
+	v.logger.Info("Validation of step 4 took: " + time.Since(start).String())
 }
 
-func (v *Verifier) validateSelectionEncryptionForSlice(helper *ValidationHelper, ballots []schema.SubmittedBallot, er *deserialize.ElectionRecord) {
-	v.wg.Add(1)
-	defer v.wg.Done()
+func (v *Verifier) validateSelectionEncryptionForSlice(helper *ValidationHelper, wg *sync.WaitGroup, ballots []schema.SubmittedBallot, er *deserialize.ElectionRecord) {
+	defer wg.Done()
 
 	for _, ballot := range ballots {
 		for _, contest := range ballot.Contests {

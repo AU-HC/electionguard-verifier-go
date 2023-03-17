@@ -3,12 +3,14 @@ package core
 import (
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
+	"time"
 )
 
 func (v *Verifier) validateTallyDecryption(er *deserialize.ElectionRecord) {
 	// Validate correctness of tally decryption (Step 11)
 	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 11, "Correct decryption of tallies")
+	start := time.Now()
 
 	for _, contest := range er.PlaintextTally.Contests {
 		helper.addCheck("Tally label exists in election manifest", contains(er.Manifest.Contests, contest.ObjectId))
@@ -27,4 +29,5 @@ func (v *Verifier) validateTallyDecryption(er *deserialize.ElectionRecord) {
 	}
 
 	v.helpers[helper.VerificationStep] = helper
+	v.logger.Info("Validation of step 11 took: " + time.Since(start).String())
 }

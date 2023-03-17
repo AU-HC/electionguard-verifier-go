@@ -4,12 +4,14 @@ import (
 	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
+	"time"
 )
 
 func (v *Verifier) validatePartialDecryptionForSpoiledBallots(er *deserialize.ElectionRecord) {
 	// Validate correctness of partial decryption for spoiled ballots (Step 12)
 	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 12, "Correctness of partial decryption for spoiled ballots")
+	start := time.Now()
 
 	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
 	for _, ballot := range er.SpoiledBallots {
@@ -38,4 +40,5 @@ func (v *Verifier) validatePartialDecryptionForSpoiledBallots(er *deserialize.El
 	}
 
 	v.helpers[helper.VerificationStep] = helper
+	v.logger.Info("Validation of step 12 took: " + time.Since(start).String())
 }

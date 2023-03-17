@@ -4,11 +4,13 @@ import (
 	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
 	"strconv"
+	"time"
 )
 
 func (v *Verifier) validateGuardianPublicKeys(er *deserialize.ElectionRecord) {
 	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 2, "Guardian public-key validation")
+	start := time.Now()
 
 	for i, guardian := range er.Guardians {
 		for j, proof := range guardian.ElectionProofs {
@@ -24,4 +26,5 @@ func (v *Verifier) validateGuardianPublicKeys(er *deserialize.ElectionRecord) {
 	}
 
 	v.helpers[helper.VerificationStep] = helper
+	v.logger.Info("Validation of step 2 took: " + time.Since(start).String())
 }

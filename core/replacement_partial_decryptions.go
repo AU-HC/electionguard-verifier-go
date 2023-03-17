@@ -3,12 +3,14 @@ package core
 import (
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
+	"time"
 )
 
 func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *deserialize.ElectionRecord) {
 	// Validate correctness of construction of replacement partial decryptions (Step 10)
 	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 10, "Correctness of construction of replacement partial decryptions")
+	start := time.Now()
 
 	// 10.A TODO: Refactor
 	for l, wl := range er.CoefficientsValidationSet.Coefficients {
@@ -46,4 +48,5 @@ func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *de
 	}
 
 	v.helpers[helper.VerificationStep] = helper
+	v.logger.Info("Validation of step 10 took: " + time.Since(start).String())
 }

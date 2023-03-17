@@ -2,12 +2,14 @@ package core
 
 import (
 	"electionguard-verifier-go/deserialize"
+	"time"
 )
 
 func (v *Verifier) validateConfirmationCodes(er *deserialize.ElectionRecord) {
 	// Validate confirmation codes (Step 6)
 	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 6, "Validation of confirmation codes")
+	start := time.Now()
 
 	hasSeen := make(map[string]bool)
 	noDuplicateConfirmationCodesFound := true
@@ -25,4 +27,5 @@ func (v *Verifier) validateConfirmationCodes(er *deserialize.ElectionRecord) {
 	helper.addCheck("(6.B) No duplicate confirmation codes found", noDuplicateConfirmationCodesFound)
 
 	v.helpers[helper.VerificationStep] = helper
+	v.logger.Info("Validation of step 6 took: " + time.Since(start).String())
 }
