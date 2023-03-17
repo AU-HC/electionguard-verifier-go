@@ -22,8 +22,8 @@
 - [x] Add parallelization for step 4, 5, 9 (Split slice into n slices)
 - [x] Refactor validation helper in `core/validate_utility.go`
 - [x] Verify step 16C to 16E
+- [x] Check 16.B
 - [ ] Refactor WaitGroup in `core/verifier.go` to not have `wg.Add(1)` in goroutines
-- [ ] Check 16.B
 - [ ] Verify step 11C to 11F
 - [ ] Verify step 6A
 - [ ] Finish `README.md`
