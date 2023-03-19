@@ -22,7 +22,7 @@ func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.Elect
 
 						for _, part := range share.RecoveredParts {
 							coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]
-							product = mulP(product, powP(&part.Share, &coefficient))
+							product = v.mulP(product, v.powP(&part.Share, &coefficient))
 						}
 						if len(share.RecoveredParts) > 0 {
 							helper.addCheck("(14.B) Correct missing decryption share", m.Compare(product))

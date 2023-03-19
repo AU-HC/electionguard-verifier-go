@@ -6,10 +6,10 @@ import (
 	"math/big"
 )
 
-func isValidResidue(a schema.BigInt) bool {
+func (v *Verifier) isValidResidue(a schema.BigInt) bool {
 	// Checking the value is in range
-	p := utility.GetP()
-	q := utility.GetQ()
+	p := &v.constants.P.Int
+	q := v.constants.Q
 	zero := schema.MakeBigIntFromInt(0)
 	one := schema.MakeBigIntFromInt(1)
 
@@ -17,13 +17,13 @@ func isValidResidue(a schema.BigInt) bool {
 	valueIsSmallerThanP := p.Cmp(&a.Int) == 1
 	valueIsInRange := valueIsSmallerThanP && valueIsAboveOrEqualToZero // a is in [0, P)
 
-	validResidue := powP(&a, q).Compare(one) // a^q mod p == 1
+	validResidue := v.powP(&a, q).Compare(one) // a^q mod p == 1
 
 	return valueIsInRange && validResidue
 }
 
-func isInRange(a schema.BigInt) bool {
-	q := utility.GetQ()
+func (v *Verifier) isInRange(a schema.BigInt) bool {
+	q := &v.constants.Q.Int
 	zero := big.NewInt(0)
 
 	valueIsAboveOrEqualToZero := zero.Cmp(&a.Int) <= 0
@@ -63,18 +63,18 @@ func modQ(a *schema.BigInt) *schema.BigInt {
 	return &result
 }
 
-func powP(b, e *schema.BigInt) *schema.BigInt {
+func (v *Verifier) powP(b, e *schema.BigInt) *schema.BigInt {
 	var result schema.BigInt
-	p := utility.GetP()
+	p := &v.constants.P.Int
 
-	result.Exp(&b.Int, &e.Int, &p.Int)
+	result.Exp(&b.Int, &e.Int, p)
 
 	return &result
 }
 
-func mulP(a, b *schema.BigInt) *schema.BigInt {
+func (v *Verifier) mulP(a, b *schema.BigInt) *schema.BigInt {
 	var result schema.BigInt
-	p := &utility.GetP().Int
+	p := &v.constants.P.Int
 
 	modOfA := a.Mod(&a.Int, p)
 	modOfB := b.Mod(&b.Int, p)
@@ -86,12 +86,12 @@ func mulP(a, b *schema.BigInt) *schema.BigInt {
 	return &result
 }
 
-func addQ(a, b *schema.BigInt) *schema.BigInt {
+func (v *Verifier) addQ(a, b *schema.BigInt) *schema.BigInt {
 	var result schema.BigInt
-	q := utility.GetQ().Int
+	q := &v.constants.Q.Int
 
 	result.Add(&b.Int, &a.Int)
-	result.Mod(&result.Int, &q)
+	result.Mod(&result.Int, q)
 
 	return &result
 }

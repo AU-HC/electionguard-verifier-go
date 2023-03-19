@@ -22,11 +22,11 @@ func (v *Verifier) validateDecryptionOfSpoiledBallots(er *deserialize.ElectionRe
 				mi := schema.MakeBigIntFromInt(1)
 				sumOfAllSelections += selection.Tally
 				for _, share := range selection.Shares {
-					mi = mulP(mi, &share.Share)
+					mi = v.mulP(mi, &share.Share)
 				}
 
-				helper.addCheck("(15.A) The equation is satisfied", beta.Compare(mulP(&m, mi)))
-				helper.addCheck("(15.B) The equation is satisfied", m.Compare(powP(v.constants.G, V)))
+				helper.addCheck("(15.A) The equation is satisfied", beta.Compare(v.mulP(&m, mi)))
+				helper.addCheck("(15.B) The equation is satisfied", m.Compare(v.powP(v.constants.G, V)))
 			}
 		}
 	}

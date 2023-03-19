@@ -21,10 +21,10 @@ func (v *Verifier) validateTallyDecryption(er *deserialize.ElectionRecord) {
 			m := selection.Value
 			t := schema.MakeBigIntFromInt(selection.Tally)
 			for _, share := range selection.Shares {
-				mi = mulP(mi, &share.Share)
+				mi = v.mulP(mi, &share.Share)
 			}
-			helper.addCheck("(11.A) The equation is satisfied", b.Compare(mulP(&m, mi)))
-			helper.addCheck("(11.B) The equation is satisfied", m.Compare(powP(v.constants.G, t)))
+			helper.addCheck("(11.A) The equation is satisfied", b.Compare(v.mulP(&m, mi)))
+			helper.addCheck("(11.B) The equation is satisfied", m.Compare(v.powP(v.constants.G, t)))
 		}
 	}
 

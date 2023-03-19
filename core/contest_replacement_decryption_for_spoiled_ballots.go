@@ -21,7 +21,7 @@ func (v *Verifier) validateContestReplacementDecryptionForSpoiledBallots(er *des
 					m := part.Share
 
 					coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]
-					product = mulP(product, powP(&m, &coefficient))
+					product = v.mulP(product, v.powP(&m, &coefficient))
 				}
 				helper.addCheck("(19.A) The equation is satisfied", mi.Compare(product))
 			}

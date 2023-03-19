@@ -19,8 +19,8 @@ func (v *Verifier) validateGuardianPublicKeys(er *deserialize.ElectionRecord) {
 			helper.addCheck("(2.A) The challenge is correctly computed ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", proof.Challenge.Compare(hash))
 
 			// (2.B)
-			left := powP(v.constants.G, &proof.Response)
-			right := mulP(powP(&guardian.ElectionCommitments[j], &proof.Challenge), &proof.Commitment)
+			left := v.powP(v.constants.G, &proof.Response)
+			right := v.mulP(v.powP(&guardian.ElectionCommitments[j], &proof.Challenge), &proof.Commitment)
 			helper.addCheck("(2.B) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", left.Compare(right))
 		}
 	}

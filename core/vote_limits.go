@@ -47,8 +47,8 @@ func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots 
 				if selection.IsPlaceholderSelection {
 					numberOfSelections++
 				}
-				calculatedAHat = mulP(calculatedAHat, &selection.Ciphertext.Pad)
-				calculatedBHat = mulP(calculatedBHat, &selection.Ciphertext.Data)
+				calculatedAHat = v.mulP(calculatedAHat, &selection.Ciphertext.Pad)
+				calculatedBHat = v.mulP(calculatedBHat, &selection.Ciphertext.Data)
 			}
 
 			aHat := contest.CiphertextAccumulation.Pad
@@ -58,17 +58,17 @@ func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots 
 			V := contest.Proof.Response
 
 			c := crypto.HashElems(er.CiphertextElectionRecord.CryptoExtendedBaseHash, aHat, bHat, a, b)
-			equationFLeft := powP(v.constants.G, &V)
-			equationFRight := mulP(&a, powP(&aHat, c))
-			equationGLeft := mulP(powP(v.constants.G, mulP(schema.MakeBigIntFromInt(votesAllowed), c)), powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &V))
-			equationGRight := mulP(&b, powP(&bHat, c))
+			equationFLeft := v.powP(v.constants.G, &V)
+			equationFRight := v.mulP(&a, v.powP(&aHat, c))
+			equationGLeft := v.mulP(v.powP(v.constants.G, v.mulP(schema.MakeBigIntFromInt(votesAllowed), c)), v.powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &V))
+			equationGRight := v.mulP(&b, v.powP(&bHat, c))
 
 			helper.addCheck("(5.A) The number of placeholder positions matches the selection limit", votesAllowed == numberOfSelections)
 			helper.addCheck("(5.B) The a hat is computed correctly", aHat.Compare(calculatedAHat))
 			helper.addCheck("(5.B) The b hat is computed correctly", bHat.Compare(calculatedBHat))
-			helper.addCheck("(5.C) The given value V is in Zq", isInRange(V))
-			helper.addCheck("(5.D) The given value a are in Zp^r", isValidResidue(contest.Proof.Pad))
-			helper.addCheck("(5.D) The given values b are in Zp^r", isValidResidue(contest.Proof.Data))
+			helper.addCheck("(5.C) The given value V is in Zq", v.isInRange(V))
+			helper.addCheck("(5.D) The given value a are in Zp^r", v.isValidResidue(contest.Proof.Pad))
+			helper.addCheck("(5.D) The given values b are in Zp^r", v.isValidResidue(contest.Proof.Data))
 			helper.addCheck("(5.E) The challenge value is correctly computed", contest.Proof.Challenge.Compare(c))
 			helper.addCheck("(5.F) The equation is satisfied", equationFLeft.Compare(equationFRight))
 			helper.addCheck("(5.G) The equation is satisfied", equationGLeft.Compare(equationGRight))

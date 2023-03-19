@@ -20,8 +20,8 @@ func (v *Verifier) validateBallotAggregation(er *deserialize.ElectionRecord) {
 				ballotWasCast := ballot.State == 1
 				if ballotWasCast {
 					ciphertextSelection := getSelection(ballot, contest.ObjectId, selection.ObjectId)
-					a = mulP(a, &ciphertextSelection.Pad)
-					b = mulP(b, &ciphertextSelection.Data)
+					a = v.mulP(a, &ciphertextSelection.Pad)
+					b = v.mulP(b, &ciphertextSelection.Data)
 				}
 			}
 			A := selection.Message.Pad

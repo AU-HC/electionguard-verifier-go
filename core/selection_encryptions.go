@@ -57,22 +57,22 @@ func (v *Verifier) validateSelectionEncryptionForSlice(helper *ValidationHelper,
 				v0 := ballotSelection.Proof.ProofZeroResponse
 				v1 := ballotSelection.Proof.ProofOneResponse
 
-				helper.addCheck("(4.A) a is in the set Z_p^r", isValidResidue(a))
-				helper.addCheck("(4.A) b is in the set Z_p^r", isValidResidue(b))
-				helper.addCheck("(4.A) a0 is in the set Z_p^r", isValidResidue(a0))
-				helper.addCheck("(4.A) b0 is in the set Z_p^r", isValidResidue(b0))
-				helper.addCheck("(4.A) a1 is in the set Z_p^r", isValidResidue(a1))
-				helper.addCheck("(4.A) b1 is in the set Z_p^r", isValidResidue(b1))
+				helper.addCheck("(4.A) a is in the set Z_p^r", v.isValidResidue(a))
+				helper.addCheck("(4.A) b is in the set Z_p^r", v.isValidResidue(b))
+				helper.addCheck("(4.A) a0 is in the set Z_p^r", v.isValidResidue(a0))
+				helper.addCheck("(4.A) b0 is in the set Z_p^r", v.isValidResidue(b0))
+				helper.addCheck("(4.A) a1 is in the set Z_p^r", v.isValidResidue(a1))
+				helper.addCheck("(4.A) b1 is in the set Z_p^r", v.isValidResidue(b1))
 				helper.addCheck("(4.B) The challenge value c is computed correctly", c.Compare(crypto.HashElems(er.CiphertextElectionRecord.CryptoExtendedBaseHash, a, b, a0, b0, a1, b1)))
-				helper.addCheck("(4.C) c0 is in Zq for", isInRange(c0))
-				helper.addCheck("(4.C) c1 is in Zq for", isInRange(c1))
-				helper.addCheck("(4.C) v0 is in Zq for", isInRange(v0))
-				helper.addCheck("(4.C) v1 is in Zq for", isInRange(v1))
-				helper.addCheck("(4.D) The equation c=(c0+c1) mod q is satisfied", c.Compare(addQ(&c0, &c1)))
-				helper.addCheck("(4.E) The equation g^v0=a0*a^c0 is satisfied", powP(v.constants.G, &v0).Compare(mulP(&a0, powP(&a, &c0))))
-				helper.addCheck("(4.F) The equation g^v1=a1*a^c1 is satisfied", powP(v.constants.G, &v1).Compare(mulP(&a1, powP(&a, &c1))))
-				helper.addCheck("(4.G) The equation K^v0=b0*b^c0 is satisfied", powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &v0).Compare(mulP(&b0, powP(&b, &c0))))
-				helper.addCheck("(4.H) The equation g^c1=b0*b^c0 is satisfied", mulP(powP(v.constants.G, &c1), powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &v1)).Compare(mulP(&b1, powP(&b, &c1))))
+				helper.addCheck("(4.C) c0 is in Zq for", v.isInRange(c0))
+				helper.addCheck("(4.C) c1 is in Zq for", v.isInRange(c1))
+				helper.addCheck("(4.C) v0 is in Zq for", v.isInRange(v0))
+				helper.addCheck("(4.C) v1 is in Zq for", v.isInRange(v1))
+				helper.addCheck("(4.D) The equation c=(c0+c1) mod q is satisfied", c.Compare(v.addQ(&c0, &c1)))
+				helper.addCheck("(4.E) The equation g^v0=a0*a^c0 is satisfied", v.powP(v.constants.G, &v0).Compare(v.mulP(&a0, v.powP(&a, &c0))))
+				helper.addCheck("(4.F) The equation g^v1=a1*a^c1 is satisfied", v.powP(v.constants.G, &v1).Compare(v.mulP(&a1, v.powP(&a, &c1))))
+				helper.addCheck("(4.G) The equation K^v0=b0*b^c0 is satisfied", v.powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &v0).Compare(v.mulP(&b0, v.powP(&b, &c0))))
+				helper.addCheck("(4.H) The equation g^c1=b0*b^c0 is satisfied", v.mulP(v.powP(v.constants.G, &c1), v.powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &v1)).Compare(v.mulP(&b1, v.powP(&b, &c1))))
 			}
 		}
 	}

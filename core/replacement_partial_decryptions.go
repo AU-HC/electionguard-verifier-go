@@ -38,7 +38,7 @@ func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *de
 
 					for _, part := range share.RecoveredParts {
 						coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]
-						product = mulP(product, powP(&part.Share, &coefficient))
+						product = v.mulP(product, v.powP(&part.Share, &coefficient))
 					}
 
 					helper.addCheck("(10.B) Correct tally share ", share.Share.Compare(product))

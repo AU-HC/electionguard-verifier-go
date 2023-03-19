@@ -15,7 +15,7 @@ func (v *Verifier) validateJointPublicKey(er *deserialize.ElectionRecord) {
 
 	elgamalPublicKey := schema.MakeBigIntFromString("1", 10)
 	for _, guardian := range er.Guardians {
-		elgamalPublicKey = mulP(elgamalPublicKey, &guardian.ElectionPublicKey)
+		elgamalPublicKey = v.mulP(elgamalPublicKey, &guardian.ElectionPublicKey)
 	}
 
 	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash

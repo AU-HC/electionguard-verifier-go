@@ -27,12 +27,12 @@ func (v *Verifier) validatePartialDecryptionForSpoiledBallots(er *deserialize.El
 						c := share.Proof.Challenge
 						V := share.Proof.Response
 
-						helper.addCheck("(12.A) The given value v is in the set Zq", isInRange(V))
-						helper.addCheck("(12.B) The given value a is in the set Zpr", isValidResidue(a))
-						helper.addCheck("(12.B) The given value b is in the set Zpr", isValidResidue(b))
+						helper.addCheck("(12.A) The given value v is in the set Zq", v.isInRange(V))
+						helper.addCheck("(12.B) The given value a is in the set Zpr", v.isValidResidue(a))
+						helper.addCheck("(12.B) The given value b is in the set Zpr", v.isValidResidue(b))
 						helper.addCheck("(12.C) The challenge is computed correctly", c.Compare(crypto.HashElems(extendedBaseHash, alpha, beta, a, b, m)))
-						helper.addCheck("(12.D) The equation is satisfied", powP(v.constants.G, &V).Compare(mulP(&a, powP(getGuardianPublicKey(share.GuardianId, er.Guardians), &c))))
-						helper.addCheck("(12.E) The equation is satisfied", powP(&alpha, &V).Compare(mulP(&b, powP(&m, &c))))
+						helper.addCheck("(12.D) The equation is satisfied", v.powP(v.constants.G, &V).Compare(v.mulP(&a, v.powP(getGuardianPublicKey(share.GuardianId, er.Guardians), &c))))
+						helper.addCheck("(12.E) The equation is satisfied", v.powP(&alpha, &V).Compare(v.mulP(&b, v.powP(&m, &c))))
 					}
 				}
 			}
