@@ -26,5 +26,5 @@
 - [x] Check if mulP etc. is too slow
 - [x] Verify step 11C-11F
 - [ ] Refactor WaitGroup in `core/verifier.go` to not have `wg.Add(1)` in goroutines
-- [ ] Verify step 6A
+- [ ] Verify step 6A (correct confirmation codes)
 - [ ] Finish `README.md`
