@@ -35,7 +35,7 @@ The verifier also has alternate options which can be set, using the following fl
     - *1* : Logging of information and below
     - *2* : Logging of debug and below
 
-The project provides some sample data in `/data` -- taken from [Microsoft](https://github.com/microsoft/electionguard/releases/tag/v1.1) and [egvote.us](https://www.egvote.us/cc/id/22). 
+The project provides some sample data in `/data`, which is taken from [Microsoft](https://github.com/microsoft/electionguard/releases/tag/v1.1) and [egvote.us](https://www.egvote.us/cc/id/22). 
 To verify `/data/idaho_pilot_2022/` with logging level set to `information` and output file `output.json` execute the following command
 ```
 $ go run main.go --p="data/idaho_pilot_2022/election-record/" --v=1 --o="output.json" 
