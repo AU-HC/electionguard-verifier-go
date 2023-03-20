@@ -27,12 +27,12 @@ func (v *Verifier) validatePartialDecryptions(er *deserialize.ElectionRecord) {
 					bi := share.Proof.Data
 					m := share.Share
 
-					helper.addCheck("(8.A) The value v is in the set Zq for", v.isInRange(vi))
-					helper.addCheck("(8.B) The value a is in the set Zqr for", v.isValidResidue(share.Proof.Pad))
-					helper.addCheck("(8.B) The value b is in the set Zqr for", v.isValidResidue(share.Proof.Data))
-					helper.addCheck("(8.C) The challenge is computed correctly", c.Compare(crypto.HashElems(extendedBaseHash, A, B, ai, bi, m)))
-					helper.addCheck("(8.D) The equation is satisfied", v.powP(v.constants.G, &vi).Compare(v.mulP(&ai, v.powP(getGuardianPublicKey(share.GuardianId, er.Guardians), &c))))
-					helper.addCheck("(8.E) The equation is satisfied", v.powP(&A, &vi).Compare(v.mulP(&bi, v.powP(&m, &c))))
+					helper.addCheck(step8A, v.isInRange(vi))
+					helper.addCheck(step8B1, v.isValidResidue(share.Proof.Pad))
+					helper.addCheck(step8B2, v.isValidResidue(share.Proof.Data))
+					helper.addCheck(step8C, c.Compare(crypto.HashElems(extendedBaseHash, A, B, ai, bi, m)))
+					helper.addCheck(step8D, v.powP(v.constants.G, &vi).Compare(v.mulP(&ai, v.powP(getGuardianPublicKey(share.GuardianId, er.Guardians), &c))))
+					helper.addCheck(step8E, v.powP(&A, &vi).Compare(v.mulP(&bi, v.powP(&m, &c))))
 				}
 			}
 		}

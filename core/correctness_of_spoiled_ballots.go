@@ -25,16 +25,16 @@ func (v *Verifier) validateCorrectnessOfSpoiledBallots(er *deserialize.ElectionR
 
 			for _, selection := range contest.Selections {
 				sumOfAllSelections += selection.Tally
-				helper.addCheck("(16.A) For each option in the contest, the selection V is either a 0 or a 1", selection.Tally == 0 || selection.Tally == 1)
+				helper.addCheck(step16A, selection.Tally == 0 || selection.Tally == 1)
 
 				selectionIsNotPlaceholder := !isPlaceholderSelection(ballot, selection.ObjectId)
 				if selectionIsNotPlaceholder {
-					helper.addCheck("(16.D) For each non-placeholder selection the option text label occurs as an option label for the contest in the election manifest", doesManifestSelectionExist(selection.ObjectId, manifestContest.BallotSelections))
+					helper.addCheck(step16D, doesManifestSelectionExist(selection.ObjectId, manifestContest.BallotSelections))
 					xd[contest.ObjectId][selection.ObjectId] = struct{}{}
 				}
 			}
-			helper.addCheck("(16.B) The sum of all selections in the contest is at most the selection limit L for that contest.", sumOfAllSelections <= manifestContest.VotesAllowed)
-			helper.addCheck("(16.C) The contest text label occurs as a contest label in the list of contests in the election manifest.", doesContestExistInManifest(contest.ObjectId, er.Manifest.Contests))
+			helper.addCheck(step16B, sumOfAllSelections <= manifestContest.VotesAllowed)
+			helper.addCheck(step16C, doesContestExistInManifest(contest.ObjectId, er.Manifest.Contests))
 		}
 	}
 
@@ -44,7 +44,7 @@ func (v *Verifier) validateCorrectnessOfSpoiledBallots(er *deserialize.ElectionR
 
 			if contestExists {
 				_, selectionExists := maps[selection.ObjectID]
-				helper.addCheck("(16.E) For each option text label listed for this contest in the election manifest, the option label occurs for a non-placeholder option", selectionExists)
+				helper.addCheck(step16E, selectionExists)
 
 			} else {
 				// TODO: Report *should* be reported

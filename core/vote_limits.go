@@ -4,12 +4,14 @@ import (
 	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
+	"time"
 )
 
 func (v *Verifier) validateVoteLimits(er *deserialize.ElectionRecord) {
 	// Validate adherence to vote limits (Step 5)
 	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 5, "Adherence to vote limits")
+	start := time.Now()
 
 	// Split the slice of ballots into multiple slices
 	ballots := er.SubmittedBallots
@@ -25,15 +27,17 @@ func (v *Verifier) validateVoteLimits(er *deserialize.ElectionRecord) {
 			end = len(ballots)
 		}
 
+		helper.wg.Add(1)
 		go v.validateVoteLimitsForSlice(helper, ballots[i:end], er)
 	}
 
+	helper.wg.Wait()
 	v.helpers[helper.VerificationStep] = helper
+	v.logger.Info("Validation of step 5 took: " + time.Since(start).String())
 }
 
 func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots []schema.SubmittedBallot, er *deserialize.ElectionRecord) {
-	v.wg.Add(1)
-	defer v.wg.Done()
+	defer helper.wg.Done()
 
 	for _, ballot := range ballots {
 		for _, contest := range ballot.Contests {
@@ -63,15 +67,15 @@ func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots 
 			equationGLeft := v.mulP(v.powP(v.constants.G, v.mulP(schema.MakeBigIntFromInt(votesAllowed), c)), v.powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &V))
 			equationGRight := v.mulP(&b, v.powP(&bHat, c))
 
-			helper.addCheck("(5.A) The number of placeholder positions matches the selection limit", votesAllowed == numberOfSelections)
-			helper.addCheck("(5.B) The a hat is computed correctly", aHat.Compare(calculatedAHat))
-			helper.addCheck("(5.B) The b hat is computed correctly", bHat.Compare(calculatedBHat))
-			helper.addCheck("(5.C) The given value V is in Zq", v.isInRange(V))
-			helper.addCheck("(5.D) The given value a are in Zp^r", v.isValidResidue(contest.Proof.Pad))
-			helper.addCheck("(5.D) The given values b are in Zp^r", v.isValidResidue(contest.Proof.Data))
-			helper.addCheck("(5.E) The challenge value is correctly computed", contest.Proof.Challenge.Compare(c))
-			helper.addCheck("(5.F) The equation is satisfied", equationFLeft.Compare(equationFRight))
-			helper.addCheck("(5.G) The equation is satisfied", equationGLeft.Compare(equationGRight))
+			helper.addCheck(step5A, votesAllowed == numberOfSelections)
+			helper.addCheck(step5B1, aHat.Compare(calculatedAHat))
+			helper.addCheck(step5B2, bHat.Compare(calculatedBHat))
+			helper.addCheck(step5C, v.isInRange(V))
+			helper.addCheck(step5D, v.isValidResidue(contest.Proof.Pad))
+			helper.addCheck(step5E, v.isValidResidue(contest.Proof.Data))
+			helper.addCheck(step5F1, contest.Proof.Challenge.Compare(c))
+			helper.addCheck(step5F2, equationFLeft.Compare(equationFRight))
+			helper.addCheck(step5G, equationGLeft.Compare(equationGRight))
 		}
 	}
 

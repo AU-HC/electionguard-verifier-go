@@ -27,12 +27,12 @@ func (v *Verifier) validateSubstituteContestDataForSpoiledBallots(er *deserializ
 					b := part.Proof.Data
 					m := part.Share
 
-					helper.addCheck("(18.A) The value v is in the set Zq", v.isInRange(V))
-					helper.addCheck("(18.B) The value a is in the set Zqr", v.isValidResidue(a))
-					helper.addCheck("(18.B) The value b is in the set Zqr", v.isValidResidue(b))
-					helper.addCheck("(18.C) The challenge is computed correctly", c.Compare(crypto.HashElems(extendedBaseHash, c0, c1, c2, a, b, m)))
-					helper.addCheck("(18.D) The equation is satisfied", v.powP(v.constants.G, &V).Compare(v.mulP(&a, v.powP(&er.Guardians[k].ElectionPublicKey, &c))))
-					helper.addCheck("(18.E) The equation is satisfied", v.powP(&c0, &V).Compare(v.mulP(&b, v.powP(&m, &c))))
+					helper.addCheck(step18A, v.isInRange(V))
+					helper.addCheck(step18B1, v.isValidResidue(a))
+					helper.addCheck(step18B2, v.isValidResidue(b))
+					helper.addCheck(step18C, c.Compare(crypto.HashElems(extendedBaseHash, c0, c1, c2, a, b, m)))
+					helper.addCheck(step18D, v.powP(v.constants.G, &V).Compare(v.mulP(&a, v.powP(&er.Guardians[k].ElectionPublicKey, &c))))
+					helper.addCheck(step18E, v.powP(&c0, &V).Compare(v.mulP(&b, v.powP(&m, &c))))
 				}
 			}
 		}

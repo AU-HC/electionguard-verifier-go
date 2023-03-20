@@ -21,8 +21,8 @@ func (v *Verifier) validateJointPublicKey(er *deserialize.ElectionRecord) {
 	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
 	computedExtendedBaseHash := crypto.HashElems(er.CiphertextElectionRecord.CryptoBaseHash, er.CiphertextElectionRecord.CommitmentHash)
 
-	helper.addCheck("(3.A) The joint public election key is computed correctly", elgamalPublicKey.Compare(&er.CiphertextElectionRecord.ElgamalPublicKey))
-	helper.addCheck("(3.B) The extended base hash is computed correctly", extendedBaseHash.Compare(computedExtendedBaseHash))
+	helper.addCheck(step3A, elgamalPublicKey.Compare(&er.CiphertextElectionRecord.ElgamalPublicKey))
+	helper.addCheck(step3B, extendedBaseHash.Compare(computedExtendedBaseHash))
 
 	v.helpers[helper.VerificationStep] = helper
 	v.logger.Info("Validation of step 3 took: " + time.Since(start).String())

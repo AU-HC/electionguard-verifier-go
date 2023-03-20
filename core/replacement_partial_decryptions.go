@@ -12,7 +12,7 @@ func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *de
 	helper := MakeValidationHelper(v.logger, 10, "Correctness of construction of replacement partial decryptions")
 	start := time.Now()
 
-	// 10.A TODO: Refactor
+	// 10.A, 14.A? TODO: Refactor
 	for l, wl := range er.CoefficientsValidationSet.Coefficients {
 		productJ := schema.MakeBigIntFromInt(1)
 		productJMinusL := schema.MakeBigIntFromInt(1)
@@ -27,7 +27,7 @@ func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *de
 		}
 		productJ = modQ(productJ)
 		productJMinusL = modQ(mul(&wl, productJMinusL))
-		helper.addCheck("(10.A) Coefficient check for guardian "+l, productJ.Compare(productJMinusL))
+		helper.addCheck(step10A, productJ.Compare(productJMinusL))
 	}
 
 	for _, contest := range er.PlaintextTally.Contests {
@@ -41,7 +41,7 @@ func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *de
 						product = v.mulP(product, v.powP(&part.Share, &coefficient))
 					}
 
-					helper.addCheck("(10.B) Correct tally share ", share.Share.Compare(product))
+					helper.addCheck(step10B, share.Share.Compare(product))
 				}
 			}
 		}

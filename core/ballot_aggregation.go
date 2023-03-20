@@ -26,8 +26,8 @@ func (v *Verifier) validateBallotAggregation(er *deserialize.ElectionRecord) {
 			}
 			A := selection.Message.Pad
 			B := selection.Message.Data
-			helper.addCheck("(7.A) A is calculated correctly", A.Compare(a))
-			helper.addCheck("(7.B) B is calculated correctly", B.Compare(b))
+			helper.addCheck(step7A, A.Compare(a))
+			helper.addCheck(step7B, B.Compare(b))
 		}
 	}
 

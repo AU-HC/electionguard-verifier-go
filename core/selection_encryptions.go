@@ -4,7 +4,6 @@ import (
 	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
-	"sync"
 	"time"
 )
 
@@ -13,11 +12,9 @@ func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) 
 	defer v.wg.Done()
 	start := time.Now()
 	helper := MakeValidationHelper(v.logger, 4, "Correctness of selection encryptions")
-	var step4Wg sync.WaitGroup
-
-	ballots := er.SubmittedBallots
 
 	// Split the slice of ballots into multiple slices
+	ballots := er.SubmittedBallots
 	chunkSize := len(ballots) / 20
 	if chunkSize == 0 {
 		chunkSize = len(ballots) / 3
@@ -30,17 +27,17 @@ func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) 
 			end = len(ballots)
 		}
 
-		step4Wg.Add(1)
-		go v.validateSelectionEncryptionForSlice(helper, &step4Wg, ballots[i:end], er)
+		helper.wg.Add(1)
+		go v.validateSelectionEncryptionForSlice(helper, ballots[i:end], er)
 	}
 
-	step4Wg.Wait()
+	helper.wg.Wait()
 	v.helpers[helper.VerificationStep] = helper
 	v.logger.Info("Validation of step 4 took: " + time.Since(start).String())
 }
 
-func (v *Verifier) validateSelectionEncryptionForSlice(helper *ValidationHelper, wg *sync.WaitGroup, ballots []schema.SubmittedBallot, er *deserialize.ElectionRecord) {
-	defer wg.Done()
+func (v *Verifier) validateSelectionEncryptionForSlice(helper *ValidationHelper, ballots []schema.SubmittedBallot, er *deserialize.ElectionRecord) {
+	defer helper.wg.Done()
 
 	for _, ballot := range ballots {
 		for _, contest := range ballot.Contests {
@@ -57,22 +54,22 @@ func (v *Verifier) validateSelectionEncryptionForSlice(helper *ValidationHelper,
 				v0 := ballotSelection.Proof.ProofZeroResponse
 				v1 := ballotSelection.Proof.ProofOneResponse
 
-				helper.addCheck("(4.A) a is in the set Z_p^r", v.isValidResidue(a))
-				helper.addCheck("(4.A) b is in the set Z_p^r", v.isValidResidue(b))
-				helper.addCheck("(4.A) a0 is in the set Z_p^r", v.isValidResidue(a0))
-				helper.addCheck("(4.A) b0 is in the set Z_p^r", v.isValidResidue(b0))
-				helper.addCheck("(4.A) a1 is in the set Z_p^r", v.isValidResidue(a1))
-				helper.addCheck("(4.A) b1 is in the set Z_p^r", v.isValidResidue(b1))
-				helper.addCheck("(4.B) The challenge value c is computed correctly", c.Compare(crypto.HashElems(er.CiphertextElectionRecord.CryptoExtendedBaseHash, a, b, a0, b0, a1, b1)))
-				helper.addCheck("(4.C) c0 is in Zq for", v.isInRange(c0))
-				helper.addCheck("(4.C) c1 is in Zq for", v.isInRange(c1))
-				helper.addCheck("(4.C) v0 is in Zq for", v.isInRange(v0))
-				helper.addCheck("(4.C) v1 is in Zq for", v.isInRange(v1))
-				helper.addCheck("(4.D) The equation c=(c0+c1) mod q is satisfied", c.Compare(v.addQ(&c0, &c1)))
-				helper.addCheck("(4.E) The equation g^v0=a0*a^c0 is satisfied", v.powP(v.constants.G, &v0).Compare(v.mulP(&a0, v.powP(&a, &c0))))
-				helper.addCheck("(4.F) The equation g^v1=a1*a^c1 is satisfied", v.powP(v.constants.G, &v1).Compare(v.mulP(&a1, v.powP(&a, &c1))))
-				helper.addCheck("(4.G) The equation K^v0=b0*b^c0 is satisfied", v.powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &v0).Compare(v.mulP(&b0, v.powP(&b, &c0))))
-				helper.addCheck("(4.H) The equation g^c1=b0*b^c0 is satisfied", v.mulP(v.powP(v.constants.G, &c1), v.powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &v1)).Compare(v.mulP(&b1, v.powP(&b, &c1))))
+				helper.addCheck(step4A1, v.isValidResidue(a))
+				helper.addCheck(step4A2, v.isValidResidue(b))
+				helper.addCheck(step4A3, v.isValidResidue(a0))
+				helper.addCheck(step4A4, v.isValidResidue(b0))
+				helper.addCheck(step4A5, v.isValidResidue(a1))
+				helper.addCheck(step4A6, v.isValidResidue(b1))
+				helper.addCheck(step4B, c.Compare(crypto.HashElems(er.CiphertextElectionRecord.CryptoExtendedBaseHash, a, b, a0, b0, a1, b1)))
+				helper.addCheck(step4C1, v.isInRange(c0))
+				helper.addCheck(step4C2, v.isInRange(c1))
+				helper.addCheck(step4C3, v.isInRange(v0))
+				helper.addCheck(step4C4, v.isInRange(v1))
+				helper.addCheck(step4D, c.Compare(v.addQ(&c0, &c1)))
+				helper.addCheck(step4E, v.powP(v.constants.G, &v0).Compare(v.mulP(&a0, v.powP(&a, &c0))))
+				helper.addCheck(step4F, v.powP(v.constants.G, &v1).Compare(v.mulP(&a1, v.powP(&a, &c1))))
+				helper.addCheck(step4G, v.powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &v0).Compare(v.mulP(&b0, v.powP(&b, &c0))))
+				helper.addCheck(step4H, v.mulP(v.powP(v.constants.G, &c1), v.powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &v1)).Compare(v.mulP(&b1, v.powP(&b, &c1))))
 			}
 		}
 	}

@@ -23,7 +23,7 @@ func (v *Verifier) validateContestReplacementDecryptionForSpoiledBallots(er *des
 					coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]
 					product = v.mulP(product, v.powP(&m, &coefficient))
 				}
-				helper.addCheck("(19.A) The equation is satisfied", mi.Compare(product))
+				helper.addCheck(step19A, mi.Compare(product))
 			}
 		}
 	}

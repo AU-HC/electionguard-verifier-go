@@ -1,30 +1,45 @@
 # ElectionGuard Verifier in Go
-...
+*Andreas Skriver Nielsen, Niklas Bille Olesen, and Hans-Christian Kjeldsen*
+
+## Overview
+[ElectionGuard](https://github.com/microsoft/electionguard) is an open-source software development kit (SDK) by Microsoft,
+that aims to improve the security and transparency of elections. The primary focus is that
+
+- Individual voters can verify that their votes have been accurately recorded.
+- Voters and observers can verify that all recorded votes have been accurately counted.
+
+Our independent verifier written in Go, allows voters and observers to confirm the consistency of an election using the supplied election artifacts
+along with the published election results.
 
 ## Installation
-...
+As a prerequisite make sure to have installed
+- Go, which can be downloaded [here](https://go.dev/doc/install)
+
+Download the verifier as a ZIP, or clone the repository from source:
+```
+git clone https://github.com/AU-HC/electionguard-verifier-go.git 
+```
 
 ## Usage
-...
+The verifier is currently a command line utility tool, to verify an election the following command has to be executed.
+```
+$ go run main.go --p="path/to/election-record/"
+```
+It's important to note that the `-p` flag must be set, as it specifies the election record path. The election record
+must follow the specification of ElectionGuard version 1.0 or 1.1
 
-## TODO
-- [x] Verify step 14
-- [x] Double check `schema/manifest.go`
-- [x] Refactor `schema/manifest.go`
-- [x] Verify step 18
-- [x] Verify step 19
-- [x] Verify step 7
-- [x] General refactor of `core/verifier.go`
-- [x] Do proper error handling when parsing JSON data
-- [x] Confirm step 17 works according to spec sheet
-- [x] Add parallelization
-- [x] Make it possible to get output as a file with information (such as amount of checked invariants for each step, etc.)
-- [x] Add parallelization for step 4, 5, 9 (Split slice into n slices)
-- [x] Refactor validation helper in `core/validate_utility.go`
-- [x] Verify step 16C to 16E
-- [x] Check 16.B
-- [x] Check if mulP etc. is too slow
-- [x] Verify step 11C-11F
-- [ ] Refactor WaitGroup in `core/verifier.go` to not have `wg.Add(1)` in goroutines
-- [ ] Verify step 6A (correct confirmation codes)
-- [ ] Finish `README.md`
+The verifier also has alternate options which can be set, using the following flags:
+- `-o` of type `string`: Which specifies if the verifier, should output a JSON file with additional verification information to the specified path.
+- `-v` of type `int`: Which specifies the logging level for the verifier, the options are:
+    - *0* (default): Will log nothing
+    - *1* : Logging of information and below
+    - *2* : Logging of debug and below
+
+## Remarks
+### Note
+The verifier is currently not verifying step `6.A` as the ElectionGuard specification is not detailed enough.
+
+### Backlog
+- [x] Finish `README.md`
+- [ ] Check `10.A`, `14.A`
+- [ ] Verify step `6A` (Correct confirmation codes)

@@ -25,8 +25,8 @@ func (v *Verifier) validateDecryptionOfSpoiledBallots(er *deserialize.ElectionRe
 					mi = v.mulP(mi, &share.Share)
 				}
 
-				helper.addCheck("(15.A) The equation is satisfied", beta.Compare(v.mulP(&m, mi)))
-				helper.addCheck("(15.B) The equation is satisfied", m.Compare(v.powP(v.constants.G, V)))
+				helper.addCheck(step15A, beta.Compare(v.mulP(&m, mi)))
+				helper.addCheck(step15B, m.Compare(v.powP(v.constants.G, V)))
 			}
 		}
 	}

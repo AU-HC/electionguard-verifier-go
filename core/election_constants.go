@@ -12,10 +12,10 @@ func (v *Verifier) validateElectionConstants(er *deserialize.ElectionRecord) {
 	start := time.Now()
 
 	constants := utility.MakeCorrectElectionConstants()
-	helper.addCheck("(1.A) The large prime is equal to the large modulus p", constants.P.Compare(&er.ElectionConstants.LargePrime))
-	helper.addCheck("(1.B) The small prime is equal to the prime q", constants.Q.Compare(&er.ElectionConstants.SmallPrime))
-	helper.addCheck("(1.C) The cofactor is equal to r = (p − 1)/q", constants.C.Compare(&er.ElectionConstants.Cofactor))
-	helper.addCheck("(1.D) The generator is equal to the generator g", constants.G.Compare(&er.ElectionConstants.Generator))
+	helper.addCheck(step1A, constants.P.Compare(&er.ElectionConstants.LargePrime))
+	helper.addCheck(step1B, constants.Q.Compare(&er.ElectionConstants.SmallPrime))
+	helper.addCheck(step1C, constants.C.Compare(&er.ElectionConstants.Cofactor))
+	helper.addCheck(step1D, constants.G.Compare(&er.ElectionConstants.Generator))
 
 	v.helpers[helper.VerificationStep] = helper
 	v.logger.Info("Validation of step 1 took: " + time.Since(start).String())

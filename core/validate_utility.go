@@ -15,6 +15,7 @@ type ValidationHelper struct {
 	logger           *zap.Logger
 	errorMsg         *strings.Builder
 	mu               sync.Mutex
+	wg               sync.WaitGroup
 }
 
 func MakeValidationHelper(logger *zap.Logger, step int, description string) *ValidationHelper {
@@ -25,6 +26,7 @@ func MakeValidationHelper(logger *zap.Logger, step int, description string) *Val
 		VerificationStep: step,
 		isValid:          true,
 		mu:               sync.Mutex{},
+		wg:               sync.WaitGroup{},
 	}
 }
 

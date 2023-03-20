@@ -16,7 +16,7 @@ func (v *Verifier) validateTallyDecryption(er *deserialize.ElectionRecord) {
 
 	for _, contest := range er.PlaintextTally.Contests {
 		contestMap[contest.ObjectId] = make(map[string]struct{})
-		helper.addCheck("(11.C) Tally label exists in election manifest", contains(er.Manifest.Contests, contest.ObjectId))
+		helper.addCheck(step11C, contains(er.Manifest.Contests, contest.ObjectId))
 
 		for _, selection := range contest.Selections {
 			contestMap[contest.ObjectId][selection.ObjectId] = struct{}{}
@@ -30,9 +30,9 @@ func (v *Verifier) validateTallyDecryption(er *deserialize.ElectionRecord) {
 				mi = v.mulP(mi, &share.Share)
 			}
 
-			helper.addCheck("(11.A) The equation is satisfied", b.Compare(v.mulP(&m, mi)))
-			helper.addCheck("(11.B) The equation is satisfied", m.Compare(v.powP(v.constants.G, t)))
-			helper.addCheck("(11.D) The option in the contest occurs as an option for the contest in the election manifest", doesContestContainSelection(er.Manifest.Contests, contest.ObjectId, selection.ObjectId))
+			helper.addCheck(step11A, b.Compare(v.mulP(&m, mi)))
+			helper.addCheck(step11B, m.Compare(v.powP(v.constants.G, t)))
+			helper.addCheck(step11D, doesContestContainSelection(er.Manifest.Contests, contest.ObjectId, selection.ObjectId))
 		}
 	}
 
@@ -49,14 +49,14 @@ func (v *Verifier) validateTallyDecryption(er *deserialize.ElectionRecord) {
 		if ok {
 			for _, selection := range contest.BallotSelections {
 				_, ok = contestSelections[selection.ObjectID]
-				helper.addCheck("(11.E) The option text label for the contest in the election manifest occurs as a option in the plaintext tally", ok)
+				helper.addCheck(step11E, ok)
 			}
 		} else {
 			// error *should* already be logged
 		}
 
 		_, ok = ballotContestMap[contest.ObjectID]
-		helper.addCheck("(11.F) For each contest text label that occurs in at least one submitted ballot, that contest text label occurs in the list of contests in the plaintext tally", ok)
+		helper.addCheck(step11F, ok)
 	}
 
 	v.helpers[helper.VerificationStep] = helper

@@ -26,7 +26,7 @@ func (v *Verifier) validateReplacementPartialDecryptionForSpoiledBallots(er *des
 							product = v.mulP(product, v.powP(&part.Share, &coefficient))
 						}
 						if len(share.RecoveredParts) > 0 {
-							helper.addCheck("(14.B) Correct missing decryption share", m.Compare(product))
+							helper.addCheck(step14B, m.Compare(product))
 						}
 					}
 				}

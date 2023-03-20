@@ -4,6 +4,7 @@ import (
 	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
+	"time"
 )
 
 func (v *Verifier) validateSubstituteDataForMissingGuardians(er *deserialize.ElectionRecord) {
@@ -11,6 +12,7 @@ func (v *Verifier) validateSubstituteDataForMissingGuardians(er *deserialize.Ele
 	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 9, "Correctness of substitute data for missing guardians")
 	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
+	start := time.Now()
 
 	// Mapping map to slice
 	var contests []schema.ContestTally
@@ -27,15 +29,17 @@ func (v *Verifier) validateSubstituteDataForMissingGuardians(er *deserialize.Ele
 			end = len(contests)
 		}
 
+		helper.wg.Add(1)
 		go v.validateSubstituteDataForMissingGuardiansForSlice(helper, contests[i:end], extendedBaseHash)
 	}
 
+	helper.wg.Wait()
 	v.helpers[helper.VerificationStep] = helper
+	v.logger.Info("Validation of step 9 took: " + time.Since(start).String())
 }
 
 func (v *Verifier) validateSubstituteDataForMissingGuardiansForSlice(helper *ValidationHelper, contests []schema.ContestTally, extendedBaseHash schema.BigInt) {
-	v.wg.Add(1)
-	defer v.wg.Done()
+	defer helper.wg.Done()
 
 	for _, contest := range contests {
 		for _, selection := range contest.Selections {
@@ -50,12 +54,12 @@ func (v *Verifier) validateSubstituteDataForMissingGuardiansForSlice(helper *Val
 						b := part.Proof.Data
 						m := part.Share
 
-						helper.addCheck("(9.A) The given value v is in Zq", v.isInRange(V))
-						helper.addCheck("(9.B) The given value a is in Zp^r", v.isValidResidue(a))
-						helper.addCheck("(9.B) The given value a is in Zp^r", v.isValidResidue(b))
-						helper.addCheck("(9.C) The challenge value c is correct", c.Compare(crypto.HashElems(extendedBaseHash, A, B, a, b, m)))
-						helper.addCheck("(9.D) The equation is satisfied", v.powP(v.constants.G, &V).Compare(v.mulP(&a, v.powP(&part.RecoveryPublicKey, &c))))
-						helper.addCheck("(9.E) The equation is satisfied", v.powP(&A, &V).Compare(v.mulP(&b, v.powP(&m, &c))))
+						helper.addCheck(step9A, v.isInRange(V))
+						helper.addCheck(step9B1, v.isValidResidue(a))
+						helper.addCheck(step9B2, v.isValidResidue(b))
+						helper.addCheck(step9C, c.Compare(crypto.HashElems(extendedBaseHash, A, B, a, b, m)))
+						helper.addCheck(step9D, v.powP(v.constants.G, &V).Compare(v.mulP(&a, v.powP(&part.RecoveryPublicKey, &c))))
+						helper.addCheck(step9E, v.powP(&A, &V).Compare(v.mulP(&b, v.powP(&m, &c))))
 					}
 				}
 			}
