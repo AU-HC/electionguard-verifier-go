@@ -41,7 +41,6 @@ To verify `/data/idaho_pilot_2022/` with logging level set to `information` and 
 $ go run main.go --p="data/idaho_pilot_2022/election-record/" --v=1 --o="output.json" 
 ```
 
-
 ## Remarks
 ### Note
 The verifier is currently not verifying step `6.A` as the ElectionGuard specification is not detailed enough.
@@ -50,3 +49,4 @@ The verifier is currently not verifying step `6.A` as the ElectionGuard specific
 - [x] Finish `README.md`
 - [ ] Check `10.A`, `14.A`
 - [ ] Verify step `6A` (Correct confirmation codes)
+- [ ] Upload report to GitHub, and create section in `README.md`
