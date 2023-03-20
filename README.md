@@ -23,9 +23,8 @@
 - [x] Refactor validation helper in `core/validate_utility.go`
 - [x] Verify step 16C to 16E
 - [x] Check 16.B
-- [ ] Check if mulP etc. is too slow
+- [x] Check if mulP etc. is too slow
+- [x] Verify step 11C-11F
 - [ ] Refactor WaitGroup in `core/verifier.go` to not have `wg.Add(1)` in goroutines
-- [ ] Verify step 11C-11F
 - [ ] Verify step 6A
 - [ ] Finish `README.md`
-- [ ] Is `schema/manifest.go` supposed to be bricked? Does it even matter?

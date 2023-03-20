@@ -66,6 +66,20 @@ func doesManifestSelectionExist(objectID string, selections []schema.ManifestBal
 	return false
 }
 
+func doesContestContainSelection(slice []schema.Contest, contestID, selectionID string) bool {
+	for _, contest := range slice {
+		if contest.ObjectID == contestID {
+			for _, selection := range contest.BallotSelections {
+				if selection.ObjectID == selectionID {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
 // TODO: Fix these to return nothing if two of the same exist, and log a message (Also move them somewhere else -> helper_methods.go)
 func getContest(objectID string, contests []schema.Contest) schema.Contest {
 	for _, contest := range contests {
