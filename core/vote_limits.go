@@ -4,7 +4,6 @@ import (
 	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
-	"strconv"
 )
 
 func (v *Verifier) validateVoteLimits(er *deserialize.ElectionRecord) {
@@ -14,7 +13,11 @@ func (v *Verifier) validateVoteLimits(er *deserialize.ElectionRecord) {
 
 	// Split the slice of ballots into multiple slices
 	ballots := er.SubmittedBallots
-	chunkSize := len(ballots) / 2
+	chunkSize := len(ballots) / 15
+	if chunkSize == 0 {
+		chunkSize = len(ballots) / 3
+	}
+
 	for i := 0; i < len(ballots); i += chunkSize {
 		end := i + chunkSize
 
@@ -32,8 +35,8 @@ func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots 
 	v.wg.Add(1)
 	defer v.wg.Done()
 
-	for i, ballot := range ballots {
-		for j, contest := range ballot.Contests {
+	for _, ballot := range ballots {
+		for _, contest := range ballot.Contests {
 			contestInManifest := getContest(contest.ObjectId, er.Manifest.Contests)
 			votesAllowed := contestInManifest.VotesAllowed
 			numberOfSelections := 0
@@ -44,8 +47,8 @@ func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots 
 				if selection.IsPlaceholderSelection {
 					numberOfSelections++
 				}
-				calculatedAHat = mulP(calculatedAHat, &selection.Ciphertext.Pad)
-				calculatedBHat = mulP(calculatedBHat, &selection.Ciphertext.Data)
+				calculatedAHat = v.mulP(calculatedAHat, &selection.Ciphertext.Pad)
+				calculatedBHat = v.mulP(calculatedBHat, &selection.Ciphertext.Data)
 			}
 
 			aHat := contest.CiphertextAccumulation.Pad
@@ -55,20 +58,21 @@ func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots 
 			V := contest.Proof.Response
 
 			c := crypto.HashElems(er.CiphertextElectionRecord.CryptoExtendedBaseHash, aHat, bHat, a, b)
-			equationFLeft := powP(v.constants.G, &V)
-			equationFRight := mulP(&a, powP(&aHat, c))
-			equationGLeft := mulP(powP(v.constants.G, mulP(schema.MakeBigIntFromInt(votesAllowed), c)), powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &V))
-			equationGRight := mulP(&b, powP(&bHat, c))
+			equationFLeft := v.powP(v.constants.G, &V)
+			equationFRight := v.mulP(&a, v.powP(&aHat, c))
+			equationGLeft := v.mulP(v.powP(v.constants.G, v.mulP(schema.MakeBigIntFromInt(votesAllowed), c)), v.powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &V))
+			equationGRight := v.mulP(&b, v.powP(&bHat, c))
 
-			helper.addCheck("(5.A) The number of placeholder positions matches the selection limit ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", votesAllowed == numberOfSelections)
-			helper.addCheck("(5.B) The a hat is computed correctly ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", aHat.Compare(calculatedAHat))
-			helper.addCheck("(5.B) The b hat is computed correctly ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", bHat.Compare(calculatedBHat))
-			helper.addCheck("(5.C) The given value V is in Zq ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", isInRange(V))
-			helper.addCheck("(5.D) The given value a are in Zp^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", isValidResidue(contest.Proof.Pad))
-			helper.addCheck("(5.D) The given values b are in Zp^r ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", isValidResidue(contest.Proof.Data))
-			helper.addCheck("(5.E) The challenge value is correctly computed ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", contest.Proof.Challenge.Compare(c))
-			helper.addCheck("(5.F) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", equationFLeft.Compare(equationFRight))
-			helper.addCheck("(5.G) The equation is satisfied ("+strconv.Itoa(i)+","+strconv.Itoa(j)+")", equationGLeft.Compare(equationGRight))
+			helper.addCheck("(5.A) The number of placeholder positions matches the selection limit", votesAllowed == numberOfSelections)
+			helper.addCheck("(5.B) The a hat is computed correctly", aHat.Compare(calculatedAHat))
+			helper.addCheck("(5.B) The b hat is computed correctly", bHat.Compare(calculatedBHat))
+			helper.addCheck("(5.C) The given value V is in Zq", v.isInRange(V))
+			helper.addCheck("(5.D) The given value a are in Zp^r", v.isValidResidue(contest.Proof.Pad))
+			helper.addCheck("(5.D) The given values b are in Zp^r", v.isValidResidue(contest.Proof.Data))
+			helper.addCheck("(5.E) The challenge value is correctly computed", contest.Proof.Challenge.Compare(c))
+			helper.addCheck("(5.F) The equation is satisfied", equationFLeft.Compare(equationFRight))
+			helper.addCheck("(5.G) The equation is satisfied", equationGLeft.Compare(equationGRight))
 		}
 	}
+
 }

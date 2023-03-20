@@ -3,12 +3,14 @@ package core
 import (
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
+	"time"
 )
 
 func (v *Verifier) validateBallotAggregation(er *deserialize.ElectionRecord) {
 	// Validate correctness of ballot aggregation (Step 7)
 	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 7, "Correctness of ballot aggregation")
+	start := time.Now()
 
 	for _, contest := range er.PlaintextTally.Contests {
 		for _, selection := range contest.Selections {
@@ -18,8 +20,8 @@ func (v *Verifier) validateBallotAggregation(er *deserialize.ElectionRecord) {
 				ballotWasCast := ballot.State == 1
 				if ballotWasCast {
 					ciphertextSelection := getSelection(ballot, contest.ObjectId, selection.ObjectId)
-					a = mulP(a, &ciphertextSelection.Pad)
-					b = mulP(b, &ciphertextSelection.Data)
+					a = v.mulP(a, &ciphertextSelection.Pad)
+					b = v.mulP(b, &ciphertextSelection.Data)
 				}
 			}
 			A := selection.Message.Pad
@@ -30,4 +32,5 @@ func (v *Verifier) validateBallotAggregation(er *deserialize.ElectionRecord) {
 	}
 
 	v.helpers[helper.VerificationStep] = helper
+	v.logger.Info("Validation of step 7 took: " + time.Since(start).String())
 }

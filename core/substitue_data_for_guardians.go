@@ -50,12 +50,12 @@ func (v *Verifier) validateSubstituteDataForMissingGuardiansForSlice(helper *Val
 						b := part.Proof.Data
 						m := part.Share
 
-						helper.addCheck("(9.A) The given value v is in Zq", isInRange(V))
-						helper.addCheck("(9.B) The given value a is in Zp^r", isValidResidue(a))
-						helper.addCheck("(9.B) The given value a is in Zp^r", isValidResidue(b))
+						helper.addCheck("(9.A) The given value v is in Zq", v.isInRange(V))
+						helper.addCheck("(9.B) The given value a is in Zp^r", v.isValidResidue(a))
+						helper.addCheck("(9.B) The given value a is in Zp^r", v.isValidResidue(b))
 						helper.addCheck("(9.C) The challenge value c is correct", c.Compare(crypto.HashElems(extendedBaseHash, A, B, a, b, m)))
-						helper.addCheck("(9.D) The equation is satisfied", powP(v.constants.G, &V).Compare(mulP(&a, powP(&part.RecoveryPublicKey, &c))))
-						helper.addCheck("(9.E) The equation is satisfied", powP(&A, &V).Compare(mulP(&b, powP(&m, &c))))
+						helper.addCheck("(9.D) The equation is satisfied", v.powP(v.constants.G, &V).Compare(v.mulP(&a, v.powP(&part.RecoveryPublicKey, &c))))
+						helper.addCheck("(9.E) The equation is satisfied", v.powP(&A, &V).Compare(v.mulP(&b, v.powP(&m, &c))))
 					}
 				}
 			}
