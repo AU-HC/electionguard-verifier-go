@@ -14,10 +14,12 @@ func main() {
 	// Fetching logging level and creating logger
 	logger := utility.ConfigureLogger(applicationArguments.LoggingLevel)
 	outputStrategy := core.MakeOutputStrategy(applicationArguments.OutputPath)
+	verifyStrategy := core.MakeVerifyStrategy(applicationArguments.UseMultipleThreads)
 
-	// Create verifier, set strategy, and verify election data
+	// Create verifier, set strategies, and verify election data
 	verifier := *core.MakeVerifier(logger)
 	verifier.SetOutputStrategy(outputStrategy)
+	verifier.SetVerifyStrategy(verifyStrategy)
 	electionIsValid := verifier.Verify(path)
 
 	// Result of verification of election data

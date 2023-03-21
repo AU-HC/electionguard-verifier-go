@@ -9,11 +9,12 @@ import (
 )
 
 type Verifier struct {
-	logger         *zap.Logger                      // logger used to log information
-	constants      utility.CorrectElectionConstants // constants is election constants (p, q, r, g)
-	wg             *sync.WaitGroup                  // wg is used to sync goroutines for each step
-	helpers        []*ValidationHelper              // helpers are used to store result of each verification step
-	outputStrategy OutputStrategy                   // outputStrategy is used to output the verification results
+	logger           *zap.Logger                      // logger used to log information
+	constants        utility.CorrectElectionConstants // constants is election constants (p, q, r, g)
+	wg               *sync.WaitGroup                  // wg is used to sync goroutines for each step
+	helpers          []*ValidationHelper              // helpers are used to store result of each verification step
+	verifierStrategy VerifyStrategy                   // verifierStrategy is used to verify an election with a single or multiple threads
+	outputStrategy   OutputStrategy                   // outputStrategy is used to output the verification results
 }
 
 func MakeVerifier(logger *zap.Logger) *Verifier {
@@ -22,78 +23,21 @@ func MakeVerifier(logger *zap.Logger) *Verifier {
 
 func (v *Verifier) Verify(path string) bool {
 	// Deserialize election record and fetching correct election constants (Step 0)
-	er, electionRecordIsValid := v.getElectionRecord(path)
+	er, electionRecordIsNotValid := v.getElectionRecord(path)
 	v.constants = utility.MakeCorrectElectionConstants()
-	if !electionRecordIsValid {
+	if electionRecordIsNotValid {
 		return false
 	}
 
-	// Setting up synchronization
+	// Setting up synchronization (Will have to even if using one thread)
 	v.wg.Add(19)
+
+	// Starting time and verifying election using supplied strategy
 	start := time.Now()
-
-	// Validate election parameters (Step 1)
-	go v.validateElectionConstants(er)
-
-	// Validate guardian public-key (Step 2)
-	go v.validateGuardianPublicKeys(er)
-
-	// Validation election public-key (Step 3)
-	go v.validateJointPublicKey(er)
-
-	// Validate correctness of selection encryptions (Step 4)
-	go v.validateSelectionEncryptions(er)
-
-	// Validate adherence to vote limits (Step 5)
-	go v.validateVoteLimits(er)
-
-	// Validate confirmation codes (Step 6)
-	go v.validateConfirmationCodes(er)
-
-	// Validate correctness of ballot aggregation (Step 7)
-	go v.validateBallotAggregation(er)
-
-	// Validate correctness of partial decryptions (Step 8)
-	go v.validatePartialDecryptions(er)
-
-	// Validate correctness of substitute data for missing guardians (Step 9)
-	go v.validateSubstituteDataForMissingGuardians(er)
-
-	// Validate correctness of construction of replacement partial decryptions (Step 10)
-	go v.validateConstructionOfReplacementForPartialDecryptions(er)
-
-	// Validate correctness of tally decryption (Step 11)
-	go v.validateTallyDecryption(er)
-
-	// Validate correctness of partial decryption for spoiled ballots (Step 12)
-	go v.validatePartialDecryptionForSpoiledBallots(er)
-
-	// Validate correctness of substitute data for spoiled ballots (Step 13)
-	go v.validateSubstituteDataForSpoiledBallots(er)
-
-	// Validate of correct replacement partial decryptions for spoiled ballots (Step 14)
-	go v.validateReplacementPartialDecryptionForSpoiledBallots(er)
-
-	// Validation of correct decryption of spoiled ballots (Step 15)
-	go v.validateDecryptionOfSpoiledBallots(er)
-
-	// and validation of correctness of spoiled ballots (Step 16)
-	go v.validateCorrectnessOfSpoiledBallots(er)
-
-	// Verifying correctness of contest data partial decryptions for spoiled ballots (Step 17)
-	go v.validateContestDataPartialDecryptionsForSpoiledBallots(er)
-
-	// Validating correctness of substitute contest data for spoiled ballots (Step 18)
-	go v.validateSubstituteContestDataForSpoiledBallots(er)
-
-	// Validating the correctness of contest replacement decryptions for spoiled ballots (Step 19)
-	go v.validateContestReplacementDecryptionForSpoiledBallots(er)
-
-	// Waiting for all goroutines to finish
-	v.wg.Wait()
+	v.verifierStrategy.verify(er, v)
 	elapsed := time.Since(start).String()
-	electionIsValid := v.validateAllVerificationSteps()
 
+	electionIsValid := v.validateAllVerificationSteps()
 	v.logger.Info("Validation of election took: " + elapsed)
 
 	// Output validation results to file using specific strategy
@@ -130,9 +74,13 @@ func (v *Verifier) getElectionRecord(path string) (*deserialize.ElectionRecord, 
 	}
 
 	// If length of error message is 0, no errors were reported and thus return electionRecord, true
-	return electionRecord, len(err) == 0
+	return electionRecord, len(err) != 0
 }
 
 func (v *Verifier) SetOutputStrategy(strategy OutputStrategy) {
 	v.outputStrategy = strategy
+}
+
+func (v *Verifier) SetVerifyStrategy(strategy VerifyStrategy) {
+	v.verifierStrategy = strategy
 }

@@ -29,8 +29,9 @@ It's important to note that the `-p` flag must be set, as it specifies the elect
 must follow the specification of ElectionGuard version 1.0 or 1.1
 
 The verifier also has alternate options which can be set, using the following flags:
-- `-o` of type `string`: Which specifies if the verifier, should output a JSON file with additional verification information to the specified path.
-- `-v` of type `int`: Which specifies the logging level for the verifier, the options are:
+- `-o` of type `string`: Specifies if the verifier, should output a JSON file with additional verification information to the specified path.
+- `-c` of type `bool` : Specifies if the verifier should verify the steps concurrent. The default value is true.
+- `-v` of type `int`: Specifies the logging level for the verifier, the options are:
     - *0* : Will log nothing (default)
     - *1* : Logging of information
     - *2* : Logging of debug
