@@ -31,9 +31,9 @@ must follow the specification of ElectionGuard version 1.0 or 1.1
 The verifier also has alternate options which can be set, using the following flags:
 - `-o` of type `string`: Which specifies if the verifier, should output a JSON file with additional verification information to the specified path.
 - `-v` of type `int`: Which specifies the logging level for the verifier, the options are:
-    - *0* (default): Will log nothing
-    - *1* : Logging of information and below
-    - *2* : Logging of debug and below
+    - *0* : Will log nothing (default)
+    - *1* : Logging of information
+    - *2* : Logging of debug
 
 The project provides some sample data in `/data`, which is taken from [Microsoft](https://github.com/microsoft/electionguard/releases/tag/v1.1) and [egvote.us](https://www.egvote.us/cc/id/22). 
 To verify `/data/idaho_pilot_2022/` with logging level set to `information` and output file `output.json` execute the following command
@@ -47,6 +47,6 @@ The verifier is currently not verifying step `6.A` as the ElectionGuard specific
 
 ### Backlog
 - [x] Finish `README.md`
-- [ ] Check `10.A`, `14.A`
+- [x] Check `10.A`, `14.A`
 - [ ] Verify step `6A` (Correct confirmation codes)
 - [ ] Upload report to GitHub, and create section in `README.md`
