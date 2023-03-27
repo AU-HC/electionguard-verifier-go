@@ -8,10 +8,9 @@ import (
 )
 
 func (v *Verifier) validatePartialDecryptions(er *deserialize.ElectionRecord) {
-	// Validate correctness of partial decryptions (Step 8)
-	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 8, "Correctness of partial decryptions")
-	start := time.Now()
+	defer v.wg.Done()
+	defer helper.measureTimeToValidateStep(time.Now())
 
 	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
 	for _, contest := range er.PlaintextTally.Contests {
@@ -39,5 +38,4 @@ func (v *Verifier) validatePartialDecryptions(er *deserialize.ElectionRecord) {
 	}
 
 	v.helpers[helper.VerificationStep] = helper
-	v.logger.Info("Validation of step 8 took: " + time.Since(start).String())
 }

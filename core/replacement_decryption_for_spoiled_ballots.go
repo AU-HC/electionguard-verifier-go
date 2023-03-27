@@ -7,10 +7,9 @@ import (
 )
 
 func (v *Verifier) validateReplacementPartialDecryptionForSpoiledBallots(er *deserialize.ElectionRecord) {
-	// Validation of correct replacement partial decryptions for spoiled ballots (Step 14)
-	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 14, "Correctness of replacement partial decryptions for spoiled ballots")
-	start := time.Now()
+	defer v.wg.Done()
+	defer helper.measureTimeToValidateStep(time.Now())
 
 	for _, ballot := range er.SpoiledBallots {
 		for _, contest := range ballot.Contests {
@@ -35,5 +34,4 @@ func (v *Verifier) validateReplacementPartialDecryptionForSpoiledBallots(er *des
 	}
 
 	v.helpers[helper.VerificationStep] = helper
-	v.logger.Info("Validation of step 14 took: " + time.Since(start).String())
 }

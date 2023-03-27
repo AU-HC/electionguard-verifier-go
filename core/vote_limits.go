@@ -8,10 +8,9 @@ import (
 )
 
 func (v *Verifier) validateVoteLimits(er *deserialize.ElectionRecord) {
-	// Validate adherence to vote limits (Step 5)
-	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 5, "Adherence to vote limits")
-	start := time.Now()
+	defer v.wg.Done()
+	defer helper.measureTimeToValidateStep(time.Now())
 
 	// Split the slice of ballots into multiple slices
 	ballots := er.SubmittedBallots
@@ -33,7 +32,6 @@ func (v *Verifier) validateVoteLimits(er *deserialize.ElectionRecord) {
 
 	helper.wg.Wait()
 	v.helpers[helper.VerificationStep] = helper
-	v.logger.Info("Validation of step 5 took: " + time.Since(start).String())
 }
 
 func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots []schema.SubmittedBallot, er *deserialize.ElectionRecord) {
@@ -78,5 +76,4 @@ func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots 
 			helper.addCheck(step5G, equationGLeft.Compare(equationGRight))
 		}
 	}
-
 }

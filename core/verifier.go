@@ -13,7 +13,7 @@ type Verifier struct {
 	constants        utility.CorrectElectionConstants // constants is election constants (p, q, r, g)
 	wg               *sync.WaitGroup                  // wg is used to sync goroutines for each step
 	helpers          []*ValidationHelper              // helpers are used to store result of each verification step
-	verifierStrategy VerifyStrategy                   // verifierStrategy is used to verify an election with a single or multiple threads
+	verifierStrategy VerifyStrategy                   // verifierStrategy is used to decide if the steps should be verified concurrently
 	outputStrategy   OutputStrategy                   // outputStrategy is used to output the verification results
 }
 
@@ -35,10 +35,10 @@ func (v *Verifier) Verify(path string) bool {
 	// Starting time and verifying election using supplied strategy
 	start := time.Now()
 	v.verifierStrategy.verify(er, v)
-	elapsed := time.Since(start).String()
+	elapsed := time.Since(start)
 
 	electionIsValid := v.validateAllVerificationSteps()
-	v.logger.Info("Validation of election took: " + elapsed)
+	v.logger.Info("Validation of election took: " + elapsed.String())
 
 	// Output validation results to file using specific strategy
 	v.outputStrategy.Output(*er, v.helpers)

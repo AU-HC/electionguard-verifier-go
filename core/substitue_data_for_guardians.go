@@ -9,10 +9,11 @@ import (
 
 func (v *Verifier) validateSubstituteDataForMissingGuardians(er *deserialize.ElectionRecord) {
 	// Validate correctness of substitute data for missing guardians (Step 9)
-	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 9, "Correctness of substitute data for missing guardians")
+	defer v.wg.Done()
+	defer helper.measureTimeToValidateStep(time.Now())
+
 	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
-	start := time.Now()
 
 	// Mapping map to slice
 	var contests []schema.ContestTally
@@ -35,7 +36,6 @@ func (v *Verifier) validateSubstituteDataForMissingGuardians(er *deserialize.Ele
 
 	helper.wg.Wait()
 	v.helpers[helper.VerificationStep] = helper
-	v.logger.Info("Validation of step 9 took: " + time.Since(start).String())
 }
 
 func (v *Verifier) validateSubstituteDataForMissingGuardiansForSlice(helper *ValidationHelper, contests []schema.ContestTally, extendedBaseHash schema.BigInt) {

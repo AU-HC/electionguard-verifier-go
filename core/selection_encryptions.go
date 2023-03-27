@@ -9,9 +9,9 @@ import (
 
 func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) {
 	// Validate correctness of selection encryptions (Step 4)
-	defer v.wg.Done()
-	start := time.Now()
 	helper := MakeValidationHelper(v.logger, 4, "Correctness of selection encryptions")
+	defer v.wg.Done()
+	defer helper.measureTimeToValidateStep(time.Now())
 
 	// Split the slice of ballots into multiple slices
 	ballots := er.SubmittedBallots
@@ -33,7 +33,6 @@ func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) 
 
 	helper.wg.Wait()
 	v.helpers[helper.VerificationStep] = helper
-	v.logger.Info("Validation of step 4 took: " + time.Since(start).String())
 }
 
 func (v *Verifier) validateSelectionEncryptionForSlice(helper *ValidationHelper, ballots []schema.SubmittedBallot, er *deserialize.ElectionRecord) {

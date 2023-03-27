@@ -7,9 +7,9 @@ import (
 )
 
 func (v *Verifier) validateGuardianPublicKeys(er *deserialize.ElectionRecord) {
-	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 2, "Guardian public-key validation")
-	start := time.Now()
+	defer v.wg.Done()
+	defer helper.measureTimeToValidateStep(time.Now())
 
 	// TODO: Check j
 	for _, guardian := range er.Guardians {
@@ -26,5 +26,4 @@ func (v *Verifier) validateGuardianPublicKeys(er *deserialize.ElectionRecord) {
 	}
 
 	v.helpers[helper.VerificationStep] = helper
-	v.logger.Info("Validation of step 2 took: " + time.Since(start).String())
 }

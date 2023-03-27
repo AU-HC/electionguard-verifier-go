@@ -6,10 +6,9 @@ import (
 )
 
 func (v *Verifier) validateConfirmationCodes(er *deserialize.ElectionRecord) {
-	// Validate confirmation codes (Step 6)
-	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 6, "Validation of confirmation codes")
-	start := time.Now()
+	defer v.wg.Done()
+	defer helper.measureTimeToValidateStep(time.Now())
 
 	hasSeen := make(map[string]bool)
 	noDuplicateConfirmationCodesFound := true
@@ -27,5 +26,4 @@ func (v *Verifier) validateConfirmationCodes(er *deserialize.ElectionRecord) {
 	helper.addCheck(step6B, noDuplicateConfirmationCodesFound)
 
 	v.helpers[helper.VerificationStep] = helper
-	v.logger.Info("Validation of step 6 took: " + time.Since(start).String())
 }

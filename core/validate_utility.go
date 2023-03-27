@@ -5,12 +5,14 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 type ValidationHelper struct {
 	VerificationStep int
 	Description      string
 	Checked, Failed  int
+	TimeToVerify     int64 // in ms
 	isValid          bool
 	logger           *zap.Logger
 	errorMsg         *strings.Builder
@@ -59,4 +61,10 @@ func (v *ValidationHelper) validate() bool {
 	v.logger.Info("[INVALID]: " + stepString + ". " + v.Description)
 	v.logger.Debug(v.errorMsg.String())
 	return false
+}
+
+func (v *ValidationHelper) measureTimeToValidateStep(start time.Time) {
+	total := time.Since(start)
+	v.TimeToVerify = total.Milliseconds()
+	v.logger.Info("Validation of step " + strconv.Itoa(v.VerificationStep) + " took: " + total.String())
 }

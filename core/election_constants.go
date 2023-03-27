@@ -7,9 +7,9 @@ import (
 )
 
 func (v *Verifier) validateElectionConstants(er *deserialize.ElectionRecord) {
-	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 1, "Election parameters are correct")
-	start := time.Now()
+	defer v.wg.Done()
+	defer helper.measureTimeToValidateStep(time.Now())
 
 	constants := utility.MakeCorrectElectionConstants()
 	helper.addCheck(step1A, constants.P.Compare(&er.ElectionConstants.LargePrime))
@@ -18,5 +18,4 @@ func (v *Verifier) validateElectionConstants(er *deserialize.ElectionRecord) {
 	helper.addCheck(step1D, constants.G.Compare(&er.ElectionConstants.Generator))
 
 	v.helpers[helper.VerificationStep] = helper
-	v.logger.Info("Validation of step 1 took: " + time.Since(start).String())
 }

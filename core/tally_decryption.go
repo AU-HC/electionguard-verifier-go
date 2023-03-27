@@ -7,12 +7,12 @@ import (
 )
 
 func (v *Verifier) validateTallyDecryption(er *deserialize.ElectionRecord) {
-	// Validate correctness of tally decryption (Step 11)
-	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 11, "Correct decryption of tallies")
+	defer v.wg.Done()
+	defer helper.measureTimeToValidateStep(time.Now())
+
 	contestMap := make(map[string]map[string]struct{})
 	ballotContestMap := make(map[string]struct{})
-	start := time.Now()
 
 	for _, contest := range er.PlaintextTally.Contests {
 		contestMap[contest.ObjectId] = make(map[string]struct{})
@@ -60,5 +60,4 @@ func (v *Verifier) validateTallyDecryption(er *deserialize.ElectionRecord) {
 	}
 
 	v.helpers[helper.VerificationStep] = helper
-	v.logger.Info("Validation of step 11 took: " + time.Since(start).String())
 }

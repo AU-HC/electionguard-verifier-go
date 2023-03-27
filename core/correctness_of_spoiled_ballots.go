@@ -6,12 +6,11 @@ import (
 )
 
 func (v *Verifier) validateCorrectnessOfSpoiledBallots(er *deserialize.ElectionRecord) {
-	// Validation of correctness of spoiled ballots (Step 16)
-	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 16, "Correctness of spoiled ballots")
-	xd := make(map[string]map[string]struct{})
-	start := time.Now()
+	defer v.wg.Done()
+	defer helper.measureTimeToValidateStep(time.Now())
 
+	xd := make(map[string]map[string]struct{})
 	for _, ballot := range er.SubmittedBallots { // Looping over submitted ballots to have access to ballot state
 		if ballot.State != 2 { // State 2 = spoiled
 			continue
@@ -53,5 +52,4 @@ func (v *Verifier) validateCorrectnessOfSpoiledBallots(er *deserialize.ElectionR
 	}
 
 	v.helpers[helper.VerificationStep] = helper
-	v.logger.Info("Validation of step 16 took: " + time.Since(start).String())
 }

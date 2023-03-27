@@ -22,7 +22,7 @@ func main() {
 	verifier.SetVerifyStrategy(verifyStrategy)
 	electionIsValid := verifier.Verify(path)
 
-	// Result of verification of election data
+	// Result of verification of the election data
 	if electionIsValid {
 		fmt.Println("Election is valid")
 	} else {

@@ -7,12 +7,11 @@ import (
 )
 
 func (v *Verifier) validateContestDataPartialDecryptionsForSpoiledBallots(er *deserialize.ElectionRecord) {
-	// Verifying correctness of contest data partial decryptions for spoiled ballots (Step 17)
-	defer v.wg.Done()
 	helper := MakeValidationHelper(v.logger, 17, "Correctness of contest data partial decryptions for spoiled ballots")
-	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
-	start := time.Now()
+	defer v.wg.Done()
+	defer helper.measureTimeToValidateStep(time.Now())
 
+	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
 	for _, ballot := range er.SpoiledBallots {
 		for _, contest := range ballot.Contests {
 			c0 := contest.ContestData.Ciphertext.Generator
@@ -37,5 +36,4 @@ func (v *Verifier) validateContestDataPartialDecryptionsForSpoiledBallots(er *de
 	}
 
 	v.helpers[helper.VerificationStep] = helper
-	v.logger.Info("Validation of step 17 took: " + time.Since(start).String())
 }
