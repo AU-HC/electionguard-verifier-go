@@ -95,7 +95,7 @@ func (v *Verifier) Benchmark(path string, samples int) {
 		return
 	}
 
-	timingForRuns := make([]int64, samples)
+	runs := make([]float64, samples)
 	for i := 0; i < samples; i++ {
 		// Setting up synchronization (Will have to even if using one thread)
 		v.wg.Add(19)
@@ -105,9 +105,10 @@ func (v *Verifier) Benchmark(path string, samples int) {
 		v.verifierStrategy.verify(er, v)
 		elapsed := time.Since(start)
 
-		timingForRuns[i] = elapsed.Milliseconds()
+		runs[i] = float64(elapsed.Milliseconds())
 	}
 
 	// Output the data to a json file
-
+	result := MakeBenchmarkResults(samples, runs)
+	result.OutputToJsonFile()
 }
