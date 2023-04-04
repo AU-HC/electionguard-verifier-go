@@ -5,10 +5,11 @@ import (
 )
 
 type ApplicationArguments struct {
-	LoggingLevel          LoggingLevel
-	ElectionArtifactsPath string
-	OutputPath            string
-	UseMultipleThreads    bool
+	LoggingLevel              LoggingLevel
+	ElectionArtifactsPath     string
+	OutputPath                string
+	ConcurrentSteps           bool
+	AmountBenchmarkingSamples int
 }
 
 func InitApplicationArguments() ApplicationArguments {
@@ -19,7 +20,8 @@ func InitApplicationArguments() ApplicationArguments {
 	loggingLevelIntPtr := flag.Int("v", 0, "Logging level: 0 = no logging, 1 = info and higher, 2 = debug and higher")
 	flag.StringVar(&arguments.ElectionArtifactsPath, "p", "data/hamilton-general/election_record", "Path to election record")
 	flag.StringVar(&arguments.OutputPath, "o", "", "File which to output verification result")
-	flag.BoolVar(&arguments.UseMultipleThreads, "c", true, "Decides if the verifier should run the verification steps concurrent")
+	flag.BoolVar(&arguments.ConcurrentSteps, "c", true, "Decides if the verifier should run the verification steps concurrent")
+	flag.IntVar(&arguments.AmountBenchmarkingSamples, "b", 0, "Decides if the verifier should be benchmarked, and the amount of samples")
 
 	// Parsing flags
 	flag.Parse()

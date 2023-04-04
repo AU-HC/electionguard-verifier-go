@@ -18,13 +18,17 @@ type Verifier struct {
 }
 
 func MakeVerifier(logger *zap.Logger) *Verifier {
-	return &Verifier{logger: logger, wg: &sync.WaitGroup{}, helpers: make([]*ValidationHelper, 20)}
+	return &Verifier{
+		logger:    logger,
+		wg:        &sync.WaitGroup{},
+		helpers:   make([]*ValidationHelper, 20),
+		constants: utility.MakeCorrectElectionConstants(),
+	}
 }
 
 func (v *Verifier) Verify(path string) bool {
 	// Deserialize election record and fetching correct election constants (Step 0)
 	er, electionRecordIsNotValid := v.getElectionRecord(path)
-	v.constants = utility.MakeCorrectElectionConstants()
 	if electionRecordIsNotValid {
 		return false
 	}
@@ -83,4 +87,27 @@ func (v *Verifier) SetOutputStrategy(strategy OutputStrategy) {
 
 func (v *Verifier) SetVerifyStrategy(strategy VerifyStrategy) {
 	v.verifierStrategy = strategy
+}
+
+func (v *Verifier) Benchmark(path string, samples int) {
+	er, electionRecordIsNotValid := v.getElectionRecord(path)
+	if electionRecordIsNotValid {
+		return
+	}
+
+	timingForRuns := make([]int64, samples)
+	for i := 0; i < samples; i++ {
+		// Setting up synchronization (Will have to even if using one thread)
+		v.wg.Add(19)
+
+		// Starting time and verifying election using supplied strategy
+		start := time.Now()
+		v.verifierStrategy.verify(er, v)
+		elapsed := time.Since(start)
+
+		timingForRuns[i] = elapsed.Milliseconds()
+	}
+
+	// Output the data to a json file
+
 }
