@@ -7,12 +7,13 @@ import (
 )
 
 type BenchmarkResult struct {
-	AmountOfSamples int
-	MinRun          float64
-	MaxRun          float64
-	Median          float64
-	Mean            float64
-	Runs            []float64
+	AmountOfSamples   int
+	MinRun            float64
+	MaxRun            float64
+	Median            float64
+	Mean              float64
+	StandardDeviation float64
+	Runs              []float64
 }
 
 func MakeBenchmarkResults(samples int, runs []float64) BenchmarkResult {
@@ -31,6 +32,9 @@ func MakeBenchmarkResults(samples int, runs []float64) BenchmarkResult {
 
 	mean, _ := stats.Mean(runs)
 	benchmarkResults.Mean = mean
+
+	sd, _ := stats.StandardDeviation(runs)
+	benchmarkResults.StandardDeviation = sd
 
 	return benchmarkResults
 }
