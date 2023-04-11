@@ -31,6 +31,7 @@ must follow the specification of ElectionGuard version 1.0 or 1.1
 The verifier also has alternate options which can be set, using the following flags:
 - `-o` of type `string`: Specifies if the verifier, should output a JSON file with additional verification information to the specified path.
 - `-c` of type `bool` : Specifies if the verifier should verify the steps concurrent. The default value is true.
+- `-b` of type `int`: Specifies the amount of samples for a benchmarking run. Setting this flag with a value other than 0, will not verify the specified election.
 - `-v` of type `int`: Specifies the logging level for the verifier, the options are:
     - *0* : Will log nothing (default)
     - *1* : Logging of information
@@ -42,12 +43,10 @@ To verify `/data/idaho_pilot_2022/` with logging level set to `information` and 
 $ go run main.go --p="data/idaho_pilot_2022/election-record/" --v=1 --o="output.json" 
 ```
 
-## Remarks
-### Note
-The verifier is currently not verifying step `6.A` as the ElectionGuard specification is not detailed enough.
+## Additional information
+### Remarks on the verifier
+* The verifier is currently not verifying step `6.A` as the ElectionGuard specification is not detailed enough.
 
 ### Backlog
-- [x] Finish `README.md`
-- [x] Check `10.A`, `14.A`
-- [ ] Verify step `6A` (Correct confirmation codes)
+- [ ] Comment code, and general cleanup
 - [ ] Upload report to GitHub, and create section in `README.md`
