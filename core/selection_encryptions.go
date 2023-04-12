@@ -30,8 +30,8 @@ func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) 
 		helper.wg.Add(1)
 		go v.validateSelectionEncryptionForSlice(helper, ballots[i:end], er)
 	}
-
 	helper.wg.Wait()
+
 	v.helpers[helper.VerificationStep] = helper
 }
 
