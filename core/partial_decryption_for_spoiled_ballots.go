@@ -12,14 +12,39 @@ func (v *Verifier) validatePartialDecryptionForSpoiledBallots(er *deserialize.El
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())
 
+	ballots := er.SpoiledBallots
+	chunkSize := len(ballots) / 20
+	if chunkSize == 0 {
+		chunkSize = len(ballots) / 3
+	}
+
+	for i := 0; i < len(ballots); i += chunkSize {
+		end := i + chunkSize
+
+		if end > len(ballots) {
+			end = len(ballots)
+		}
+
+		helper.wg.Add(1)
+		go v.validatePartialDecryptionForSpoiledBallotsForSlice(helper, ballots[i:end], er)
+	}
+
+	helper.wg.Wait()
+	v.helpers[helper.VerificationStep] = helper
+}
+
+func (v *Verifier) validatePartialDecryptionForSpoiledBallotsForSlice(helper *ValidationHelper, spoiledBallots []schema.SpoiledBallot, er *deserialize.ElectionRecord) {
+	defer helper.wg.Done()
+
 	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
-	for _, ballot := range er.SpoiledBallots {
+	zero := schema.MakeBigIntFromInt(0)
+	for _, ballot := range spoiledBallots {
 		for _, contest := range ballot.Contests {
 			for _, selection := range contest.Selections {
 				alpha := selection.Message.Pad
 				beta := selection.Message.Data
 				for _, share := range selection.Shares {
-					if !share.Proof.Pad.Compare(schema.MakeBigIntFromInt(0)) { // Comparing with zero, will need better way of determining this TODO: Fix
+					if !share.Proof.Pad.Compare(zero) { // Comparing with zero, will need better way of determining this TODO: Fix
 						m := share.Share
 						a := share.Proof.Pad
 						b := share.Proof.Data
