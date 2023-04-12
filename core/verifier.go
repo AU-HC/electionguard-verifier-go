@@ -108,6 +108,6 @@ func (v *Verifier) Benchmark(path string, amountOfSamples int) {
 		runs[i] = float64(elapsed.Milliseconds())
 	}
 
-	//  Output the data to a json file
+	// Output the data to a json file
 	v.outputStrategy.OutputBenchmark(amountOfSamples, runs)
 }
