@@ -89,14 +89,14 @@ func (v *Verifier) SetVerifyStrategy(strategy VerifyStrategy) {
 	v.verifierStrategy = strategy
 }
 
-func (v *Verifier) Benchmark(path string, samples int) {
+func (v *Verifier) Benchmark(path string, amountOfSamples int) {
 	er, electionRecordIsNotValid := v.getElectionRecord(path)
 	if electionRecordIsNotValid {
 		return
 	}
 
-	runs := make([]float64, samples)
-	for i := 0; i < samples; i++ {
+	runs := make([]float64, amountOfSamples)
+	for i := 0; i < amountOfSamples; i++ {
 		// Setting up synchronization (Will have to even if using one thread)
 		v.wg.Add(19)
 
@@ -109,6 +109,5 @@ func (v *Verifier) Benchmark(path string, samples int) {
 	}
 
 	// Output the data to a json file
-	result := MakeBenchmarkResults(samples, runs)
-	result.OutputToJsonFile()
+	v.outputStrategy.OutputBenchmark(amountOfSamples, runs)
 }

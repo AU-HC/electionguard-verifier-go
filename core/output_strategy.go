@@ -21,12 +21,17 @@ type VerificationRecord struct {
 
 type OutputStrategy interface {
 	Output(record deserialize.ElectionRecord, results []*ValidationHelper)
+	OutputBenchmark(amountOfSamples int, runs []float64)
 }
 
 type NoOutputStrategy struct {
 }
 
 func (s NoOutputStrategy) Output(record deserialize.ElectionRecord, results []*ValidationHelper) {
+	// do nothing
+}
+
+func (s NoOutputStrategy) OutputBenchmark(samples int, runs []float64) {
 	// do nothing
 }
 
@@ -43,6 +48,20 @@ func (s ToFileStrategy) Output(record deserialize.ElectionRecord, results []*Val
 	}
 	vr := VerificationRecord{ElectionName: record.Manifest.ElectionScopeID, VerificationSteps: xd}
 	jsonBytes, err := json.MarshalIndent(vr, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+
+	err = os.WriteFile(s.Path, jsonBytes, 0644)
+	if err != nil {
+		return
+	}
+}
+
+func (s ToFileStrategy) OutputBenchmark(amountOfSamples int, runs []float64) {
+	b := MakeBenchmarkResults(amountOfSamples, runs)
+
+	jsonBytes, err := json.MarshalIndent(b, "", "  ")
 	if err != nil {
 		panic(err)
 	}

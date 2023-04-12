@@ -1,9 +1,7 @@
 package core
 
 import (
-	"encoding/json"
 	"github.com/montanaflynn/stats"
-	"os"
 )
 
 type BenchmarkResult struct {
@@ -37,16 +35,4 @@ func MakeBenchmarkResults(samples int, runs []float64) BenchmarkResult {
 	benchmarkResults.StandardDeviation = sd
 
 	return benchmarkResults
-}
-
-func (b *BenchmarkResult) OutputToJsonFile() {
-	jsonBytes, err := json.MarshalIndent(*b, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-
-	err = os.WriteFile("benchmark.json", jsonBytes, 0644)
-	if err != nil {
-		return
-	}
 }
