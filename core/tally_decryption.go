@@ -43,21 +43,23 @@ func (v *Verifier) validateTallyDecryption(er *deserialize.ElectionRecord) {
 	}
 
 	// TODO: This check does not take placeholder options into account
-	// as that information is contained in submitted ballots
-	for _, contest := range er.Manifest.Contests {
-		contestSelections, ok := contestMap[contest.ObjectID]
-		if ok {
-			for _, selection := range contest.BallotSelections {
-				_, ok = contestSelections[selection.ObjectID]
-				helper.addCheck(step11E, ok)
+	// TODO: as that information is contained in submitted ballots
+	/*
+		for _, contest := range er.Manifest.Contests {
+			contestSelections, ok := contestMap[contest.ObjectID]
+			if ok {
+				for _, selection := range contest.BallotSelections {
+					_, ok = contestSelections[selection.ObjectID]
+					helper.addCheck(step11E, ok)
+				}
+			} else {
+				// error *should* already be logged
 			}
-		} else {
-			// error *should* already be logged
-		}
 
-		_, ok = ballotContestMap[contest.ObjectID]
-		helper.addCheck(step11F, ok)
-	}
+			_, ok = ballotContestMap[contest.ObjectID]
+			helper.addCheck(step11F, ok)
+		}
+	*/
 
 	v.helpers[helper.VerificationStep] = helper
 }

@@ -4,9 +4,9 @@ import (
 	"electionguard-verifier-go/deserialize"
 )
 
-func MakeVerifyStrategy(useMultipleThreads bool) VerifyStrategy {
+func MakeVerifyStrategy(useMultipleThreads bool, amountOfLogicalCores int) VerifyStrategy {
 	if useMultipleThreads {
-		return ParallelStrategy{}
+		return ParallelStrategy{amountOfLogicalCores: amountOfLogicalCores}
 	}
 
 	return SingleThreadStrategy{}
@@ -14,6 +14,8 @@ func MakeVerifyStrategy(useMultipleThreads bool) VerifyStrategy {
 
 type VerifyStrategy interface {
 	verify(er *deserialize.ElectionRecord, verifier *Verifier)
+	getBallotSplitSize() int
+	getContestSplitSize() int
 }
 
 type SingleThreadStrategy struct {
@@ -78,7 +80,16 @@ func (s SingleThreadStrategy) verify(er *deserialize.ElectionRecord, verifier *V
 	verifier.validateContestReplacementDecryptionForSpoiledBallots(er)
 }
 
+func (s SingleThreadStrategy) getBallotSplitSize() int {
+	return 1
+}
+
+func (s SingleThreadStrategy) getContestSplitSize() int {
+	return 1
+}
+
 type ParallelStrategy struct {
+	amountOfLogicalCores int // Amount of logical cores on the current machine, used to decide amount of goroutines
 }
 
 func (s ParallelStrategy) verify(er *deserialize.ElectionRecord, verifier *Verifier) {
@@ -141,4 +152,12 @@ func (s ParallelStrategy) verify(er *deserialize.ElectionRecord, verifier *Verif
 
 	// Waiting for all goroutines to finish
 	verifier.wg.Wait()
+}
+
+func (s ParallelStrategy) getBallotSplitSize() int {
+	return s.amountOfLogicalCores
+}
+
+func (s ParallelStrategy) getContestSplitSize() int {
+	return 2
 }

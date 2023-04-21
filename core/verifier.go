@@ -4,6 +4,7 @@ import (
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/utility"
 	"go.uber.org/zap"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -106,6 +107,8 @@ func (v *Verifier) Benchmark(path string, amountOfSamples int) {
 		elapsed := time.Since(start)
 
 		runs[i] = float64(elapsed.Milliseconds())
+
+		v.logger.Info(strconv.Itoa(i+1) + "/" + strconv.Itoa(amountOfSamples))
 	}
 
 	// Output the data to a json file
