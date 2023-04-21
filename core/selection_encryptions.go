@@ -15,7 +15,7 @@ func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) 
 
 	// Split the slice of ballots into multiple slices
 	ballots := er.SubmittedBallots
-	chunkSize := len(ballots) / 20
+	chunkSize := len(ballots) / v.verifierStrategy.getBallotSplitSize()
 	if chunkSize == 0 {
 		chunkSize = len(ballots) / 3
 	}

@@ -13,7 +13,7 @@ func (v *Verifier) validatePartialDecryptionForSpoiledBallots(er *deserialize.El
 	defer helper.measureTimeToValidateStep(time.Now())
 
 	ballots := er.SpoiledBallots
-	chunkSize := len(ballots) / 20
+	chunkSize := len(ballots) / v.verifierStrategy.getBallotSplitSize()
 	if chunkSize == 0 {
 		chunkSize = len(ballots) / 3
 	}
