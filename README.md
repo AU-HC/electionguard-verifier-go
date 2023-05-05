@@ -47,9 +47,9 @@ $ go run main.go --p="data/idaho_pilot_2022/election-record/" --v=1 --o="output.
 ### Remarks on the verifier
 * The verifier is currently not verifying step `6.A` as the ElectionGuard specification is not detailed enough.
 
-### Test data
-* All the test data can be found on the release.
-* A sample of the test data is already included in the project folder `/data`.
+### Sample data
+* All the sample data can be found on the release.
+* Some of the sample data is already included in the project folder `/data`.
 
 ### Backlog
 - [ ] Comment code, and general cleanup
