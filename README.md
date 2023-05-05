@@ -57,7 +57,7 @@ $ ./electionguard-verifier-go --p="data/full/election_record/" --v=1 --o="output
 ### Remarks on the verifier
 * The verifier is currently not verifying step `6.A` as the ElectionGuard specification is not detailed enough.
 * The verifier is currently not verifying step `11.E` and `11.F` because the information needed to verify is not located in spoiled ballots.
-* We have not yet been able to verify that step `17`, `18`, and `19` is being verified correctly as no election record contains the artifacts to verify the steps. 
+* We have not yet been able to verify that step `17`, `18`, and `19` is being verified correctly as no election record contains the required artifacts to verify the steps. 
 
 ### Sample data
 * All the sample data can be found on the release.
