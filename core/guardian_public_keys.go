@@ -11,7 +11,6 @@ func (v *Verifier) validateGuardianPublicKeys(er *deserialize.ElectionRecord) {
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())
 
-	// TODO: Check j
 	for _, guardian := range er.Guardians {
 		for j, proof := range guardian.ElectionProofs {
 			// (2.A)

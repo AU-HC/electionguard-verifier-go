@@ -3,7 +3,6 @@ package core
 import (
 	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
-	"electionguard-verifier-go/schema"
 	"time"
 )
 
@@ -19,7 +18,7 @@ func (v *Verifier) validatePartialDecryptions(er *deserialize.ElectionRecord) {
 			B := selection.Message.Data
 
 			for _, share := range selection.Shares {
-				if !share.Proof.Pad.Compare(schema.MakeBigIntFromString("0", 10)) { // Comparing with zero, will need better way of determining this TODO: Fix
+				if share.Proof.IsNotEmpty() {
 					vi := share.Proof.Response
 					c := share.Proof.Challenge
 					ai := share.Proof.Pad

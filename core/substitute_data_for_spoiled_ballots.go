@@ -3,7 +3,6 @@ package core
 import (
 	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
-	"electionguard-verifier-go/schema"
 	"time"
 )
 
@@ -21,7 +20,7 @@ func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.Elect
 				beta := selection.Message.Data
 
 				for _, share := range selection.Shares {
-					if !share.Proof.Pad.Compare(schema.MakeBigIntFromInt(0)) {
+					if share.Proof.IsNotEmpty() {
 
 						for _, part := range share.RecoveredParts {
 							mil := part.Share

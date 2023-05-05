@@ -21,8 +21,12 @@ func (v *Verifier) validateSubstituteDataForMissingGuardians(er *deserialize.Ele
 		contests = append(contests, contest)
 	}
 
-	// Split the slice of contests into multiple slices (namely 2)
-	chunkSize := len(contests) / v.verifierStrategy.getContestSplitSize()
+	// Split the slice of contests into multiple slices (namely 1 or 2)
+	chunkSize := 1
+	if len(contests) > v.verifierStrategy.getBallotSplitSize() {
+		chunkSize = len(contests) / v.verifierStrategy.getContestSplitSize()
+	}
+
 	for i := 0; i < len(contests); i += chunkSize {
 		end := i + chunkSize
 
@@ -47,7 +51,7 @@ func (v *Verifier) validateSubstituteDataForMissingGuardiansForSlice(helper *Val
 			B := selection.Message.Data
 			for _, share := range selection.Shares {
 				for _, part := range share.RecoveredParts {
-					if part.ObjectId != "" { // TODO: Implement method to check if "Recovered parts" is not nil
+					if part.IsNotEmpty() {
 						V := part.Proof.Response
 						c := part.Proof.Challenge
 						a := part.Proof.Pad

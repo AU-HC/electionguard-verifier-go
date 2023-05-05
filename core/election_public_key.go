@@ -13,7 +13,7 @@ func (v *Verifier) validateJointPublicKey(er *deserialize.ElectionRecord) {
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())
 
-	elgamalPublicKey := schema.MakeBigIntFromString("1", 10)
+	elgamalPublicKey := schema.MakeBigIntFromInt(1)
 	for _, guardian := range er.Guardians {
 		elgamalPublicKey = v.mulP(elgamalPublicKey, &guardian.ElectionPublicKey)
 	}

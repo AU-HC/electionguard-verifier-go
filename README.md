@@ -37,15 +37,22 @@ The verifier also has alternate options which can be set, using the following fl
     - *1* : Logging of information
     - *2* : Logging of debug
 
-The project provides some sample data in `/data`, which is taken from [Microsoft](https://github.com/microsoft/electionguard/releases/tag/v1.1) and [egvote.us](https://www.egvote.us/cc/id/22). 
-To verify `/data/idaho_pilot_2022/` with logging level set to `information` and output file `output.json` execute the following command
+The project provides some sample data in `/data`, courtesy of [Microsoft](https://github.com/microsoft/electionguard/releases/tag/v1.1) and [egvote.us](https://www.egvote.us/cc/id/22). 
+To verify `/data/full/` with logging level set to `information` and output file `output.json` execute the following command
 ```
-$ go run main.go --p="data/idaho_pilot_2022/election-record/" --v=1 --o="output.json" 
+$ go run main.go --p="data/full/election_record/" --v=1 --o="output.json" 
+```
+or 
+```
+$ go build main.go
+$ TODO
 ```
 
 ## Additional information
 ### Remarks on the verifier
 * The verifier is currently not verifying step `6.A` as the ElectionGuard specification is not detailed enough.
+* The verifier is currently not verifying step `11.E` and `11.F` because the information needed to verify is not located in spoiled ballots.
+* We have not yet been able to verify that step `17`, `18`, and `19` is being verified correctly as no election record contains the artifacts to verify the steps. 
 
 ### Sample data
 * All the sample data can be found on the release.
