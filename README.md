@@ -8,8 +8,7 @@ that aims to improve the security and transparency of elections. The primary foc
 - Individual voters can verify that their votes have been accurately recorded.
 - Voters and observers can verify that all recorded votes have been accurately counted.
 
-Our independent verifier written in Go, allows voters and observers to confirm the consistency of an election using the supplied election artifacts
-along with the published election results.
+Our independent verifier written in Go, allows voters and observers to confirm the consistency of an election using the supplied election record.
 
 ## Installation
 As a prerequisite make sure to have installed
