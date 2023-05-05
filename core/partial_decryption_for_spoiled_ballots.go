@@ -13,9 +13,9 @@ func (v *Verifier) validatePartialDecryptionForSpoiledBallots(er *deserialize.El
 	defer helper.measureTimeToValidateStep(time.Now())
 
 	ballots := er.SpoiledBallots
-	chunkSize := len(ballots) / v.verifierStrategy.getBallotSplitSize()
-	if chunkSize == 0 {
-		chunkSize = len(ballots) / 3
+	chunkSize := 1
+	if len(ballots) > v.verifierStrategy.getBallotSplitSize() {
+		chunkSize = len(ballots) / v.verifierStrategy.getBallotSplitSize()
 	}
 
 	for i := 0; i < len(ballots); i += chunkSize {
@@ -37,14 +37,14 @@ func (v *Verifier) validatePartialDecryptionForSpoiledBallotsForSlice(helper *Va
 	defer helper.wg.Done()
 
 	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
-	zero := schema.MakeBigIntFromInt(0)
+
 	for _, ballot := range spoiledBallots {
 		for _, contest := range ballot.Contests {
 			for _, selection := range contest.Selections {
 				alpha := selection.Message.Pad
 				beta := selection.Message.Data
 				for _, share := range selection.Shares {
-					if !share.Proof.Pad.Compare(zero) { // Comparing with zero, will need better way of determining this TODO: Fix
+					if share.Proof.IsNotEmpty() {
 						m := share.Share
 						a := share.Proof.Pad
 						b := share.Proof.Data

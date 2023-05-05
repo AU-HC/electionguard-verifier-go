@@ -46,7 +46,7 @@ func (v *Verifier) validateCorrectnessOfSpoiledBallots(er *deserialize.ElectionR
 				helper.addCheck(step16E, selectionExists)
 
 			} else {
-				// TODO: Report *should* be reported
+				// Report *should* be reported so no need to report extra error
 			}
 		}
 	}

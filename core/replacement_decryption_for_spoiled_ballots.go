@@ -17,7 +17,7 @@ func (v *Verifier) validateReplacementPartialDecryptionForSpoiledBallots(er *des
 				for _, share := range selection.Shares {
 					m := share.Share
 
-					if !share.Proof.Pad.Compare(schema.MakeBigIntFromString("0", 10)) { // Comparing with zero, will need better way of determining this TODO: Fix {
+					if share.Proof.IsNotEmpty() {
 						product := schema.MakeBigIntFromInt(1)
 
 						for _, part := range share.RecoveredParts {

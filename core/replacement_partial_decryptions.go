@@ -32,7 +32,8 @@ func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *de
 	for _, contest := range er.PlaintextTally.Contests {
 		for _, selection := range contest.Selections {
 			for _, share := range selection.Shares {
-				if share.Proof.Usage == "" { // TODO: Need better way of checking for nil
+				if len(share.RecoveredParts) > 0 {
+
 					product := schema.MakeBigIntFromInt(1)
 
 					for _, part := range share.RecoveredParts {

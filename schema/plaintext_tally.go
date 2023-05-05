@@ -42,3 +42,73 @@ type RecoveredPart struct {
 	RecoveryPublicKey         BigInt  `json:"recovery_key"`
 	Proof                     CpProof `json:"proof"`
 }
+
+func (c *CpProof) IsNotEmpty() bool {
+	zero := MakeBigIntFromInt(0)
+
+	if c.Pad.Compare(zero) {
+		return false
+	}
+
+	if c.Data.Compare(zero) {
+		return false
+	}
+
+	if c.Challenge.Compare(zero) {
+		return false
+	}
+
+	if c.Response.Compare(zero) {
+		return false
+	}
+
+	if c.Usage == "" {
+		return false
+	}
+
+	return true
+}
+
+func (s *SelectionShare) IsNotEmpty() bool {
+	if s.ObjectId == "" {
+		return false
+	}
+
+	if s.GuardianId == "" {
+		return false
+	}
+
+	if s.Share.Compare(MakeBigIntFromInt(0)) {
+		return false
+	}
+
+	if s.ObjectId == "" {
+		return false
+	}
+
+	return true
+}
+
+func (r *RecoveredPart) IsNotEmpty() bool {
+	if r.ObjectId == "" {
+		return false
+	}
+
+	if r.GuardianIdentifier == "" {
+		return false
+	}
+
+	if r.MissingGuardianIdentifier == "" {
+		return false
+	}
+
+	if r.Share.Compare(MakeBigIntFromInt(0)) {
+		return false
+	}
+
+	if r.RecoveryPublicKey.Compare(MakeBigIntFromInt(0)) {
+		return false
+	}
+
+	return true
+}
