@@ -38,7 +38,7 @@ The verifier also has alternate options which can be set, using the following fl
     - *2* : Logging of debug
 
 The project provides some sample data in `/data`, courtesy of [Microsoft](https://github.com/microsoft/electionguard/releases/tag/v1.1) and [egvote.us](https://www.egvote.us/cc/id/22). 
-To verify `/data/full/` with logging level set to `information` and output file `output.json` execute the following command
+To verify `/data/full/` with logging level set to `information` and output file `output.json` execute one of the following command blocks.
 ```
 $ go run main.go --p="data/full/election_record/" --v=1 --o="output.json" 
 ```
