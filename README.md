@@ -42,10 +42,15 @@ To verify `/data/full/` with logging level set to `information` and output file 
 ```
 $ go run main.go --p="data/full/election_record/" --v=1 --o="output.json" 
 ```
-or 
+or (Windows)
 ```
 $ go build main.go
-$ TODO
+$ electionguard-verifier-go.exe --p="data/full/election_record/" --v=1 --o="output.json" 
+```
+or (Mac/Linux)
+```
+$ go build main.go
+$ ./electionguard-verifier-go --p="data/full/election_record/" --v=1 --o="output.json" 
 ```
 
 ## Additional information
