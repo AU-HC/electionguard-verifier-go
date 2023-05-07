@@ -20,23 +20,19 @@ func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.Elect
 				beta := selection.Message.Data
 
 				for _, share := range selection.Shares {
-					if share.Proof.IsNotEmpty() {
+					for _, part := range share.RecoveredParts {
+						mil := part.Share
+						ai := part.Proof.Pad
+						bi := part.Proof.Data
+						ci := part.Proof.Challenge
+						vi := part.Proof.Response
 
-						for _, part := range share.RecoveredParts {
-							mil := part.Share
-							ai := part.Proof.Pad
-							bi := part.Proof.Data
-							ci := part.Proof.Challenge
-							vi := part.Proof.Response
-
-							helper.addCheck(step13A, v.isInRange(vi))
-							helper.addCheck(step13B1, v.isValidResidue(ai))
-							helper.addCheck(step13B2, v.isValidResidue(bi))
-							helper.addCheck(step13C, ci.Compare(crypto.HashElems(extendedBaseHash, alpha, beta, ai, bi, mil)))
-							helper.addCheck(step13D, v.powP(v.constants.G, &vi).Compare(v.powP(v.mulP(&ai, &part.RecoveryPublicKey), &ci)))
-							helper.addCheck(step13E, v.powP(&ai, &vi).Compare(v.mulP(&bi, v.powP(&mil, &ci))))
-
-						}
+						helper.addCheck(step13A, v.isInRange(vi))
+						helper.addCheck(step13B1, v.isValidResidue(ai))
+						helper.addCheck(step13B2, v.isValidResidue(bi))
+						helper.addCheck(step13C, ci.Compare(crypto.HashElems(extendedBaseHash, alpha, beta, ai, bi, mil)))
+						helper.addCheck(step13D, v.powP(v.constants.G, &vi).Compare(v.powP(v.mulP(&ai, &part.RecoveryPublicKey), &ci)))
+						helper.addCheck(step13E, v.powP(&ai, &vi).Compare(v.mulP(&bi, v.powP(&mil, &ci))))
 					}
 				}
 			}

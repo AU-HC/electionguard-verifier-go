@@ -1,7 +1,5 @@
 package schema
 
-// TODO: Check this whole thing :)))))))
-
 type SpoiledBallot struct {
 	ObjectId string                      `json:"object_id"`
 	Contests map[string]DecryptedContest `json:"contests"`
