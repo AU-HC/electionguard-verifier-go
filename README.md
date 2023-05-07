@@ -62,6 +62,3 @@ $ ./electionguard-verifier-go --p="data/full/election_record/" --v=1 --o="output
 * All the sample data can be found on the release.
 * Some of the sample data is already included in the project folder `/data`.
 
-### Backlog
-- [ ] Comment code, and general cleanup
-- [ ] Upload report to GitHub, and create section in `README.md`
