@@ -13,7 +13,7 @@ func getSut() core.Verifier {
 	amountOfLogicalCores := runtime.NumCPU()
 
 	// Fetching logging level and creating logger
-	logger := utility.ConfigureLogger(5)
+	logger := utility.ConfigureLogger(0)
 	outputStrategy := core.NoOutputStrategy{}
 	verifyStrategy := core.MakeVerifyStrategy(true, amountOfLogicalCores)
 
