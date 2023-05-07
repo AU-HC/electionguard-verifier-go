@@ -72,10 +72,10 @@ func (v *Verifier) getElectionRecord(path string) (*deserialize.ElectionRecord, 
 	electionRecord, err := parser.ParseElectionRecord(path)
 
 	if err != "" {
-		v.logger.Info("[INVALID]: Election data was well formed (Step 0)")
-		v.logger.Debug(err)
+		v.logger.Info("Election data was well formed")
 	} else {
-		v.logger.Info("[VALID]: Election data was well formed (Step 0)")
+		v.logger.Info("Election data was not well formed")
+		v.logger.Debug(err)
 	}
 
 	// If length of error message is 0, no errors were reported and thus return electionRecord, true

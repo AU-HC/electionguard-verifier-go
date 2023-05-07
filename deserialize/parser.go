@@ -94,7 +94,10 @@ func parseJsonToGoStruct[E any](logger *zap.Logger, errorMsg *strings.Builder, p
 func parseJsonToSlice[E any](logger *zap.Logger, errorMsg *strings.Builder, path string, typeOfObject E) []E {
 	// Getting all files in directory
 	files, err := os.ReadDir(path)
-	utility.PanicError(err)
+	if err != nil {
+		errorMsg.WriteString("Could not find folder at " + path)
+		return []E{}
+	}
 
 	// Creating list and parsing all files in directory
 	var l []E
