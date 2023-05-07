@@ -1,0 +1,23 @@
+{
+  "object_id": "ballot-cb3535dc-1a4e-11ed-bf89-04d9f5218a21",
+  "style_id": "jefferson-county-ballot-style",
+  "contests": [{
+    "object_id": "justice-supreme-court",
+    "ballot_selections": [{
+      "object_id": "write-in-selection",
+      "vote": 0,
+      "is_placeholder_selection": false,
+      "write_in": null
+    }, {
+      "object_id": "john-hancock-selection",
+      "vote": 1,
+      "is_placeholder_selection": false,
+      "write_in": null
+    }, {
+      "object_id": "benjamin-franklin-selection",
+      "vote": 0,
+      "is_placeholder_selection": false,
+      "write_in": null
+    }]
+  }]
+}
