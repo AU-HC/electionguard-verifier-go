@@ -53,7 +53,6 @@ func isPlaceholderSelection(ballot schema.SubmittedBallot, objectID string) bool
 		}
 	}
 
-	// TODO: Log error
 	return false
 }
 
@@ -81,7 +80,6 @@ func doesContestContainSelection(slice []schema.Contest, contestID, selectionID 
 	return false
 }
 
-// TODO: Fix these to return nothing if two of the same exist, and log a message (Also move them somewhere else -> helper_methods.go)
 func getContest(objectID string, contests []schema.Contest) schema.Contest {
 	for _, contest := range contests {
 		if objectID == contest.ObjectID {

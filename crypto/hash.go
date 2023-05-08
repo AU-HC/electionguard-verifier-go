@@ -21,7 +21,7 @@ var ciphertextType = reflect.TypeOf(schema.Ciphertext{})
 
 type SHA256 struct {
 	toHash bytes.Buffer
-	q      schema.BigInt // TODO: Probably optimize the way Q is handled
+	q      schema.BigInt
 }
 
 func MakeSHA256() *SHA256 {
@@ -37,9 +37,9 @@ func (s *SHA256) digest() *schema.BigInt {
 	var hash32 = sha256.Sum256([]byte(s.toHash.String()))
 
 	// Turning byte array into big.Int
-	intValueForHash := schema.MakeBigIntFromByteArrayModQ(hash32[:])
+	intValueForHash := schema.MakeBigIntFromByteArray(hash32[:])
 
-	// Taking hash mod q TODO: Should it be q - 1?
+	// Taking hash mod q
 	intValueForHash.Mod(&intValueForHash.Int, &s.q.Int)
 
 	return intValueForHash

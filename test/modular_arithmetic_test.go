@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-// TODO: Should change to larger integers
 func TestModMul(t *testing.T) {
 	a := new(schema.BigInt)
 	a.SetString("3", 10)

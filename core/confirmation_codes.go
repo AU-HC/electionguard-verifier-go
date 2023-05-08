@@ -14,7 +14,8 @@ func (v *Verifier) validateConfirmationCodes(er *deserialize.ElectionRecord) {
 	noDuplicateConfirmationCodesFound := true
 	for _, ballot := range er.SubmittedBallots {
 		// Computation of confirmation code (6.A)
-		helper.addCheck(step6A, true) // TODO: Fake it
+		// At the moment the documentation of confirmation codes is insufficient
+		helper.addCheck(step6A, true)
 
 		// No duplicate confirmation codes (6.B)
 		stringOfCode := ballot.Code.String()

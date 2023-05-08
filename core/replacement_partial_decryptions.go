@@ -24,6 +24,7 @@ func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *de
 				productJMinusL = mul(productJMinusL, sub(jInt, lInt))
 			}
 		}
+
 		productJ = modQ(productJ)
 		productJMinusL = modQ(mul(&wl, productJMinusL))
 		helper.addCheck(step10A, productJ.Compare(productJMinusL))

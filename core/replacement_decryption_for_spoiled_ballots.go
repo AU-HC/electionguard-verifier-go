@@ -11,6 +11,8 @@ func (v *Verifier) validateReplacementPartialDecryptionForSpoiledBallots(er *des
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())
 
+	// Step 14A is already checked in step 10A
+
 	for _, ballot := range er.SpoiledBallots {
 		for _, contest := range ballot.Contests {
 			for _, selection := range contest.Selections {
