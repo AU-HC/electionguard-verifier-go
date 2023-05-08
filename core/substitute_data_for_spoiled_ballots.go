@@ -31,11 +31,10 @@ func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.Elect
 						missingGuardian := findGuardian(er, part.MissingGuardianIdentifier)
 						guardian := findGuardian(er, part.GuardianIdentifier)
 
-						sum := schema.MakeBigIntFromInt(0)
-
-						for i, commitment := range missingGuardian.ElectionCommitments {
-							temp := v.powP(&commitment, v.powP(schema.MakeBigIntFromInt(guardian.SequenceOrder), schema.MakeBigIntFromInt(i)))
-							sum = v.addP(sum, temp)
+						sum := schema.MakeBigIntFromInt(1)
+						for j, commitment := range missingGuardian.ElectionCommitments {
+							temp := v.powP(&commitment, v.powP(schema.MakeBigIntFromInt(guardian.SequenceOrder), schema.MakeBigIntFromInt(j)))
+							sum = v.mulP(sum, temp)
 						}
 
 						helper.addCheck(step13A, v.isInRange(vil))
@@ -51,14 +50,4 @@ func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.Elect
 	}
 
 	v.helpers[helper.VerificationStep] = helper
-
-}
-
-func findGuardian(er *deserialize.ElectionRecord, guardianId string) schema.Guardian {
-	for _, guardian := range er.Guardians {
-		if guardian.GuardianId == guardianId {
-			return guardian
-		}
-	}
-	panic("Guardian not found!")
 }

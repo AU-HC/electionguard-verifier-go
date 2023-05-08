@@ -15,18 +15,18 @@ func (v *Verifier) validateReplacementPartialDecryptionForSpoiledBallots(er *des
 		for _, contest := range ballot.Contests {
 			for _, selection := range contest.Selections {
 				for _, share := range selection.Shares {
-					m := share.Share
+					if len(share.RecoveredParts) > 0 {
 
-					if share.Proof.IsNotEmpty() {
+						m := share.Share
+
 						product := schema.MakeBigIntFromInt(1)
 
 						for _, part := range share.RecoveredParts {
 							coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]
 							product = v.mulP(product, v.powP(&part.Share, &coefficient))
 						}
-						if len(share.RecoveredParts) > 0 {
-							helper.addCheck(step14B, m.Compare(product))
-						}
+
+						helper.addCheck(step14B, m.Compare(product))
 					}
 				}
 			}
