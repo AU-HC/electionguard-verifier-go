@@ -12,9 +12,34 @@ func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.Elect
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())
 
+	// Split the slice of ballots into multiple slices
+	ballots := er.SpoiledBallots
+	chunkSize := 1
+	if len(ballots) > v.verifierStrategy.getBallotSplitSize() {
+		chunkSize = len(ballots) / v.verifierStrategy.getBallotSplitSize()
+	}
+
+	for i := 0; i < len(ballots); i += chunkSize {
+		end := i + chunkSize
+
+		if end > len(ballots) {
+			end = len(ballots)
+		}
+
+		helper.wg.Add(1)
+		go v.validateSubstituteDataForSpoiledBallotsForSlice(helper, ballots[i:end], er)
+	}
+
+	helper.wg.Wait()
+	v.helpers[helper.VerificationStep] = helper
+}
+
+func (v *Verifier) validateSubstituteDataForSpoiledBallotsForSlice(helper *ValidationHelper, spoiledBallots []schema.SpoiledBallot, er *deserialize.ElectionRecord) {
+	defer helper.wg.Done()
+
 	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
 
-	for _, ballot := range er.SpoiledBallots {
+	for _, ballot := range spoiledBallots {
 		for _, contest := range ballot.Contests {
 			for _, selection := range contest.Selections {
 				alpha := selection.Message.Pad
@@ -48,6 +73,4 @@ func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.Elect
 			}
 		}
 	}
-
-	v.helpers[helper.VerificationStep] = helper
 }
