@@ -25,7 +25,7 @@ func (b *BigInt) UnmarshalJSON(p []byte) error {
 
 	// Declare new bigInt and return error if SetString fails
 	z := big.Int{}
-	_, ok := z.SetString(s, 16) // TODO: Check base
+	_, ok := z.SetString(s, 16)
 	if !ok {
 		return fmt.Errorf("not a valid big integer: %s", p)
 	}
@@ -58,8 +58,7 @@ func MakeBigIntFromInt(data int) *BigInt {
 	return &result
 }
 
-// TODO: Fix so it takes mod q of the result
-func MakeBigIntFromByteArrayModQ(bytes []byte) *BigInt {
+func MakeBigIntFromByteArray(bytes []byte) *BigInt {
 	var result BigInt
 	result.SetBytes(bytes)
 

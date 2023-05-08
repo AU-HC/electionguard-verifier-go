@@ -1,6 +1,7 @@
 package core
 
 import (
+	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
 )
 
@@ -52,7 +53,6 @@ func isPlaceholderSelection(ballot schema.SubmittedBallot, objectID string) bool
 		}
 	}
 
-	// TODO: Log error
 	return false
 }
 
@@ -80,7 +80,6 @@ func doesContestContainSelection(slice []schema.Contest, contestID, selectionID 
 	return false
 }
 
-// TODO: Fix these to return nothing if two of the same exist, and log a message (Also move them somewhere else -> helper_methods.go)
 func getContest(objectID string, contests []schema.Contest) schema.Contest {
 	for _, contest := range contests {
 		if objectID == contest.ObjectID {
@@ -116,4 +115,13 @@ func makeOneCiphertext() schema.Ciphertext {
 	result.Pad = *schema.MakeBigIntFromString("1", 10)
 	result.Data = *schema.MakeBigIntFromString("1", 10)
 	return result
+}
+
+func findGuardian(er *deserialize.ElectionRecord, guardianId string) schema.Guardian {
+	for _, guardian := range er.Guardians {
+		if guardian.GuardianId == guardianId {
+			return guardian
+		}
+	}
+	panic("Guardian not found!")
 }

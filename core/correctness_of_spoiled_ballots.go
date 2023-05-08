@@ -45,8 +45,6 @@ func (v *Verifier) validateCorrectnessOfSpoiledBallots(er *deserialize.ElectionR
 				_, selectionExists := maps[selection.ObjectID]
 				helper.addCheck(step16E, selectionExists)
 
-			} else {
-				// Report *should* be reported so no need to report extra error
 			}
 		}
 	}

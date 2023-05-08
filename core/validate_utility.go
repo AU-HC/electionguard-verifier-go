@@ -13,6 +13,7 @@ type ValidationHelper struct {
 	Description      string
 	Checked, Failed  int
 	TimeToVerify     int64 // in ms
+	ErrorMessage     string
 	isValid          bool
 	logger           *zap.Logger
 	errorMsg         *strings.Builder
@@ -60,6 +61,8 @@ func (v *ValidationHelper) validate() bool {
 
 	v.logger.Info("[INVALID]: " + stepString + ". " + v.Description)
 	v.logger.Debug(v.errorMsg.String())
+
+	v.ErrorMessage = v.errorMsg.String()
 	return false
 }
 
