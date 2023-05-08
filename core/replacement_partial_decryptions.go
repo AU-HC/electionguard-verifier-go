@@ -11,7 +11,6 @@ func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *de
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())
 
-	// 10.A, 14.A? TODO: Refactor
 	for l, wl := range er.CoefficientsValidationSet.Coefficients {
 		productJ := schema.MakeBigIntFromInt(1)
 		productJMinusL := schema.MakeBigIntFromInt(1)
