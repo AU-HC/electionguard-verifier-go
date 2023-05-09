@@ -71,7 +71,7 @@ func (v *Verifier) getElectionRecord(path string) (*deserialize.ElectionRecord, 
 	parser := *deserialize.MakeParser(v.logger)
 	electionRecord, err := parser.ParseElectionRecord(path)
 
-	if err != "" {
+	if err == "" {
 		v.logger.Info("Election data was well formed")
 	} else {
 		v.logger.Info("Election data was not well formed")
