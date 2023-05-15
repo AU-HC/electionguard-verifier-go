@@ -59,6 +59,6 @@ $ ./electionguard-verifier-go --p="data/full/election_record/" --v=1 --o="output
 * We have not yet been able to verify that step `17`, `18`, and `19` is being verified correctly as no election record contains the required artifacts to verify the steps. 
 
 ### Sample data
-* All the sample data can be found on the release.
+* All the sample data can be found in [ElectionGuard verifier data](https://github.com/au681633/electionguard-verifier-data).
 * Some of the sample data is already included in the project folder `/data`.
 
