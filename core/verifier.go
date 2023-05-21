@@ -117,12 +117,13 @@ func (v *Verifier) Benchmark(path string, amountOfSamples int) {
 }
 
 func (v *Verifier) BenchmarkDeserialization(amountOfSamples int) {
-	paths := make([]string, 5)
+	paths := make([]string, 6)
 	paths[0] = "data/benchmark-10/election_record/"
 	paths[1] = "data/benchmark-25/election_record/"
 	paths[2] = "data/benchmark-50/election_record/"
-	paths[3] = "data/benchmark-200/election_record/"
-	paths[4] = "data/benchmark-500/election_record/"
+	paths[3] = "data/benchmark-100/election_record/"
+	paths[4] = "data/benchmark-200/election_record/"
+	paths[5] = "data/benchmark-500/election_record/"
 
 	for _, path := range paths {
 		var totalTime int64
