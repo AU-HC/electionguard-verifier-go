@@ -41,10 +41,10 @@ func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots 
 		for _, contest := range ballot.Contests {
 			contestInManifest := getContest(contest.ObjectId, er.Manifest.Contests)
 			votesAllowed := contestInManifest.VotesAllowed
-			votesAllowedBigInt := schema.MakeBigIntFromInt(votesAllowed)
+			votesAllowedBigInt := schema.IntToBigInt(votesAllowed)
 			numberOfPlaceholderSelections := 0
-			calculatedAHat := schema.MakeBigIntFromInt(1)
-			calculatedBHat := schema.MakeBigIntFromInt(1)
+			calculatedAHat := schema.IntToBigInt(1)
+			calculatedBHat := schema.IntToBigInt(1)
 
 			for _, selection := range contest.BallotSelections {
 				if selection.IsPlaceholderSelection {
@@ -67,9 +67,9 @@ func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots 
 			helper.addCheck(step5B1, aHat.Compare(calculatedAHat))
 			helper.addCheck(step5B2, bHat.Compare(calculatedBHat))
 			helper.addCheck(step5C, v.isInRange(V))
-			helper.addCheck(step5D, v.isValidResidue(contest.Proof.Pad))
-			helper.addCheck(step5E, v.isValidResidue(contest.Proof.Data))
-			helper.addCheck(step5F1, contest.Proof.Challenge.Compare(computedChallenge))
+			helper.addCheck(step5D, v.isValidResidue(a))
+			helper.addCheck(step5E, v.isValidResidue(b))
+			helper.addCheck(step5F1, c.Compare(computedChallenge))
 			helper.addCheck(step5F2, v.powP(v.constants.G, &V).Compare(v.mulP(&a, v.powP(&aHat, &c))))
 			helper.addCheck(step5G, v.mulP(v.powP(v.constants.G, v.mulP(votesAllowedBigInt, &c)), v.powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &V)).Compare(v.mulP(&b, v.powP(&bHat, &c))))
 		}

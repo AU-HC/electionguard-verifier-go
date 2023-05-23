@@ -10,8 +10,8 @@ func (v *Verifier) isValidResidue(a schema.BigInt) bool {
 	// Checking the value is in range
 	p := &v.constants.P.Int
 	q := v.constants.Q
-	zero := schema.MakeBigIntFromInt(0)
-	one := schema.MakeBigIntFromInt(1)
+	zero := schema.IntToBigInt(0)
+	one := schema.IntToBigInt(1)
 
 	valueIsAboveOrEqualToZero := zero.Cmp(&a.Int) <= 0
 	valueIsSmallerThanP := p.Cmp(&a.Int) == 1

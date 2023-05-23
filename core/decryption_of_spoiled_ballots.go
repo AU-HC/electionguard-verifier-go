@@ -17,8 +17,8 @@ func (v *Verifier) validateDecryptionOfSpoiledBallots(er *deserialize.ElectionRe
 			for _, selection := range contest.Selections {
 				beta := selection.Message.Data
 				m := selection.Value
-				V := schema.MakeBigIntFromInt(selection.Tally)
-				mi := schema.MakeBigIntFromInt(1)
+				V := schema.IntToBigInt(selection.Tally)
+				mi := schema.IntToBigInt(1)
 				sumOfAllSelections += selection.Tally
 				for _, share := range selection.Shares {
 					mi = v.mulP(mi, &share.Share)

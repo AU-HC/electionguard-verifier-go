@@ -13,8 +13,8 @@ func (v *Verifier) validateBallotAggregation(er *deserialize.ElectionRecord) {
 
 	for _, contest := range er.PlaintextTally.Contests {
 		for _, selection := range contest.Selections {
-			a := schema.MakeBigIntFromInt(1)
-			b := schema.MakeBigIntFromInt(1)
+			a := schema.IntToBigInt(1)
+			b := schema.IntToBigInt(1)
 			for _, ballot := range er.SubmittedBallots {
 				ballotWasCast := ballot.State == 1
 				if ballotWasCast {

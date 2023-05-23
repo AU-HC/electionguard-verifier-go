@@ -15,7 +15,7 @@ func (v *Verifier) validateContestReplacementDecryptionForSpoiledBallots(er *des
 		for _, contest := range ballot.Contests {
 			for _, share := range contest.ContestData.Shares {
 				mi := share.Share
-				product := schema.MakeBigIntFromInt(1)
+				product := schema.IntToBigInt(1)
 				for _, part := range share.RecoveredParts {
 					m := part.Share
 

@@ -44,7 +44,7 @@ type RecoveredPart struct {
 }
 
 func (c *CpProof) IsNotEmpty() bool {
-	zero := MakeBigIntFromInt(0)
+	zero := IntToBigInt(0)
 
 	if c.Pad.Compare(zero) {
 		return false
@@ -78,7 +78,7 @@ func (s *SelectionShare) IsNotEmpty() bool {
 		return false
 	}
 
-	if s.Share.Compare(MakeBigIntFromInt(0)) {
+	if s.Share.Compare(IntToBigInt(0)) {
 		return false
 	}
 
@@ -102,11 +102,11 @@ func (r *RecoveredPart) IsNotEmpty() bool {
 		return false
 	}
 
-	if r.Share.Compare(MakeBigIntFromInt(0)) {
+	if r.Share.Compare(IntToBigInt(0)) {
 		return false
 	}
 
-	if r.RecoveryPublicKey.Compare(MakeBigIntFromInt(0)) {
+	if r.RecoveryPublicKey.Compare(IntToBigInt(0)) {
 		return false
 	}
 
