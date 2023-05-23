@@ -41,13 +41,14 @@ func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots 
 		for _, contest := range ballot.Contests {
 			contestInManifest := getContest(contest.ObjectId, er.Manifest.Contests)
 			votesAllowed := contestInManifest.VotesAllowed
-			numberOfSelections := 0
+			votesAllowedBigInt := schema.MakeBigIntFromInt(votesAllowed)
+			numberOfPlaceholderSelections := 0
 			calculatedAHat := schema.MakeBigIntFromInt(1)
 			calculatedBHat := schema.MakeBigIntFromInt(1)
 
 			for _, selection := range contest.BallotSelections {
 				if selection.IsPlaceholderSelection {
-					numberOfSelections++
+					numberOfPlaceholderSelections++
 				}
 				calculatedAHat = v.mulP(calculatedAHat, &selection.Ciphertext.Pad)
 				calculatedBHat = v.mulP(calculatedBHat, &selection.Ciphertext.Data)
@@ -58,22 +59,19 @@ func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots 
 			a := contest.Proof.Pad
 			b := contest.Proof.Data
 			V := contest.Proof.Response
+			c := contest.Proof.Challenge
 
-			c := crypto.HashElems(er.CiphertextElectionRecord.CryptoExtendedBaseHash, aHat, bHat, a, b)
-			equationFLeft := v.powP(v.constants.G, &V)
-			equationFRight := v.mulP(&a, v.powP(&aHat, c))
-			equationGLeft := v.mulP(v.powP(v.constants.G, v.mulP(schema.MakeBigIntFromInt(votesAllowed), c)), v.powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &V))
-			equationGRight := v.mulP(&b, v.powP(&bHat, c))
+			computedChallenge := crypto.HashElems(er.CiphertextElectionRecord.CryptoExtendedBaseHash, aHat, bHat, a, b)
 
-			helper.addCheck(step5A, votesAllowed == numberOfSelections)
+			helper.addCheck(step5A, votesAllowed == numberOfPlaceholderSelections)
 			helper.addCheck(step5B1, aHat.Compare(calculatedAHat))
 			helper.addCheck(step5B2, bHat.Compare(calculatedBHat))
 			helper.addCheck(step5C, v.isInRange(V))
 			helper.addCheck(step5D, v.isValidResidue(contest.Proof.Pad))
 			helper.addCheck(step5E, v.isValidResidue(contest.Proof.Data))
-			helper.addCheck(step5F1, contest.Proof.Challenge.Compare(c))
-			helper.addCheck(step5F2, equationFLeft.Compare(equationFRight))
-			helper.addCheck(step5G, equationGLeft.Compare(equationGRight))
+			helper.addCheck(step5F1, contest.Proof.Challenge.Compare(computedChallenge))
+			helper.addCheck(step5F2, v.powP(v.constants.G, &V).Compare(v.mulP(&a, v.powP(&aHat, &c))))
+			helper.addCheck(step5G, v.mulP(v.powP(v.constants.G, v.mulP(votesAllowedBigInt, &c)), v.powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &V)).Compare(v.mulP(&b, v.powP(&bHat, &c))))
 		}
 	}
 }
