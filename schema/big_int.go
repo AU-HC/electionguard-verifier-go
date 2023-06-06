@@ -50,7 +50,7 @@ func MakeBigIntFromString(data string, base int) *BigInt {
 	return &result
 }
 
-func MakeBigIntFromInt(data int) *BigInt {
+func IntToBigInt(data int) *BigInt {
 	var result BigInt
 	stringOfData := strconv.Itoa(data)
 	result.SetString(stringOfData, 10)

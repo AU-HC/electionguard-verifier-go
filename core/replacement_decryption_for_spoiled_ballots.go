@@ -21,7 +21,7 @@ func (v *Verifier) validateReplacementPartialDecryptionForSpoiledBallots(er *des
 
 						m := share.Share
 
-						product := schema.MakeBigIntFromInt(1)
+						product := schema.IntToBigInt(1)
 
 						for _, part := range share.RecoveredParts {
 							coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]

@@ -12,8 +12,8 @@ func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *de
 	defer helper.measureTimeToValidateStep(time.Now())
 
 	for l, wl := range er.CoefficientsValidationSet.Coefficients {
-		productJ := schema.MakeBigIntFromInt(1)
-		productJMinusL := schema.MakeBigIntFromInt(1)
+		productJ := schema.IntToBigInt(1)
+		productJMinusL := schema.IntToBigInt(1)
 
 		for j := range er.CoefficientsValidationSet.Coefficients {
 			if j != l {
@@ -34,7 +34,7 @@ func (v *Verifier) validateConstructionOfReplacementForPartialDecryptions(er *de
 			for _, share := range selection.Shares {
 				if len(share.RecoveredParts) > 0 {
 
-					product := schema.MakeBigIntFromInt(1)
+					product := schema.IntToBigInt(1)
 
 					for _, part := range share.RecoveredParts {
 						coefficient := er.CoefficientsValidationSet.Coefficients[part.GuardianIdentifier]

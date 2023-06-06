@@ -23,7 +23,7 @@ func (v *Verifier) validateTallyDecryption(er *deserialize.ElectionRecord) {
 
 			b := selection.Message.Data
 			m := selection.Value
-			t := schema.MakeBigIntFromInt(selection.Tally)
+			t := schema.IntToBigInt(selection.Tally)
 
 			mi := schema.MakeBigIntFromString("1", 10)
 			for _, share := range selection.Shares {

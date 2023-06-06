@@ -56,9 +56,9 @@ func (v *Verifier) validateSubstituteDataForSpoiledBallotsForSlice(helper *Valid
 						missingGuardian := findGuardian(er, part.MissingGuardianIdentifier)
 						guardian := findGuardian(er, part.GuardianIdentifier)
 
-						sum := schema.MakeBigIntFromInt(1)
+						sum := schema.IntToBigInt(1)
 						for j, commitment := range missingGuardian.ElectionCommitments {
-							temp := v.powP(&commitment, v.powP(schema.MakeBigIntFromInt(guardian.SequenceOrder), schema.MakeBigIntFromInt(j)))
+							temp := v.powP(&commitment, v.powP(schema.IntToBigInt(guardian.SequenceOrder), schema.IntToBigInt(j)))
 							sum = v.mulP(sum, temp)
 						}
 
