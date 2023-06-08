@@ -158,6 +158,9 @@ func (s ParallelStrategy) getBallotChunkSize(amountOfBallots int) int {
 	if amountOfBallots > s.amountOfLogicalCores {
 		return amountOfBallots / s.amountOfLogicalCores
 	}
+	if amountOfBallots > 5 {
+		return amountOfBallots / 3
+	}
 	return amountOfBallots
 }
 

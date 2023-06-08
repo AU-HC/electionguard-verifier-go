@@ -4,6 +4,7 @@ import (
 	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
+	"fmt"
 	"time"
 )
 
@@ -15,6 +16,8 @@ func (v *Verifier) validateSubstituteDataForSpoiledBallots(er *deserialize.Elect
 	// Split the slice of ballots into multiple slices
 	ballots := er.SpoiledBallots
 	chunkSize := v.verifierStrategy.getBallotChunkSize(len(ballots))
+
+	fmt.Println(chunkSize)
 
 	for i := 0; i < len(ballots); i += chunkSize {
 		end := i + chunkSize
