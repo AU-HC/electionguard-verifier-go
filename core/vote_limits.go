@@ -14,10 +14,7 @@ func (v *Verifier) validateVoteLimits(er *deserialize.ElectionRecord) {
 
 	// Split the slice of ballots into multiple slices
 	ballots := er.SubmittedBallots
-	chunkSize := len(ballots) / v.verifierStrategy.getBallotSplitSize()
-	if chunkSize == 0 {
-		chunkSize = len(ballots) / 3
-	}
+	chunkSize := v.verifierStrategy.getBallotChunkSize(len(ballots))
 
 	for i := 0; i < len(ballots); i += chunkSize {
 		end := i + chunkSize
@@ -60,18 +57,20 @@ func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots 
 			b := contest.Proof.Data
 			V := contest.Proof.Response
 			c := contest.Proof.Challenge
+			elgamalPublicKey := er.CiphertextElectionRecord.ElgamalPublicKey
+			extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
 
-			computedChallenge := crypto.HashElems(er.CiphertextElectionRecord.CryptoExtendedBaseHash, aHat, bHat, a, b)
+			computedChallenge := crypto.HashElems(extendedBaseHash, aHat, bHat, a, b)
 
 			helper.addCheck(step5A, votesAllowed == numberOfPlaceholderSelections)
 			helper.addCheck(step5B1, aHat.Compare(calculatedAHat))
 			helper.addCheck(step5B2, bHat.Compare(calculatedBHat))
 			helper.addCheck(step5C, v.isInRange(V))
-			helper.addCheck(step5D, v.isValidResidue(a))
-			helper.addCheck(step5E, v.isValidResidue(b))
-			helper.addCheck(step5F1, c.Compare(computedChallenge))
-			helper.addCheck(step5F2, v.powP(v.constants.G, &V).Compare(v.mulP(&a, v.powP(&aHat, &c))))
-			helper.addCheck(step5G, v.mulP(v.powP(v.constants.G, v.mulP(votesAllowedBigInt, &c)), v.powP(&er.CiphertextElectionRecord.ElgamalPublicKey, &V)).Compare(v.mulP(&b, v.powP(&bHat, &c))))
+			helper.addCheck(step5D1, v.isValidResidue(a))
+			helper.addCheck(step5D2, v.isValidResidue(b))
+			helper.addCheck(step5E, c.Compare(computedChallenge))
+			helper.addCheck(step5F, v.powP(v.constants.G, &V).Compare(v.mulP(&a, v.powP(&aHat, &c))))
+			helper.addCheck(step5G, v.mulP(v.powP(v.constants.G, v.mulP(votesAllowedBigInt, &c)), v.powP(&elgamalPublicKey, &V)).Compare(v.mulP(&b, v.powP(&bHat, &c))))
 		}
 	}
 }
