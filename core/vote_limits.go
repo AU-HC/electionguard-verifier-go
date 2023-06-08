@@ -37,8 +37,8 @@ func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots 
 	for _, ballot := range ballots {
 		for _, contest := range ballot.Contests {
 			contestInManifest := getContest(contest.ObjectId, er.Manifest.Contests)
-			votesAllowed := contestInManifest.VotesAllowed
-			votesAllowedBigInt := schema.IntToBigInt(votesAllowed)
+			selectionLimit := contestInManifest.VotesAllowed
+			votesAllowedBigInt := schema.IntToBigInt(selectionLimit)
 			numberOfPlaceholderSelections := 0
 			calculatedAHat := schema.IntToBigInt(1)
 			calculatedBHat := schema.IntToBigInt(1)
@@ -62,7 +62,7 @@ func (v *Verifier) validateVoteLimitsForSlice(helper *ValidationHelper, ballots 
 
 			computedChallenge := crypto.HashElems(extendedBaseHash, aHat, bHat, a, b)
 
-			helper.addCheck(step5A, votesAllowed == numberOfPlaceholderSelections)
+			helper.addCheck(step5A, selectionLimit == numberOfPlaceholderSelections)
 			helper.addCheck(step5B1, aHat.Compare(calculatedAHat))
 			helper.addCheck(step5B2, bHat.Compare(calculatedBHat))
 			helper.addCheck(step5C, v.isInRange(V))
