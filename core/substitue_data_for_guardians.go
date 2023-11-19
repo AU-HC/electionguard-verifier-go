@@ -23,7 +23,7 @@ func (v *Verifier) validateSubstituteDataForMissingGuardians(er *deserialize.Ele
 
 	// Split the slice of contests into multiple slices (namely 1 or 2)
 	chunkSize := 1
-	if len(contests) > v.verifierStrategy.getBallotSplitSize() {
+	if len(contests) > v.verifierStrategy.getContestSplitSize() {
 		chunkSize = len(contests) / v.verifierStrategy.getContestSplitSize()
 	}
 

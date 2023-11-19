@@ -14,7 +14,7 @@ func MakeVerifyStrategy(useMultipleThreads bool, amountOfLogicalCores int) Verif
 
 type VerifyStrategy interface {
 	verify(er *deserialize.ElectionRecord, verifier *Verifier)
-	getBallotSplitSize() int
+	getBallotChunkSize(amountOfBallots int) int
 	getContestSplitSize() int
 }
 
@@ -80,8 +80,8 @@ func (s SingleThreadStrategy) verify(er *deserialize.ElectionRecord, verifier *V
 	verifier.validateContestReplacementDecryptionForSpoiledBallots(er)
 }
 
-func (s SingleThreadStrategy) getBallotSplitSize() int {
-	return 1
+func (s SingleThreadStrategy) getBallotChunkSize(amountOfBallots int) int {
+	return amountOfBallots
 }
 
 func (s SingleThreadStrategy) getContestSplitSize() int {
@@ -154,8 +154,15 @@ func (s ParallelStrategy) verify(er *deserialize.ElectionRecord, verifier *Verif
 	verifier.wg.Wait()
 }
 
-func (s ParallelStrategy) getBallotSplitSize() int {
-	return s.amountOfLogicalCores
+func (s ParallelStrategy) getBallotChunkSize(amountOfBallots int) int {
+	if amountOfBallots > s.amountOfLogicalCores {
+		return amountOfBallots / s.amountOfLogicalCores
+	}
+	if amountOfBallots > 5 {
+		// in order to ensure multithreading in smaller elections where more logical cores exist than ballots.
+		return amountOfBallots / 3
+	}
+	return amountOfBallots
 }
 
 func (s ParallelStrategy) getContestSplitSize() int {
