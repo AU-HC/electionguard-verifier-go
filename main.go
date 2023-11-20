@@ -36,6 +36,5 @@ func main() {
 		}
 	} else {
 		verifier.Benchmark(path, samples)
-		// verifier.BenchmarkDeserialization(samples)
 	}
 }
