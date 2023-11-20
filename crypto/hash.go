@@ -15,9 +15,9 @@ var nilType = reflect.TypeOf(nil)
 var stringType = reflect.TypeOf("")
 var intType = reflect.TypeOf(1)
 var bigIntType = reflect.TypeOf(schema.BigInt{})
-var ciphertextType = reflect.TypeOf(schema.Ciphertext{})
+var fileType = reflect.TypeOf(([]byte)(nil))
 
-// var submittedBallotSliceType = reflect.TypeOf(([]schema.SubmittedBallot)(nil))
+var ciphertextType = reflect.TypeOf(schema.Ciphertext{})
 
 type SHA256 struct {
 	toHash bytes.Buffer

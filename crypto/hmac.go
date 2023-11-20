@@ -10,16 +10,18 @@ import (
 )
 
 func HMAC(key schema.BigInt, domainSeparator byte, a ...interface{}) *schema.BigInt {
-	mac := hmac.New(sha256.New, key.Bytes()) // should test this actually appends as expected
+	mac := hmac.New(sha256.New, key.Bytes())
 
 	// Add the domain separator first
 	mac.Write([]byte{domainSeparator})
+
+	totalLength := 1
 
 	// Then append the message (i.e. what is to be hashed)
 	for _, x := range a {
 		var toBeHashed []byte
 
-		switch reflect.TypeOf(x) { // TODO: add files
+		switch reflect.TypeOf(x) {
 		case intType:
 			// Type cast and create byte array which the number is to be stored in
 			xInt, _ := x.(int)
@@ -34,19 +36,33 @@ func HMAC(key schema.BigInt, domainSeparator byte, a ...interface{}) *schema.Big
 
 			// Pad the string as a byte with four empty bytes
 			pad := make([]byte, 4)
+			binary.BigEndian.PutUint32(pad, uint32(len(xString)))
 			toBeHashed = append(pad, []byte(xString)...)
 
 		case bigIntType:
-			// Convert big.Int to hex
 			bigInt := x.(schema.BigInt).Int
 			fmt.Println("Length of bigint: (should be 32 or 512)", len(bigInt.Bytes()))
 			toBeHashed = bigInt.Bytes()
+
+		case fileType:
+			file, _ := x.([]byte)
+
+			pad := make([]byte, 4)
+			binary.BigEndian.PutUint32(pad, uint32(len(file)))
+			toBeHashed = append(pad, file...)
+
+			fmt.Println("length of manifest: ", len(file))
+
+		default:
+			panic("unknown type for hmac")
 		}
 
+		totalLength += len(toBeHashed)
 		mac.Write(toBeHashed)
 	}
 
 	// TODO: Should you also take mod q of the result
+	fmt.Println("totalLength:", totalLength)
 	hash := schema.MakeBigIntFromByteArray(mac.Sum(nil))
 
 	return hash

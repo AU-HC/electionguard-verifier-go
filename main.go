@@ -1,13 +1,8 @@
 package main
 
-import (
-	"electionguard-verifier-go/core"
-	"electionguard-verifier-go/utility"
-	"fmt"
-	"runtime"
-)
-
+/*
 func main() {
+
 	// Fetching flags and amount of logical cores for the CPU
 	applicationArguments := utility.InitApplicationArguments()
 	path := applicationArguments.ElectionArtifactsPath
@@ -37,4 +32,6 @@ func main() {
 	} else {
 		verifier.Benchmark(path, samples)
 	}
+
 }
+*/
