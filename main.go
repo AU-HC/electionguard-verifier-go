@@ -2,7 +2,6 @@ package main
 
 /*
 func main() {
-
 	// Fetching flags and amount of logical cores for the CPU
 	applicationArguments := utility.InitApplicationArguments()
 	path := applicationArguments.ElectionArtifactsPath
@@ -34,4 +33,5 @@ func main() {
 	}
 
 }
+
 */
