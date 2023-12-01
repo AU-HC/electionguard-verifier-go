@@ -23,7 +23,7 @@ type SingleThreadStrategy struct {
 
 func (s SingleThreadStrategy) verify(er *deserialize.ElectionRecord, verifier *Verifier) {
 	// Validate election parameters (Step 1)
-	// func()...
+	verifier.validateParameters(er)
 
 	// Validate guardian public-key (Step 2)
 
@@ -76,7 +76,7 @@ type ParallelStrategy struct {
 
 func (s ParallelStrategy) verify(er *deserialize.ElectionRecord, verifier *Verifier) {
 	// Validate election parameters (Step 1)
-	// go func()...
+	go verifier.validateParameters(er)
 
 	// Validate guardian public-key (Step 2)
 
