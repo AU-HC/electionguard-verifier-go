@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+var amountOfVerificationSteps = 2
+
 type Verifier struct {
 	logger           *zap.Logger                      // logger used to log information
 	constants        utility.CorrectElectionConstants // constants is election constants (p, q, r, g)
@@ -22,7 +24,7 @@ func MakeVerifier(logger *zap.Logger) *Verifier {
 	return &Verifier{
 		logger:    logger,
 		wg:        &sync.WaitGroup{},
-		helpers:   make([]*ValidationHelper, 20),
+		helpers:   make([]*ValidationHelper, amountOfVerificationSteps+1),
 		constants: utility.MakeCorrectElectionConstants(),
 	}
 }
@@ -34,8 +36,8 @@ func (v *Verifier) Verify(path string) bool {
 		return false
 	}
 
-	// Setting up synchronization (Will have to even if using one thread)
-	v.wg.Add(19)
+	// Setting up synchronization (will have to even if using one thread)
+	v.wg.Add(amountOfVerificationSteps)
 
 	// Starting time and verifying election using supplied strategy
 	start := time.Now()

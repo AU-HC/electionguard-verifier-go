@@ -18,11 +18,11 @@ func (v *Verifier) validateParameters(er *deserialize.ElectionRecord) {
 	g := er.ElectionConstants.Generator
 
 	// Verifying specification version and election parameters
-	helper.addCheck("(1.A) Specification is not the same as verifier specification.", er.Manifest.SpecVersion == "1.0.0")
+	helper.addCheck("(1.A) Specification is not the same as verifier specification.", er.Manifest.SpecVersion == "1.0")
 	helper.addCheck("(1.B) Large prime is not correct.", v.constants.P.Compare(&p))
 	helper.addCheck("(1.C) Small prime is not correct.", v.constants.Q.Compare(&q))
-	helper.addCheck("(1.D) Cofactor prime is not correct.", v.constants.C.Compare(&r))
-	helper.addCheck("(1.E) Generator prime is not correct.", v.constants.G.Compare(&g))
+	helper.addCheck("(1.D) Cofactor is not correct.", v.constants.C.Compare(&r))
+	helper.addCheck("(1.E) Generator is not correct.", v.constants.G.Compare(&g))
 
 	// Verifying election base hash
 	ver := schema.MakeBigIntFromString("76322E3000000000000000000000000000000000000000000000000000000000", 16) // hardcoded value (ver 2.0.0) with 27 empty bytes appended

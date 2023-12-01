@@ -14,16 +14,6 @@ func contains(slice []schema.Contest, s string) bool {
 	return false
 }
 
-func getGuardianPublicKey(id string, guardians []schema.Guardian) *schema.BigInt {
-	for _, guardian := range guardians {
-		if guardian.GuardianId == id {
-			return &guardian.ElectionPublicKey
-		}
-	}
-
-	return &schema.BigInt{}
-}
-
 func doesContestExistInManifest(objectID string, contests []schema.Contest) bool {
 	for _, contest := range contests {
 		if objectID == contest.ObjectID {
