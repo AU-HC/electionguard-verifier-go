@@ -1,59 +1,47 @@
 package schema
 
 type SubmittedBallot struct {
-	ObjectId     string          `json:"object_id"`
-	StyleId      string          `json:"style_id"`
-	ManifestHash BigInt          `json:"manifest_hash"`
-	Seed         BigInt          `json:"code_seed"`
-	Contests     []BallotContest `json:"contests"`
-	Code         BigInt          `json:"code"`
-	Timestamp    int             `json:"timestamp"`
-	CryptoHash   BigInt          `json:"crypto_hash"`
-	Nonce        interface{}     `json:"nonce"`
-	State        int             `json:"state"`
+	ObjectId string          `json:"object_id"`
+	Code     BigInt          `json:"code"`
+	Contests []BallotContest `json:"contests"`
 }
 
 type BallotContest struct {
 	ObjectId               string            `json:"object_id"`
-	SequenceOrder          int               `json:"sequence_order"`
-	DescriptionHash        BigInt            `json:"description_hash"`
-	BallotSelections       []BallotSelection `json:"ballot_selections"`
-	CiphertextAccumulation Ciphertext        `json:"ciphertext_accumulation"`
 	CryptoHash             BigInt            `json:"crypto_hash"`
-	Nonce                  interface{}       `json:"nonce"`
-	Proof                  ConstantProof     `json:"proof"`
-	ExtendedData           ExtendedData      `json:"extended_data"`
+	BallotSelections       []BallotSelection `json:"ballot_selections"`
+	Proof                  RangeProof        `json:"proof"`
+	CiphertextAccumulation Ciphertext        `json:"ciphertext_accumulation"`
 }
 
 type BallotSelection struct {
-	ObjectId               string           `json:"object_id"`
-	SequenceOrder          int              `json:"sequence_order"`
-	DescriptionHash        BigInt           `json:"description_hash"`
-	Ciphertext             Ciphertext       `json:"ciphertext"`
-	CryptoHash             BigInt           `json:"crypto_hash"`
-	IsPlaceholderSelection bool             `json:"is_placeholder_selection"`
-	Nonce                  interface{}      `json:"nonce"`
-	Proof                  DisjunctiveProof `json:"proof"`
+	ObjectId     string           `json:"object_id"`
+	CryptoHash   BigInt           `json:"crypto_hash"`
+	Proof        DisjunctiveProof `json:"proof"`
+	Ciphertext   Ciphertext       `json:"ciphertext"`
+	ExtendedData ExtendedData     `json:"extended_data"`
 }
 
 type DisjunctiveProof struct {
+	Challenge          BigInt `json:"challenge"`
 	ProofZeroPad       BigInt `json:"proof_zero_pad"`
 	ProofZeroData      BigInt `json:"proof_zero_data"`
+	ProofZeroChallenge BigInt `json:"proof_zero_challenge"`
+	ProofZeroResponse  BigInt `json:"proof_zero_response"`
 	ProofOnePad        BigInt `json:"proof_one_pad"`
 	ProofOneData       BigInt `json:"proof_one_data"`
-	ProofZeroChallenge BigInt `json:"proof_zero_challenge"`
 	ProofOneChallenge  BigInt `json:"proof_one_challenge"`
-	Challenge          BigInt `json:"challenge"`
-	ProofZeroResponse  BigInt `json:"proof_zero_response"`
 	ProofOneResponse   BigInt `json:"proof_one_response"`
-	Usage              string `json:"usage"`
 }
 
-type ConstantProof struct {
-	Pad       BigInt `json:"pad"`
-	Data      BigInt `json:"data"`
+type RangeProof struct {
+	Challenge  BigInt          `json:"challenge"`
+	Proofs     [][]interface{} `json:"proofs"`
+	RangeLimit int             `json:"range_limit"`
+}
+
+type ZeroKnowledgeProof struct {
+	xd        int
 	Challenge BigInt `json:"challenge"`
 	Response  BigInt `json:"response"`
-	Constant  int    `json:"constant"`
-	Usage     string `json:"usage"`
 }

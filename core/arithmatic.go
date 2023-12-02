@@ -105,3 +105,13 @@ func (v *Verifier) addP(a, b *schema.BigInt) *schema.BigInt {
 
 	return &result
 }
+
+func (v *Verifier) subQ(a, b *schema.BigInt) *schema.BigInt {
+	var result schema.BigInt
+	p := &v.constants.Q.Int
+
+	result.Sub(&a.Int, &b.Int)
+	result.Mod(&result.Int, p)
+
+	return &result
+}

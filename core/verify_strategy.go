@@ -31,38 +31,31 @@ func (s SingleThreadStrategy) verify(er *deserialize.ElectionRecord, verifier *V
 	// Validation election public-key (Step 3)
 	verifier.validateElectionPublicKey(er)
 
-	// Validate correctness of selection encryptions (Step 4)
+	// Validate correctness base hash (Step 4)
 	verifier.validateExtendedBaseHash(er)
 
-	// Validate adherence to vote limits (Step 5)
+	// Validate correctness of selection encryptions (Step 5)
+	verifier.validateSelectionEncryptions(er)
 
-	// Validate confirmation codes (Step 6)
+	// Validate adherence to vote limits (Step 6)
+	verifier.validateAdherenceToVoteLimits(er)
 
-	// Validate correctness of ballot aggregation (Step 7)
+	// Validate confirmation codes (Step 7)
+	verifier.validateConfirmationCodes(er)
 
-	// Validate correctness of partial decryptions (Step 8)
+	// Validate correctness of ballot aggregation (Step 8)
 
-	// Validate correctness of substitute data for missing guardians (Step 9)
+	// Validate correctness of tally decryptions (Step 9)
 
-	// Validate correctness of construction of replacement partial decryptions (Step 10)
+	// Validate correct decryption of tallies (Step 10)
 
-	// Validate correctness of tally decryption (Step 11)
+	// Correctness of decryptions of contest data (Step 11)
 
-	// Validate correctness of partial decryption for spoiled ballots (Step 12)
+	// Correctness of decryptions for challenged ballots (Step 12)
 
-	// Validate correctness of substitute data for spoiled ballots (Step 13)
+	// Validation of correct decryption of challenged ballots (Step 13)
 
-	// Validate of correct replacement partial decryptions for spoiled ballots (Step 14)
-
-	// Validation of correct decryption of spoiled ballots (Step 15)
-
-	// and validation of correctness of spoiled ballots (Step 16)
-
-	// Verifying correctness of contest data partial decryptions for spoiled ballots (Step 17)
-
-	// Validating correctness of substitute contest data for spoiled ballots (Step 18)
-
-	// Validating the correctness of contest replacement decryptions for spoiled ballots (Step 19)
+	// Verifications 14-18 should not be implemented
 }
 
 func (s SingleThreadStrategy) getBallotChunkSize(amountOfBallots int) int {
@@ -87,38 +80,31 @@ func (s ParallelStrategy) verify(er *deserialize.ElectionRecord, verifier *Verif
 	// Validation election public-key (Step 3)
 	go verifier.validateElectionPublicKey(er)
 
-	// Validate correctness of selection encryptions (Step 4)
+	// Validate correctness base hash (Step 4)
 	go verifier.validateExtendedBaseHash(er)
 
-	// Validate adherence to vote limits (Step 5)
+	// Validate correctness of selection encryptions (Step 5)
+	go verifier.validateSelectionEncryptions(er)
 
-	// Validate confirmation codes (Step 6)
+	// Validate adherence to vote limits (Step 6)
+	go verifier.validateAdherenceToVoteLimits(er)
 
-	// Validate correctness of ballot aggregation (Step 7)
+	// Validate confirmation codes (Step 7)
+	go verifier.validateConfirmationCodes(er)
 
-	// Validate correctness of partial decryptions (Step 8)
+	// Validate correctness of ballot aggregation (Step 8)
 
-	// Validate correctness of substitute data for missing guardians (Step 9)
+	// Validate correctness of tally decryptions (Step 9)
 
-	// Validate correctness of construction of replacement partial decryptions (Step 10)
+	// Validate correct decryption of tallies (Step 10)
 
-	// Validate correctness of tally decryption (Step 11)
+	// Correctness of decryptions of contest data (Step 11)
 
-	// Validate correctness of partial decryption for spoiled ballots (Step 12)
+	// Correctness of decryptions for challenged ballots (Step 12)
 
-	// Validate correctness of substitute data for spoiled ballots (Step 13)
+	// Validation of correct decryption of challenged ballots (Step 13)
 
-	// Validate of correct replacement partial decryptions for spoiled ballots (Step 14)
-
-	// Validation of correct decryption of spoiled ballots (Step 15)
-
-	// and validation of correctness of spoiled ballots (Step 16)
-
-	// Verifying correctness of contest data partial decryptions for spoiled ballots (Step 17)
-
-	// Validating correctness of substitute contest data for spoiled ballots (Step 18)
-
-	// Validating the correctness of contest replacement decryptions for spoiled ballots (Step 19)
+	// Verifications 14-18 should not be implemented
 
 	// Waiting for all goroutines to finish
 	verifier.wg.Wait()

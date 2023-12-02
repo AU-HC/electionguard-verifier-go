@@ -34,18 +34,6 @@ func getSpoiledBallot(objectID string, ballots []schema.SpoiledBallot) schema.Sp
 	return schema.SpoiledBallot{}
 }
 
-func isPlaceholderSelection(ballot schema.SubmittedBallot, objectID string) bool {
-	for _, contest := range ballot.Contests {
-		for _, selection := range contest.BallotSelections {
-			if selection.ObjectId == objectID {
-				return selection.IsPlaceholderSelection
-			}
-		}
-	}
-
-	return false
-}
-
 func doesManifestSelectionExist(objectID string, selections []schema.ManifestBallotSelection) bool {
 	for _, selection := range selections {
 		if selection.ObjectID == objectID {
@@ -86,18 +74,6 @@ func getBallotContest(objectID string, ballot schema.SubmittedBallot) schema.Bal
 		}
 	}
 	return schema.BallotContest{}
-}
-
-func getSelection(ballot schema.SubmittedBallot, contestId string, selectionId string) schema.Ciphertext {
-	contest := getBallotContest(contestId, ballot)
-	for _, selection := range contest.BallotSelections {
-		if selection.ObjectId == selectionId {
-			if !selection.IsPlaceholderSelection {
-				return selection.Ciphertext
-			}
-		}
-	}
-	return makeOneCiphertext()
 }
 
 func makeOneCiphertext() schema.Ciphertext {
