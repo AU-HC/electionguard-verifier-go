@@ -14,7 +14,6 @@ func (v *Verifier) validateGuardianPublicKeys(er *deserialize.ElectionRecord) {
 	g := &er.ElectionConstants.Generator
 	q := &er.ElectionConstants.SmallPrime
 
-	// Verifying election base hash
 	for _, guardian := range er.Guardians {
 		for _, schnorrProof := range guardian.CoefficientsProofs {
 			// Computing validity of Schnorr proof

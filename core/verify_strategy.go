@@ -29,6 +29,7 @@ func (s SingleThreadStrategy) verify(er *deserialize.ElectionRecord, verifier *V
 	verifier.validateGuardianPublicKeys(er)
 
 	// Validation election public-key (Step 3)
+	verifier.validateElectionPublicKey(er)
 
 	// Validate correctness of selection encryptions (Step 4)
 
@@ -83,6 +84,7 @@ func (s ParallelStrategy) verify(er *deserialize.ElectionRecord, verifier *Verif
 	go verifier.validateGuardianPublicKeys(er)
 
 	// Validation election public-key (Step 3)
+	go verifier.validateElectionPublicKey(er)
 
 	// Validate correctness of selection encryptions (Step 4)
 
