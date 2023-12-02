@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var amountOfVerificationSteps = 3
+var amountOfVerificationSteps = 4
 
 type Verifier struct {
 	logger           *zap.Logger                      // logger used to log information

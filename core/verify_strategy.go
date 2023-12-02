@@ -32,6 +32,7 @@ func (s SingleThreadStrategy) verify(er *deserialize.ElectionRecord, verifier *V
 	verifier.validateElectionPublicKey(er)
 
 	// Validate correctness of selection encryptions (Step 4)
+	verifier.validateExtendedBaseHash(er)
 
 	// Validate adherence to vote limits (Step 5)
 
@@ -87,6 +88,7 @@ func (s ParallelStrategy) verify(er *deserialize.ElectionRecord, verifier *Verif
 	go verifier.validateElectionPublicKey(er)
 
 	// Validate correctness of selection encryptions (Step 4)
+	go verifier.validateExtendedBaseHash(er)
 
 	// Validate adherence to vote limits (Step 5)
 
