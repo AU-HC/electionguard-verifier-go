@@ -24,16 +24,6 @@ func doesContestExistInManifest(objectID string, contests []schema.Contest) bool
 	return false
 }
 
-func getSpoiledBallot(objectID string, ballots []schema.SpoiledBallot) schema.SpoiledBallot {
-	for _, ballot := range ballots {
-		if ballot.ObjectId == objectID {
-			return ballot
-		}
-	}
-
-	return schema.SpoiledBallot{}
-}
-
 func doesManifestSelectionExist(objectID string, selections []schema.ManifestBallotSelection) bool {
 	for _, selection := range selections {
 		if selection.ObjectID == objectID {

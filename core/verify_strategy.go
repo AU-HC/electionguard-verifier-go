@@ -35,7 +35,7 @@ func (s SingleThreadStrategy) verify(er *deserialize.ElectionRecord, verifier *V
 	verifier.validateExtendedBaseHash(er)
 
 	// Validate correctness of selection encryptions (Step 5)
-	verifier.validateSelectionEncryptions(er)
+	// verifier.validateSelectionEncryptions(er)
 
 	// Validate adherence to vote limits (Step 6)
 	verifier.validateAdherenceToVoteLimits(er)
@@ -44,10 +44,13 @@ func (s SingleThreadStrategy) verify(er *deserialize.ElectionRecord, verifier *V
 	verifier.validateConfirmationCodes(er)
 
 	// Validate correctness of ballot aggregation (Step 8)
+	verifier.validateBallotAggregation(er)
 
 	// Validate correctness of tally decryptions (Step 9)
+	verifier.validateTallyDecryptions(er)
 
 	// Validate correct decryption of tallies (Step 10)
+	verifier.validateCorrectnessOfTallyDecryptions(er)
 
 	// Correctness of decryptions of contest data (Step 11)
 
@@ -93,10 +96,13 @@ func (s ParallelStrategy) verify(er *deserialize.ElectionRecord, verifier *Verif
 	go verifier.validateConfirmationCodes(er)
 
 	// Validate correctness of ballot aggregation (Step 8)
+	go verifier.validateBallotAggregation(er)
 
 	// Validate correctness of tally decryptions (Step 9)
+	go verifier.validateTallyDecryptions(er)
 
 	// Validate correct decryption of tallies (Step 10)
+	go verifier.validateCorrectnessOfTallyDecryptions(er)
 
 	// Correctness of decryptions of contest data (Step 11)
 

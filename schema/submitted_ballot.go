@@ -2,7 +2,7 @@ package schema
 
 type SubmittedBallot struct {
 	ObjectId string          `json:"object_id"`
-	Code     BigInt          `json:"code"`
+	Code     string          `json:"code"`
 	Contests []BallotContest `json:"contests"`
 }
 
@@ -36,12 +36,6 @@ type DisjunctiveProof struct {
 
 type RangeProof struct {
 	Challenge  BigInt          `json:"challenge"`
-	Proofs     [][]interface{} `json:"proofs"`
+	Proofs     [][]interface{} `json:"proofs"` // TODO?
 	RangeLimit int             `json:"range_limit"`
-}
-
-type ZeroKnowledgeProof struct {
-	xd        int
-	Challenge BigInt `json:"challenge"`
-	Response  BigInt `json:"response"`
 }

@@ -15,11 +15,10 @@ func (v *Verifier) validateConfirmationCodes(er *deserialize.ElectionRecord) {
 	noDuplicateConfirmationCodesFound := true
 	for _, ballot := range er.SubmittedBallots {
 		// No duplicate confirmation codes (6.B)
-		stringOfCode := ballot.Code.String()
-		if hasSeen[stringOfCode] {
+		if hasSeen[ballot.Code] {
 			noDuplicateConfirmationCodesFound = false
 		}
-		hasSeen[stringOfCode] = true
+		hasSeen[ballot.Code] = true
 	}
 	helper.addCheck("(7.C) Duplicate confirmation codes were found", noDuplicateConfirmationCodesFound)
 
