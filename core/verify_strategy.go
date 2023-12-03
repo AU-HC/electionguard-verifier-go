@@ -53,6 +53,7 @@ func (s SingleThreadStrategy) verify(er *deserialize.ElectionRecord, verifier *V
 	verifier.validateCorrectnessOfTallyDecryptions(er)
 
 	// Correctness of decryptions of contest data (Step 11)
+	verifier.validateCorrectnessOfDecryptionContestData(er)
 
 	// Correctness of decryptions for challenged ballots (Step 12)
 
@@ -105,6 +106,7 @@ func (s ParallelStrategy) verify(er *deserialize.ElectionRecord, verifier *Verif
 	go verifier.validateCorrectnessOfTallyDecryptions(er)
 
 	// Correctness of decryptions of contest data (Step 11)
+	go verifier.validateCorrectnessOfDecryptionContestData(er)
 
 	// Correctness of decryptions for challenged ballots (Step 12)
 
