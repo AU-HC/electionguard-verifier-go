@@ -55,9 +55,10 @@ func (v *Verifier) validateSelectionEncryptionForSlice(helper *ValidationHelper,
 				b1 := v.mulP(v.powP(k, w1), v.powP(&b, &c1))
 				expectedChallenge := crypto.Hash(q, "21", extendedBaseHash, k, a, b, a0, b0, a1, b1)
 
-				helper.addCheck("(5.D) The values alpha and beta are not valid.", v.isValidResidue(a) && v.isValidResidue(b))
-				helper.addCheck("(5.E) The proof values are not valid.", v.isInRange(c0) && v.isInRange(v0) && v.isInRange(c1) && v.isInRange(v1))
-				helper.addCheck("(5.F) The challenge value is not computed correctly.", v.addQ(&c0, &c1).Compare(expectedChallenge))
+				errorString := "(BallotID:" + ballot.Code + ", ContestID:" + contest.ObjectId + ", SelectionID:" + selection.ObjectId + ")"
+				helper.addCheck("(5.D) The values alpha and beta are not valid.", v.isValidResidue(a) && v.isValidResidue(b), errorString)
+				helper.addCheck("(5.E) The proof values are not valid.", v.isInRange(c0) && v.isInRange(v0) && v.isInRange(c1) && v.isInRange(v1), errorString)
+				helper.addCheck("(5.F) The challenge value is not computed correctly.", v.addQ(&c0, &c1).Compare(expectedChallenge), errorString)
 			}
 		}
 	}

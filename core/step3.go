@@ -16,7 +16,8 @@ func (v *Verifier) validateElectionPublicKey(er *deserialize.ElectionRecord) {
 	one := schema.MakeBigIntFromString("1", 10)
 	for _, guardian := range er.Guardians {
 		electionPublicKey = v.mulP(electionPublicKey, &guardian.Key)
-		helper.addCheck("(3.A) The guardian public-key is not in Z^r_p.", v.isValidResidue(guardian.Key) && !one.Compare(&guardian.Key))
+		errorString := "(GuardianID:" + guardian.ObjectID + ")"
+		helper.addCheck("(3.A) The guardian public-key is not in Z^r_p.", v.isValidResidue(guardian.Key) && !one.Compare(&guardian.Key), errorString)
 	}
 
 	// Validating the joint election public-key

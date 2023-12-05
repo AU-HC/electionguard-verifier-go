@@ -33,8 +33,9 @@ func (v *Verifier) validateBallotAggregation(er *deserialize.ElectionRecord) {
 				calculatedB = v.mulP(calculatedB, ballotData)
 			}
 
-			helper.addCheck("(8.A) The ballot aggregation was not correct for A.", a.Compare(calculatedA))
-			helper.addCheck("(8.B) The ballot aggregation was not correct for B.", b.Compare(calculatedB))
+			errorString := "(ContestID:" + contest.ObjectId + ", SelectionID:" + selection.ObjectId + ")"
+			helper.addCheck("(8.A) The ballot aggregation was not correct for A.", a.Compare(calculatedA), errorString)
+			helper.addCheck("(8.B) The ballot aggregation was not correct for B.", b.Compare(calculatedB), errorString)
 		}
 	}
 

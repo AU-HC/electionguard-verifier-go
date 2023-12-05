@@ -23,9 +23,10 @@ func (v *Verifier) validateCorrectnessOfTallyDecryptions(er *deserialize.Electio
 		if contestExistsInTally {
 			for _, selection := range contest.BallotSelections {
 				selectionID := selection.ObjectID
+				errorString := "(ContestID:" + contestID + ", SelectionID:" + selectionID + ")"
 
 				_, selectionExistsForContest := tallyContest.Selections[selectionID]
-				helper.addCheck("(10.D) Tally missing selectionID in contestID.", selectionExistsForContest)
+				helper.addCheck("(10.D) Tally missing selectionID in contestID.", selectionExistsForContest, errorString)
 			}
 		}
 	}
@@ -33,23 +34,28 @@ func (v *Verifier) validateCorrectnessOfTallyDecryptions(er *deserialize.Electio
 	// checking if all contests in all ballots exists in the tally
 	submittedBallotContests := allContests(er)
 	for ballotContest, _ := range submittedBallotContests {
+		errorString := "(ContestID:" + ballotContest + ")"
 		_, contestIDExistsInTally := tallyContests[ballotContest]
-		helper.addCheck("(10.E) Ballot contest has missing contest in tally.", contestIDExistsInTally)
+		helper.addCheck("(10.E) Ballot contest has missing contest in tally.", contestIDExistsInTally, errorString)
 	}
 
 	// checking if every contest selection in the tally is in the manifest, and validating the tally
 	for _, tallyContest := range tallyContests {
 		contestID := tallyContest.ObjectId
+		errorString := "(ContestID:" + contestID + ")"
+
 		contest, contestExistsInManifest := isContestIDInManifest(contestID, contests)
-		helper.addCheck("(10.B) ContestID missing in manifest contests.", contestExistsInManifest)
+		helper.addCheck("(10.B) ContestID missing in manifest contests.", contestExistsInManifest, errorString)
 		if !contestExistsInManifest {
 			continue // if the key is not present simply record the error and continue to next contest
 		}
 
 		selections := contest.BallotSelections
 		for _, tallySelection := range tallyContest.Selections {
+			errorString = "(ContestID:" + contestID + ", SelectionID:" + tallySelection.ObjectId + ")"
+
 			selectionExistsInManifest := isSelectionIDInManifest(tallySelection.ObjectId, selections)
-			helper.addCheck("(10.C) SelectionID missing in manifest selections.", selectionExistsInManifest)
+			helper.addCheck("(10.C) SelectionID missing in manifest selections.", selectionExistsInManifest, errorString)
 			if !selectionExistsInManifest {
 				continue // if the key is not present simply record the error and continue to next contest
 			}
@@ -57,7 +63,7 @@ func (v *Verifier) validateCorrectnessOfTallyDecryptions(er *deserialize.Electio
 			T := tallySelection.Value
 			t := schema.IntToBigInt(tallySelection.Tally)
 
-			helper.addCheck("(10.A) The tally value is incorrectly computed", T.Compare(v.powP(&k, t)))
+			helper.addCheck("(10.A) The tally value is incorrectly computed", T.Compare(v.powP(&k, t)), errorString)
 		}
 	}
 
