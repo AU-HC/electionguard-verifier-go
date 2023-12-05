@@ -3,6 +3,7 @@ package core
 import (
 	"electionguard-verifier-go/crypto"
 	"electionguard-verifier-go/deserialize"
+	"electionguard-verifier-go/schema"
 	"time"
 )
 
@@ -11,12 +12,33 @@ func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) 
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())
 
+	// Split the slice of ballots into multiple slices
+	ballots := er.SubmittedBallots
+	chunkSize := v.verifierStrategy.getBallotChunkSize(len(ballots))
+	for i := 0; i < len(ballots); i += chunkSize {
+		end := i + chunkSize
+
+		if end > len(ballots) {
+			end = len(ballots)
+		}
+
+		helper.wg.Add(1)
+		go v.validateSelectionEncryptionForSlice(helper, ballots[i:end], er)
+	}
+
+	helper.wg.Wait()
+	v.helpers[helper.VerificationStep] = helper
+}
+
+func (v *Verifier) validateSelectionEncryptionForSlice(helper *ValidationHelper, ballots []schema.SubmittedBallot, er *deserialize.ElectionRecord) {
+	defer helper.wg.Done()
+
 	q := &er.ElectionConstants.SmallPrime
 	g := &er.ElectionConstants.Generator
 	k := &er.CiphertextElectionRecord.ElgamalPublicKey
 	extendedBaseHash := er.CiphertextElectionRecord.CryptoExtendedBaseHash
 
-	for _, ballot := range er.SubmittedBallots {
+	for _, ballot := range ballots {
 		for _, contest := range ballot.Contests {
 			for _, selection := range contest.BallotSelections {
 				c0 := selection.Proof.ProofZeroChallenge
@@ -39,6 +61,4 @@ func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) 
 			}
 		}
 	}
-
-	v.helpers[helper.VerificationStep] = helper
 }
