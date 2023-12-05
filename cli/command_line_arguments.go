@@ -1,18 +1,19 @@
-package utility
+package cli
 
 import (
+	"electionguard-verifier-go/logging"
 	"flag"
 )
 
 type ApplicationArguments struct {
-	LoggingLevel              LoggingLevel
+	LoggingLevel              logging.Level
 	ElectionArtifactsPath     string
 	OutputPath                string
 	ConcurrentSteps           bool
 	AmountBenchmarkingSamples int
 }
 
-func InitApplicationArguments() ApplicationArguments {
+func GetApplicationArguments() ApplicationArguments {
 	// Creating struct with empty arguments
 	arguments := ApplicationArguments{}
 
@@ -30,13 +31,13 @@ func InitApplicationArguments() ApplicationArguments {
 	return arguments
 }
 
-func intToLoggingLevel(level int) LoggingLevel {
+func intToLoggingLevel(level int) logging.Level {
 	switch level {
 	case 1:
-		return LogInfo
+		return logging.LogInfo
 	case 2:
-		return LogDebug
+		return logging.LogDebug
 	default:
-		return LogNone
+		return logging.LogNone
 	}
 }

@@ -1,20 +1,21 @@
 package main
 
 import (
+	"electionguard-verifier-go/cli"
 	"electionguard-verifier-go/core"
-	"electionguard-verifier-go/utility"
+	"electionguard-verifier-go/logging"
 	"fmt"
 	"runtime"
 )
 
 func main() {
 	// Fetching flags and amount of logical cores for the CPU
-	applicationArguments := utility.InitApplicationArguments()
+	applicationArguments := cli.GetApplicationArguments()
 	path := applicationArguments.ElectionArtifactsPath
 	amountOfLogicalCores := runtime.NumCPU()
 
 	// Fetching logging level and creating logger
-	logger := utility.ConfigureLogger(applicationArguments.LoggingLevel)
+	logger := logging.ConfigureLogger(applicationArguments.LoggingLevel)
 	outputStrategy := core.MakeOutputStrategy(applicationArguments.OutputPath)
 	verifyStrategy := core.MakeVerifyStrategy(applicationArguments.ConcurrentSteps, amountOfLogicalCores)
 	samples := applicationArguments.AmountBenchmarkingSamples
@@ -37,5 +38,4 @@ func main() {
 	} else {
 		verifier.Benchmark(path, samples)
 	}
-
 }

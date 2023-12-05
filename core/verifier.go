@@ -2,7 +2,6 @@ package core
 
 import (
 	"electionguard-verifier-go/deserialize"
-	"electionguard-verifier-go/utility"
 	"go.uber.org/zap"
 	"strconv"
 	"sync"
@@ -12,12 +11,12 @@ import (
 var amountOfVerificationSteps = 13
 
 type Verifier struct {
-	logger           *zap.Logger                      // logger used to log information
-	constants        utility.CorrectElectionConstants // constants is election constants (p, q, r, g)
-	wg               *sync.WaitGroup                  // wg is used to sync goroutines for each step
-	helpers          []*ValidationHelper              // helpers are used to store result of each verification step
-	verifierStrategy VerifyStrategy                   // verifierStrategy is used to decide if the steps should be verified concurrently
-	outputStrategy   OutputStrategy                   // outputStrategy is used to output the verification results
+	logger           *zap.Logger              // logger used to log information
+	constants        CorrectElectionConstants // constants is election constants (p, q, r, g)
+	wg               *sync.WaitGroup          // wg is used to sync goroutines for each step
+	helpers          []*ValidationHelper      // helpers are used to store result of each verification step
+	verifierStrategy VerifyStrategy           // verifierStrategy is used to decide if the steps should be verified concurrently
+	outputStrategy   OutputStrategy           // outputStrategy is used to output the verification results
 }
 
 func MakeVerifier(logger *zap.Logger) *Verifier {
@@ -25,7 +24,7 @@ func MakeVerifier(logger *zap.Logger) *Verifier {
 		logger:    logger,
 		wg:        &sync.WaitGroup{},
 		helpers:   make([]*ValidationHelper, amountOfVerificationSteps+1),
-		constants: utility.MakeCorrectElectionConstants(),
+		constants: MakeCorrectElectionConstants(),
 	}
 }
 

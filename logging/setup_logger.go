@@ -1,13 +1,14 @@
-package utility
+package logging
 
 import (
+	"electionguard-verifier-go/error_handling"
 	"go.uber.org/zap"
 )
 
-func ConfigureLogger(level LoggingLevel) *zap.Logger {
+func ConfigureLogger(level Level) *zap.Logger {
 	// Creating logger and checking for error
 	logger, err := createLogger(level)
-	PanicError(err)
+	error_handling.PanicError(err)
 
 	// Created logger and returning
 	logger.Debug("successfully created logger")
@@ -15,7 +16,7 @@ func ConfigureLogger(level LoggingLevel) *zap.Logger {
 	return logger
 }
 
-func createLogger(level LoggingLevel) (*zap.Logger, error) {
+func createLogger(level Level) (*zap.Logger, error) {
 	switch level {
 	case LogDebug:
 		return zap.NewDevelopment()

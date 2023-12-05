@@ -2,7 +2,6 @@ package core
 
 import (
 	"electionguard-verifier-go/schema"
-	"electionguard-verifier-go/utility"
 	"math/big"
 )
 
@@ -49,7 +48,7 @@ func mul(a, b *schema.BigInt) *schema.BigInt {
 
 func modP(a *schema.BigInt) *schema.BigInt {
 	var result schema.BigInt
-	p := utility.GetP()
+	p := GetP()
 
 	result.Mod(&a.Int, &p.Int)
 	return &result
@@ -57,7 +56,7 @@ func modP(a *schema.BigInt) *schema.BigInt {
 
 func modQ(a *schema.BigInt) *schema.BigInt {
 	var result schema.BigInt
-	q := utility.GetQ()
+	q := GetQ()
 
 	result.Mod(&a.Int, &q.Int)
 	return &result

@@ -1,8 +1,8 @@
 package deserialize
 
 import (
+	"electionguard-verifier-go/error_handling"
 	"electionguard-verifier-go/schema"
-	"electionguard-verifier-go/utility"
 	"encoding/json"
 	"go.uber.org/zap"
 	"io"
@@ -85,7 +85,7 @@ func parseJsonToGoStruct[E any](logger *zap.Logger, errorMsg *strings.Builder, p
 	// Defer close on file, and handling any error
 	defer func(file *os.File) {
 		closeErr := file.Close()
-		utility.PanicError(closeErr)
+		error_handling.PanicError(closeErr)
 	}(file)
 
 	return typeOfObject
