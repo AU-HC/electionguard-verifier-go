@@ -56,4 +56,4 @@ $ ./electionguard-verifier-go -p="data/nov_2023/election_record/" -v=1 -o="outpu
 
 ## Remarks
 - The verifier is currently verifying specification `1.91.18`, a hybrid version that combines specification `2.0` and `1.53`. This specification aligns with the outlined criteria detailed in the [requirements document](https://www.electionguard.vote/images/MITRE-EG-CP-requirements.pdf) by MITRE.
-- To verify an `1.0` or `1.1` specification election please use a previous version of the verifier, which can be found [here](https://github.com/AU-HC/electionguard-verifier-go/tree/main/version/1.1).
+- To verify a `1.0` or `1.1` specification election please use a previous version of the verifier, which can be found [here](https://github.com/AU-HC/electionguard-verifier-go/tree/main/version/1.1).
