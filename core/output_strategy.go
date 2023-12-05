@@ -1,7 +1,7 @@
 package core
 
 import (
-	"electionguard-verifier-go/deserialize"
+	"electionguard-verifier-go/schema"
 	"encoding/json"
 	"os"
 )
@@ -21,14 +21,14 @@ type VerificationRecord struct {
 }
 
 type OutputStrategy interface {
-	Output(record deserialize.ElectionRecord, results []*ValidationHelper)
+	Output(record schema.ElectionRecord, results []*ValidationHelper)
 	OutputBenchmark(amountOfSamples int, runs []float64)
 }
 
 type NoOutputStrategy struct {
 }
 
-func (s NoOutputStrategy) Output(record deserialize.ElectionRecord, results []*ValidationHelper) {
+func (s NoOutputStrategy) Output(record schema.ElectionRecord, results []*ValidationHelper) {
 	// do nothing
 }
 
@@ -40,7 +40,7 @@ type ToFileStrategy struct {
 	Path string
 }
 
-func (s ToFileStrategy) Output(record deserialize.ElectionRecord, results []*ValidationHelper) {
+func (s ToFileStrategy) Output(record schema.ElectionRecord, results []*ValidationHelper) {
 	var helpers []ValidationHelper
 	electionIsValid := true
 

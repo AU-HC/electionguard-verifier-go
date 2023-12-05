@@ -1,7 +1,7 @@
 package core
 
 import (
-	"electionguard-verifier-go/deserialize"
+	"electionguard-verifier-go/schema"
 )
 
 func MakeVerifyStrategy(useMultipleThreads bool, amountOfLogicalCores int) VerifyStrategy {
@@ -13,7 +13,7 @@ func MakeVerifyStrategy(useMultipleThreads bool, amountOfLogicalCores int) Verif
 }
 
 type VerifyStrategy interface {
-	verify(er *deserialize.ElectionRecord, verifier *Verifier)
+	verify(er *schema.ElectionRecord, verifier *Verifier)
 	getBallotChunkSize(amountOfBallots int) int
 	getContestSplitSize() int
 }
@@ -21,7 +21,7 @@ type VerifyStrategy interface {
 type SingleThreadStrategy struct {
 }
 
-func (s SingleThreadStrategy) verify(er *deserialize.ElectionRecord, verifier *Verifier) {
+func (s SingleThreadStrategy) verify(er *schema.ElectionRecord, verifier *Verifier) {
 	// Validate election parameters (Step 1)
 	verifier.validateParameters(er)
 
@@ -76,7 +76,7 @@ type ParallelStrategy struct {
 	amountOfLogicalCores int // Amount of logical cores on the current machine, used to decide amount of goroutines
 }
 
-func (s ParallelStrategy) verify(er *deserialize.ElectionRecord, verifier *Verifier) {
+func (s ParallelStrategy) verify(er *schema.ElectionRecord, verifier *Verifier) {
 	// Validate election parameters (Step 1)
 	go verifier.validateParameters(er)
 
