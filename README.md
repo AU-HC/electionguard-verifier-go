@@ -38,7 +38,7 @@ The verifier also has alternate options which can be set, using the following fl
     - *1* : Logging of information
     - *2* : Logging of debug
 
-The project provides one sample election in the `/data/nov_2023` directory, courtesy of [ElectionGuard](https://www.electionguard.vote/elections/College_Park_Maryland_2023/). 
+The project provides one sample election in the `/data/nov_2023` directory, by courtesy of [ElectionGuard](https://www.electionguard.vote/elections/College_Park_Maryland_2023/). 
 To verify the College Park General Election with logging level set to `information` and output file `output.json` execute one of the following command blocks.
 ```
 $ go run main.go -p="data/nov_2023/election_record/" -v=1 -o="output.json" 
@@ -55,4 +55,5 @@ $ ./electionguard-verifier-go -p="data/nov_2023/election_record/" -v=1 -o="outpu
 ```
 
 ## Remarks
-The verifier is currently verifying specification `1.91.18`, a hybrid version that combines specification `2.0` and `1.53`. This specification aligns with the outlined criteria detailed in the [requirements document](https://www.electionguard.vote/images/MITRE-EG-CP-requirements.pdf) by MITRE.
+- The verifier is currently verifying specification `1.91.18`, a hybrid version that combines specification `2.0` and `1.53`. This specification aligns with the outlined criteria detailed in the [requirements document](https://www.electionguard.vote/images/MITRE-EG-CP-requirements.pdf) by MITRE.
+- To verify an `1.0` or `1.1` specification election please use a previous version of the verifier, which can be found [here](https://github.com/AU-HC/electionguard-verifier-go/tree/main/version/1.1).
