@@ -15,8 +15,9 @@ func MakeOutputStrategy(outputPath string) OutputStrategy {
 }
 
 type VerificationRecord struct {
-	ElectionName      string
-	VerificationSteps []ValidationHelper
+	ElectionName       string
+	VerificationStatus bool
+	VerificationSteps  []ValidationHelper
 }
 
 type OutputStrategy interface {
@@ -40,14 +41,20 @@ type ToFileStrategy struct {
 }
 
 func (s ToFileStrategy) Output(record deserialize.ElectionRecord, results []*ValidationHelper) {
-	var xd []ValidationHelper
-	for i, xd2 := range results {
+	var helpers []ValidationHelper
+	electionIsValid := true
+
+	for i, helper := range results {
 		if i != 0 {
-			xd = append(xd, *xd2)
+			if !helper.isValid {
+				electionIsValid = false
+			}
+			helpers = append(helpers, *helper)
 		}
 	}
-	vr := VerificationRecord{ElectionName: record.Manifest.ElectionScopeID, VerificationSteps: xd}
-	jsonBytes, err := json.MarshalIndent(vr, "", "  ")
+
+	verificationRecord := VerificationRecord{ElectionName: record.Manifest.ElectionScopeID, VerificationStatus: electionIsValid, VerificationSteps: helpers}
+	jsonBytes, err := json.MarshalIndent(verificationRecord, "", "  ")
 	if err != nil {
 		panic(err)
 	}

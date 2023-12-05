@@ -3,7 +3,6 @@ package core
 import (
 	"go.uber.org/zap"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -13,10 +12,9 @@ type ValidationHelper struct {
 	Description      string
 	Checked, Failed  int
 	TimeToVerify     int64 // in ms
-	ErrorMessage     string
+	ErrorMessage     []string
 	isValid          bool
 	logger           *zap.Logger
-	errorMsg         *strings.Builder
 	mu               sync.Mutex
 	wg               sync.WaitGroup
 }
@@ -25,7 +23,6 @@ func MakeValidationHelper(logger *zap.Logger, step int, description string) *Val
 	return &ValidationHelper{
 		logger:           logger,
 		Description:      description,
-		errorMsg:         &strings.Builder{},
 		VerificationStep: step,
 		isValid:          true,
 		mu:               sync.Mutex{},
@@ -47,11 +44,12 @@ func (v *ValidationHelper) addCheck(invariantDescription string, invariant bool,
 	// else append the error message and increment failed invariants
 	v.isValid = false
 	v.Failed += 1
-	v.errorMsg.WriteString(invariantDescription + " ")
-	for _, s := range errorString {
-		v.errorMsg.WriteString(s)
+	errorMessage := invariantDescription + " "
+	for _, s := range errorString { // only zero or one string is supplied (done as an optional argument)
+		errorMessage += s
 	}
-	v.errorMsg.WriteString("\n")
+	v.ErrorMessage = append(v.ErrorMessage, errorMessage)
+
 }
 
 func (v *ValidationHelper) validate() bool {
@@ -63,9 +61,10 @@ func (v *ValidationHelper) validate() bool {
 	}
 
 	v.logger.Info("[INVALID]: " + stepString + ". " + v.Description)
-	v.logger.Debug(v.errorMsg.String())
 
-	v.ErrorMessage = v.errorMsg.String()
+	for _, errorString := range v.ErrorMessage {
+		v.logger.Debug(errorString)
+	}
 	return false
 }
 
