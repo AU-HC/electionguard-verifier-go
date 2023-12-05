@@ -1,5 +1,5 @@
 # ElectionGuard Verifier in Go
-*Andreas Skriver Nielsen, Niklas Bille Olesen, and Hans-Christian Kjeldsen*
+*Andreas Skriver Nielsen, Niklas Bille, Markus Valdemar Grønkjær Jensen, and Hans-Christian Kjeldsen*
 
 ## Overview
 [ElectionGuard](https://github.com/microsoft/electionguard) is an open-source software development kit (SDK) by Microsoft,
