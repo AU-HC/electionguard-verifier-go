@@ -23,7 +23,8 @@ func (v *Verifier) validateTallyDecryptions(er *deserialize.ElectionRecord) {
 		for _, selection := range contest.Selections {
 			encryptedSelection := encryptedContest.Selections[selection.ObjectId]
 
-			helper.addCheck("(9.A) The challenge is not valid.", v.isInRange(selection.Proof.Response))
+			errorString := "(ContestID:" + contest.ObjectId + ", SelectionID:" + selection.ObjectId + ")"
+			helper.addCheck("(9.A) The challenge is not valid.", v.isInRange(selection.Proof.Response), errorString)
 
 			// Computing values needed for 9.C
 			m := v.mulP(&encryptedSelection.Ciphertext.Data, v.invP(&selection.Value))
@@ -38,7 +39,7 @@ func (v *Verifier) validateTallyDecryptions(er *deserialize.ElectionRecord) {
 			hash = crypto.Hash(q, hash, b)
 			hash = crypto.Hash(q, hash, m)
 
-			helper.addCheck("(9.C) The challenge is not computed correctly.", selection.Proof.Challenge.Compare(hash))
+			helper.addCheck("(9.C) The challenge is not computed correctly.", selection.Proof.Challenge.Compare(hash), errorString)
 		}
 	}
 

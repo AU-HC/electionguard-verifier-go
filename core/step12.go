@@ -22,16 +22,19 @@ func (v *Verifier) validateCorrectnessOfDecryptionsForSpoiledBallots(er *deseria
 		ballot, foundBallot := findBallot(spoiledBallot.Name, er)
 
 		if !foundBallot {
-			helper.addCheck("(12) Could not locate submitted ballot for spoiled ballotID: "+spoiledBallot.Name, false)
+			errorString := "(BallotID:" + spoiledBallot.Name + ")"
+			helper.addCheck("(12) Could not locate submitted ballot for spoiled ballot.", false, errorString)
 		}
 
 		for _, contest := range spoiledBallot.Contests {
 			for _, selection := range contest.Selections {
+				errorString := "(BallotID:" + spoiledBallot.Name + ", ContestID:" + contest.ObjectId + ", SelectionID:" + selection.ObjectId + ")"
+
 				encryptedSelection := findEncryptedSelectionForBallot(contest.ObjectId, selection.ObjectId, ballot)
 				alpha := encryptedSelection.Ciphertext.Pad
 				beta := encryptedSelection.Ciphertext.Data
 
-				helper.addCheck("(12.A) The challenge is not valid.", v.isInRange(selection.Proof.Response))
+				helper.addCheck("(12.A) The challenge is not valid.", v.isInRange(selection.Proof.Response), errorString)
 
 				// Computing values needed for 12.C
 				m := v.mulP(&beta, v.invP(&selection.Value))
@@ -46,7 +49,7 @@ func (v *Verifier) validateCorrectnessOfDecryptionsForSpoiledBallots(er *deseria
 				hash = crypto.Hash(q, hash, b)
 				hash = crypto.Hash(q, hash, m)
 
-				helper.addCheck("(12.C) The challenge is not computed correctly.", selection.Proof.Challenge.Compare(hash))
+				helper.addCheck("(12.C) The challenge is not computed correctly.", selection.Proof.Challenge.Compare(hash), errorString)
 			}
 		}
 	}

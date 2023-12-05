@@ -20,6 +20,8 @@ func (v *Verifier) validateConfirmationCodes(er *deserialize.ElectionRecord) {
 		}
 		hasSeen[ballot.Code] = true
 	}
+
+	// TODO: send the one that is duplicate?
 	helper.addCheck("(7.C) Duplicate confirmation codes were found", noDuplicateConfirmationCodesFound)
 
 	v.helpers[helper.VerificationStep] = helper

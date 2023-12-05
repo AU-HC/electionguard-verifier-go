@@ -33,7 +33,7 @@ func MakeValidationHelper(logger *zap.Logger, step int, description string) *Val
 	}
 }
 
-func (v *ValidationHelper) addCheck(invariantDescription string, invariant bool) {
+func (v *ValidationHelper) addCheck(invariantDescription string, invariant bool, errorString ...string) {
 	v.mu.Lock()
 	defer v.mu.Unlock()
 
@@ -47,7 +47,10 @@ func (v *ValidationHelper) addCheck(invariantDescription string, invariant bool)
 	// else append the error message and increment failed invariants
 	v.isValid = false
 	v.Failed += 1
-	v.errorMsg.WriteString(invariantDescription)
+	v.errorMsg.WriteString(invariantDescription + " ")
+	for _, s := range errorString {
+		v.errorMsg.WriteString(s)
+	}
 	v.errorMsg.WriteString("\n")
 }
 
