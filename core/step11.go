@@ -6,7 +6,7 @@ import (
 )
 
 func (v *Verifier) validateCorrectnessOfDecryptionContestData(er *deserialize.ElectionRecord) {
-	helper := MakeValidationHelper(v.logger, 11, "Correctness of decryptions of contest data")
+	helper := MakeValidationHelper(v.logger, 11, "Correctness of decryptions of contest data (Should not be implemented)")
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())
 

@@ -6,7 +6,7 @@ import (
 )
 
 func (v *Verifier) validateAdherenceToVoteLimits(er *deserialize.ElectionRecord) {
-	helper := MakeValidationHelper(v.logger, 6, "Adherence to vote limits")
+	helper := MakeValidationHelper(v.logger, 6, "Adherence to vote limits (Should not be implemented)")
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())
 

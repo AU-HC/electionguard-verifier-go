@@ -11,7 +11,7 @@ type ValidationHelper struct {
 	VerificationStep int
 	Description      string
 	Checked, Failed  int
-	TimeToVerify     int64 // in ms
+	TimeToVerifyInMs int64
 	ErrorMessage     []string
 	isValid          bool
 	logger           *zap.Logger
@@ -70,6 +70,6 @@ func (v *ValidationHelper) validate() bool {
 
 func (v *ValidationHelper) measureTimeToValidateStep(start time.Time) {
 	total := time.Since(start)
-	v.TimeToVerify = total.Milliseconds()
+	v.TimeToVerifyInMs = total.Milliseconds()
 	v.logger.Info("Validation of step " + strconv.Itoa(v.VerificationStep) + " took: " + total.String())
 }
