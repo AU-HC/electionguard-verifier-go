@@ -4,104 +4,70 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"electionguard-verifier-go/schema"
-	"electionguard-verifier-go/utility"
-	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
 )
+
+var separatorString = "|"
 
 var nilType = reflect.TypeOf(nil)
 var stringType = reflect.TypeOf("")
 var intType = reflect.TypeOf(1)
 var bigIntType = reflect.TypeOf(schema.BigInt{})
 var fileType = reflect.TypeOf(([]byte)(nil))
+var bigIntPointerType = reflect.TypeOf(schema.MakeBigIntFromString("0", 10))
 
-var ciphertextType = reflect.TypeOf(schema.Ciphertext{})
+func Hash(q *schema.BigInt, a ...interface{}) *schema.BigInt {
+	var buffer bytes.Buffer
 
-type SHA256 struct {
-	toHash bytes.Buffer
-	q      schema.BigInt
-}
-
-func MakeSHA256() *SHA256 {
-	return &SHA256{q: *utility.MakeCorrectElectionConstants().Q}
-}
-
-func (s *SHA256) update(data string) {
-	s.toHash.WriteString(data)
-}
-
-func (s *SHA256) digest() *schema.BigInt {
-	// Hashing all the data strings
-	var hash32 = sha256.Sum256([]byte(s.toHash.String()))
-
-	// Turning byte array into big.Int
-	intValueForHash := schema.MakeBigIntFromByteArray(hash32[:])
-
-	// Taking hash mod q
-	intValueForHash.Mod(&intValueForHash.Int, &s.q.Int)
-
-	return intValueForHash
-}
-
-func HashElems(a ...interface{}) *schema.BigInt {
-	h := MakeSHA256()
-	h.update("|")
-
+	// Then append the message (i.e. what is to be hashed)
 	for _, x := range a {
-		var hashMe string
+		// Append the separatorString
+		buffer.Write([]byte(separatorString))
 
+		var toBeHashed []byte
 		switch reflect.TypeOf(x) {
-		case nilType:
-			hashMe = "null"
 		case intType:
-			// Type cast and take the string representation of the int
+			// Type cast and create byte array which the number is to be stored in
 			xInt, _ := x.(int)
-			hashMe = strconv.Itoa(xInt)
+			toBeHashed = []byte(strconv.Itoa(xInt))
+
 		case stringType:
 			// Type cast (strings are already utf8-encoded in Golang)
-			hashMe, _ = x.(string)
+			xString, _ := x.(string)
+			toBeHashed = []byte(xString)
+
 		case bigIntType:
-			// Convert big.Int to hex
-			bigInt := x.(schema.BigInt).Int
-			hex := strings.ToUpper(bigInt.Text(16))
-			// Add leading zero if amount of digits is odd
-			hashMe = addLeadingZeroIfNeeded(hex)
-		case ciphertextType:
-			ciphertext := x.(schema.Ciphertext)
-			hash := HashElems(ciphertext.Pad, ciphertext.Data)
-			hex := strings.ToUpper(hash.Text(16))
-			hashMe = addLeadingZeroIfNeeded(hex)
+			bigInt := x.(schema.BigInt)
+			toBeHashed = hashBigInt(&bigInt)
+
+		case bigIntPointerType:
+			bigIntPointer := x.(*schema.BigInt)
+			toBeHashed = hashBigInt(bigIntPointer)
+
 		default:
-			s := reflect.ValueOf(x)
-			var slice = make([]interface{}, s.Len())
-
-			for i := 0; i < s.Len(); i++ {
-				slice[i] = s.Index(i).Interface()
-			}
-
-			sliceIsEmpty := len(slice) == 0
-			if sliceIsEmpty {
-				hashMe = "null"
-			} else {
-				// Else hash the elements and encode to hex
-				bigIntRes := HashElems(slice...)
-				hashMe = fmt.Sprintf("%X", bigIntRes)
-			}
+			panic("unknown type for hash")
 		}
-		h.update(hashMe + "|")
-	}
 
-	// Digest returns H(strings) mod q
-	return h.digest()
+		buffer.Write(toBeHashed)
+	}
+	// Append the separatorString
+	buffer.Write([]byte(separatorString))
+
+	// Hash the input and take mod q
+	hashByteArray := sha256.Sum256(buffer.Bytes())
+	hash := schema.MakeBigIntFromByteArray(hashByteArray[:])
+	hash.Mod(&hash.Int, &q.Int)
+	return hash
 }
 
-func addLeadingZeroIfNeeded(hex string) string {
-	stringLengthIsOdd := len(hex)%2 == 1
-	if stringLengthIsOdd {
-		return "0" + hex
-	}
+func hashBigInt(bigInt *schema.BigInt) []byte {
+	bigIntString := bigInt.Text(16)
 
-	return hex
+	if len(bigIntString)%2 == 1 {
+		bigIntString = "0" + bigIntString
+	}
+	bigIntString = strings.ToUpper(bigIntString)
+	return []byte(bigIntString)
 }

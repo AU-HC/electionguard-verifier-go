@@ -10,7 +10,7 @@ func (v *Verifier) validateConfirmationCodes(er *deserialize.ElectionRecord) {
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())
 
-	// Create map of seen confirmation codes (could also create a set by map[string]interface{}, however this would only save 1bit per code)
+	// Create map of seen confirmation codes
 	hasSeen := make(map[string]bool)
 	noDuplicateConfirmationCodesFound := true
 	for _, ballot := range er.SubmittedBallots {

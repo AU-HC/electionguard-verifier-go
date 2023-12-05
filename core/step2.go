@@ -23,7 +23,7 @@ func (v *Verifier) validateGuardianPublicKeys(er *deserialize.ElectionRecord) {
 
 			// Computing challenge
 			expectedC := schnorrProof.Challenge
-			calculatedC := crypto.Hash1(q, schnorrProof.PublicKey, schnorrProof.Commitment)
+			calculatedC := crypto.Hash(q, schnorrProof.PublicKey, schnorrProof.Commitment)
 
 			// Adding checks
 			helper.addCheck("(2.1) The Schnorr proof is not valid.", leftSchnorr.Compare(rightSchnorr))

@@ -56,8 +56,10 @@ func (s SingleThreadStrategy) verify(er *deserialize.ElectionRecord, verifier *V
 	verifier.validateCorrectnessOfDecryptionContestData(er)
 
 	// Correctness of decryptions for challenged ballots (Step 12)
+	verifier.validateCorrectnessOfDecryptionsForSpoiledBallots(er)
 
 	// Validation of correct decryption of challenged ballots (Step 13)
+	verifier.validateCorrectnessOfSpoiledBallotDecryptions(er)
 
 	// Verifications 14-18 should not be implemented
 }
@@ -109,8 +111,10 @@ func (s ParallelStrategy) verify(er *deserialize.ElectionRecord, verifier *Verif
 	go verifier.validateCorrectnessOfDecryptionContestData(er)
 
 	// Correctness of decryptions for challenged ballots (Step 12)
+	go verifier.validateCorrectnessOfDecryptionsForSpoiledBallots(er)
 
 	// Validation of correct decryption of challenged ballots (Step 13)
+	go verifier.validateCorrectnessOfSpoiledBallotDecryptions(er)
 
 	// Verifications 14-18 should not be implemented
 

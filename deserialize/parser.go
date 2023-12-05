@@ -12,7 +12,7 @@ import (
 
 type ElectionRecord struct {
 	// Election data fields
-	CiphertextElectionRecord  schema.CiphertextElectionRecord
+	CiphertextElectionRecord  schema.Context
 	Manifest                  schema.Manifest
 	ElectionConstants         schema.ElectionConstants
 	EncryptedTally            schema.EncryptedTally
@@ -42,7 +42,7 @@ func (p *Parser) ParseElectionRecord(path string) (*ElectionRecord, string) {
 	electionRecord := *MakeElectionRecord()
 
 	// Parsing singleton files
-	electionRecord.CiphertextElectionRecord = parseJsonToGoStruct(p.logger, p.errorMsg, path+"/context.json", schema.CiphertextElectionRecord{})
+	electionRecord.CiphertextElectionRecord = parseJsonToGoStruct(p.logger, p.errorMsg, path+"/context.json", schema.Context{})
 	electionRecord.Manifest = parseJsonToGoStruct(p.logger, p.errorMsg, path+"/manifest.json", schema.Manifest{})
 	electionRecord.EncryptedTally = parseJsonToGoStruct(p.logger, p.errorMsg, path+"/encrypted_tally.json", schema.EncryptedTally{})
 	electionRecord.ElectionConstants = parseJsonToGoStruct(p.logger, p.errorMsg, path+"/constants.json", schema.ElectionConstants{})
@@ -78,7 +78,7 @@ func parseJsonToGoStruct[E any](logger *zap.Logger, errorMsg *strings.Builder, p
 	// Unmarshal the bytearray into empty instance of variable of type E
 	jsonErr := json.Unmarshal(jsonByte, &typeOfObject)
 	if jsonErr != nil {
-		errorMsg.WriteString("Could not unmarshall file at " + path)
+		errorMsg.WriteString("Could not unmarshall file at " + path + ". Got error: " + jsonErr.Error())
 		return typeOfObject
 	}
 

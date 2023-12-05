@@ -18,7 +18,7 @@ func (v *Verifier) validateExtendedBaseHash(er *deserialize.ElectionRecord) {
 	electionPublicKey := er.CiphertextElectionRecord.ElgamalPublicKey
 
 	// Calculating hash and comparing it
-	calculatedExtendedBaseHash := crypto.Hash1(&q, baseHash, "12", electionPublicKey, commitmentHash)
+	calculatedExtendedBaseHash := crypto.Hash(&q, baseHash, "12", electionPublicKey, commitmentHash)
 	helper.addCheck("(4.A) The extended base hash is not computed correctly.", calculatedExtendedBaseHash.Compare(&extendedBaseHash))
 
 	v.helpers[helper.VerificationStep] = helper
