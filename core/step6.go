@@ -1,11 +1,11 @@
 package core
 
 import (
-	"electionguard-verifier-go/deserialize"
+	"electionguard-verifier-go/schema"
 	"time"
 )
 
-func (v *Verifier) validateAdherenceToVoteLimits(er *deserialize.ElectionRecord) {
+func (v *Verifier) validateAdherenceToVoteLimits(er *schema.ElectionRecord) {
 	helper := MakeValidationHelper(v.logger, 6, "Adherence to vote limits (Should not be implemented)")
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())

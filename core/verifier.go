@@ -2,6 +2,7 @@ package core
 
 import (
 	"electionguard-verifier-go/deserialize"
+	"electionguard-verifier-go/schema"
 	"go.uber.org/zap"
 	"strconv"
 	"sync"
@@ -67,7 +68,7 @@ func (v *Verifier) validateAllVerificationSteps() bool {
 	return electionIsValid
 }
 
-func (v *Verifier) getElectionRecord(path string) (*deserialize.ElectionRecord, bool) {
+func (v *Verifier) getElectionRecord(path string) (*schema.ElectionRecord, bool) {
 	// Fetch and deserialize election data (Step 0)
 	parser := *deserialize.MakeParser(v.logger)
 	electionRecord, err := parser.ParseElectionRecord(path)

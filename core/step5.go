@@ -2,12 +2,11 @@ package core
 
 import (
 	"electionguard-verifier-go/crypto"
-	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
 	"time"
 )
 
-func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) {
+func (v *Verifier) validateSelectionEncryptions(er *schema.ElectionRecord) {
 	helper := MakeValidationHelper(v.logger, 5, "Selection encryptions are correct")
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())
@@ -30,7 +29,7 @@ func (v *Verifier) validateSelectionEncryptions(er *deserialize.ElectionRecord) 
 	v.helpers[helper.VerificationStep] = helper
 }
 
-func (v *Verifier) validateSelectionEncryptionForSlice(helper *ValidationHelper, ballots []schema.SubmittedBallot, er *deserialize.ElectionRecord) {
+func (v *Verifier) validateSelectionEncryptionForSlice(helper *ValidationHelper, ballots []schema.SubmittedBallot, er *schema.ElectionRecord) {
 	defer helper.wg.Done()
 
 	q := &er.ElectionConstants.SmallPrime

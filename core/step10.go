@@ -1,12 +1,11 @@
 package core
 
 import (
-	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
 	"time"
 )
 
-func (v *Verifier) validateCorrectnessOfTallyDecryptions(er *deserialize.ElectionRecord) {
+func (v *Verifier) validateCorrectnessOfTallyDecryptions(er *schema.ElectionRecord) {
 	helper := MakeValidationHelper(v.logger, 10, "Correct decryption of tallies")
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())
@@ -88,7 +87,7 @@ func isContestIDInManifest(contestID string, contests []schema.ManifestContest) 
 	return schema.ManifestContest{}, false
 }
 
-func allContests(er *deserialize.ElectionRecord) map[string]struct{} {
+func allContests(er *schema.ElectionRecord) map[string]struct{} {
 	result := make(map[string]struct{})
 
 	for _, ballot := range er.SubmittedBallots {

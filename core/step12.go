@@ -2,12 +2,11 @@ package core
 
 import (
 	"electionguard-verifier-go/crypto"
-	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
 	"time"
 )
 
-func (v *Verifier) validateCorrectnessOfDecryptionsForSpoiledBallots(er *deserialize.ElectionRecord) {
+func (v *Verifier) validateCorrectnessOfDecryptionsForSpoiledBallots(er *schema.ElectionRecord) {
 	helper := MakeValidationHelper(v.logger, 12, "Correctness of decryptions for spoiled ballots")
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())
@@ -70,7 +69,7 @@ func findEncryptedSelectionForBallot(contestID, selectionID string, ballot schem
 	return schema.BallotSelection{}
 }
 
-func findBallot(name string, er *deserialize.ElectionRecord) (schema.SubmittedBallot, bool) {
+func findBallot(name string, er *schema.ElectionRecord) (schema.SubmittedBallot, bool) {
 	for _, ballot := range er.SubmittedBallots {
 		if name == ballot.Code {
 			return ballot, true

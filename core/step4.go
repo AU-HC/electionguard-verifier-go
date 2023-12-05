@@ -2,11 +2,11 @@ package core
 
 import (
 	"electionguard-verifier-go/crypto"
-	"electionguard-verifier-go/deserialize"
+	"electionguard-verifier-go/schema"
 	"time"
 )
 
-func (v *Verifier) validateExtendedBaseHash(er *deserialize.ElectionRecord) {
+func (v *Verifier) validateExtendedBaseHash(er *schema.ElectionRecord) {
 	helper := MakeValidationHelper(v.logger, 4, "Extended base hash is correct")
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())

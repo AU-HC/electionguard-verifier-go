@@ -2,12 +2,11 @@ package core
 
 import (
 	"electionguard-verifier-go/crypto"
-	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
 	"time"
 )
 
-func (v *Verifier) validateParameters(er *deserialize.ElectionRecord) {
+func (v *Verifier) validateParameters(er *schema.ElectionRecord) {
 	helper := MakeValidationHelper(v.logger, 1, "Election parameters are correct")
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())

@@ -1,11 +1,11 @@
 package core
 
 import (
-	"electionguard-verifier-go/deserialize"
+	"electionguard-verifier-go/schema"
 	"time"
 )
 
-func (v *Verifier) validateConfirmationCodes(er *deserialize.ElectionRecord) {
+func (v *Verifier) validateConfirmationCodes(er *schema.ElectionRecord) {
 	helper := MakeValidationHelper(v.logger, 7, "No duplicate confirmation codes found")
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())

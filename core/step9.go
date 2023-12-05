@@ -2,11 +2,11 @@ package core
 
 import (
 	"electionguard-verifier-go/crypto"
-	"electionguard-verifier-go/deserialize"
+	"electionguard-verifier-go/schema"
 	"time"
 )
 
-func (v *Verifier) validateTallyDecryptions(er *deserialize.ElectionRecord) {
+func (v *Verifier) validateTallyDecryptions(er *schema.ElectionRecord) {
 	helper := MakeValidationHelper(v.logger, 9, "Correctness of tally decryptions")
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())

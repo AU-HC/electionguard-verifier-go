@@ -10,24 +10,6 @@ import (
 	"strings"
 )
 
-type ElectionRecord struct {
-	// Election data fields
-	CiphertextElectionRecord  schema.Context
-	Manifest                  schema.Manifest
-	ElectionConstants         schema.ElectionConstants
-	EncryptedTally            schema.EncryptedTally
-	PlaintextTally            schema.PlaintextTally
-	CoefficientsValidationSet schema.CoefficientsValidationSet
-	SubmittedBallots          []schema.SubmittedBallot
-	SpoiledBallots            []schema.SpoiledBallot
-	EncryptionDevices         []schema.EncryptionDevice
-	Guardians                 []schema.Guardian
-}
-
-func MakeElectionRecord() *ElectionRecord {
-	return &ElectionRecord{}
-}
-
 type Parser struct {
 	logger   *zap.Logger
 	errorMsg *strings.Builder
@@ -37,9 +19,9 @@ func MakeParser(logger *zap.Logger) *Parser {
 	return &Parser{logger: logger, errorMsg: &strings.Builder{}}
 }
 
-func (p *Parser) ParseElectionRecord(path string) (*ElectionRecord, string) {
+func (p *Parser) ParseElectionRecord(path string) (*schema.ElectionRecord, string) {
 	// Creating election record struct
-	electionRecord := *MakeElectionRecord()
+	electionRecord := schema.ElectionRecord{}
 
 	// Parsing singleton files
 	electionRecord.CiphertextElectionRecord = parseJsonToGoStruct(p.logger, p.errorMsg, path+"/context.json", schema.Context{})
@@ -102,8 +84,8 @@ func parseJsonToSlice[E any](logger *zap.Logger, errorMsg *strings.Builder, path
 	// Creating list and parsing all files in directory
 	var l []E
 	for _, file := range files {
-		var xd E
-		toBeAppended := parseJsonToGoStruct(logger, errorMsg, path+file.Name(), &xd)
+		var val E
+		toBeAppended := parseJsonToGoStruct(logger, errorMsg, path+file.Name(), &val)
 		l = append(l, *toBeAppended)
 	}
 
