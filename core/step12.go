@@ -19,7 +19,6 @@ func (v *Verifier) validateCorrectnessOfDecryptionsForSpoiledBallots(er *schema.
 
 	for _, spoiledBallot := range er.SpoiledBallots {
 		ballot, foundBallot := findBallot(spoiledBallot.Name, er)
-
 		if !foundBallot {
 			errorString := "(BallotID:" + spoiledBallot.Name + ")"
 			helper.addCheck("(12) Could not locate submitted ballot for spoiled ballot.", false, errorString)
@@ -33,7 +32,7 @@ func (v *Verifier) validateCorrectnessOfDecryptionsForSpoiledBallots(er *schema.
 				alpha := encryptedSelection.Ciphertext.Pad
 				beta := encryptedSelection.Ciphertext.Data
 
-				helper.addCheck("(12.A) The challenge is not valid.", v.isInRange(selection.Proof.Response), errorString)
+				helper.addCheck("(12.A) The response is not valid.", v.isInRange(selection.Proof.Response), errorString)
 
 				// Computing values needed for 12.C
 				m := v.mulP(&beta, v.invP(&selection.Value))

@@ -19,7 +19,7 @@ func (v *Verifier) validateExtendedBaseHash(er *schema.ElectionRecord) {
 
 	// Calculating hash and comparing it
 	calculatedExtendedBaseHash := crypto.Hash(&q, baseHash, "12", electionPublicKey, commitmentHash)
-	helper.addCheck("(4.A) The extended base hash is not computed correctly.", calculatedExtendedBaseHash.Compare(&extendedBaseHash))
+	helper.addCheck("(4.B) The extended base hash is not computed correctly.", calculatedExtendedBaseHash.Compare(&extendedBaseHash))
 
 	v.helpers[helper.VerificationStep] = helper
 }

@@ -28,10 +28,10 @@ func (v *Verifier) validateGuardianPublicKeys(er *schema.ElectionRecord) {
 
 			// Adding checks
 			errorString := fmt.Sprintf("(GuardianID:"+guardian.ObjectID+", Coefficient:%d)", i)
-			helper.addCheck("(2.1) The Schnorr proof is not valid.", leftSchnorr.Compare(rightSchnorr), errorString)
 			helper.addCheck("(2.A) The value K_{i, j} is not in Z^r_p.", v.isValidResidue(schnorrProof.PublicKey), errorString)
 			helper.addCheck("(2.B) The value v_{i, j} is not in Z_q.", v.isInRange(response), errorString)
-			helper.addCheck("(2.C) The challenge is not computed correctly", expectedC.Compare(calculatedC), errorString)
+			helper.addCheck("(2.C) The Schnorr proof is not valid.", leftSchnorr.Compare(rightSchnorr), errorString)
+			helper.addCheck("(2.D) The challenge is not computed correctly", expectedC.Compare(calculatedC), errorString)
 		}
 	}
 

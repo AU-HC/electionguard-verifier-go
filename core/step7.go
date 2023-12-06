@@ -17,12 +17,10 @@ func (v *Verifier) validateConfirmationCodes(er *schema.ElectionRecord) {
 		// No duplicate confirmation codes (6.B)
 		if hasSeen[ballot.Code] {
 			noDuplicateConfirmationCodesFound = false
+			helper.addCheck("(7.C) Duplicate confirmation codes were found.", noDuplicateConfirmationCodesFound, ballot.Code)
 		}
 		hasSeen[ballot.Code] = true
 	}
-
-	// TODO: send the one that is duplicate?
-	helper.addCheck("(7.C) Duplicate confirmation codes were found", noDuplicateConfirmationCodesFound)
 
 	v.helpers[helper.VerificationStep] = helper
 }

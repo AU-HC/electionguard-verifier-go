@@ -10,26 +10,32 @@ func (v *Verifier) validateBallotAggregation(er *schema.ElectionRecord) {
 	defer v.wg.Done()
 	defer helper.measureTimeToValidateStep(time.Now())
 
-	// TODO: check only contests/selections in manifest file
+	// creating set of spoiled ballot codes for easier lookup
+	spoiledBallots := map[string]struct{}{}
+	for _, spoiledBallot := range er.SpoiledBallots {
+		spoiledBallots[spoiledBallot.Name] = struct{}{}
+	}
+
+	// verifying step 8
 	for _, contest := range er.EncryptedTally.Contests {
 		for _, selection := range contest.Selections {
 			a := selection.Ciphertext.Pad
 			b := selection.Ciphertext.Data
 
-			calculatedA := schema.MakeBigIntFromString("1", 10)
-			calculatedB := schema.MakeBigIntFromString("1", 10)
+			calculatedA := schema.IntToBigInt(1)
+			calculatedB := schema.IntToBigInt(1)
 
 			for _, ballot := range er.SubmittedBallots {
 				// check if ballot is spoiled or cast
-				ballotIsSpoiled := isBallotSpoiled(ballot, er)
+				_, ballotIsSpoiled := spoiledBallots[ballot.Code]
 				if ballotIsSpoiled {
 					continue
 				}
 
 				// find the correct contest/selection and multiply with the current aggregate
-				ballotPad, ballotData := findEncryptionForContestAndSelection(contest.ObjectId, selection.ObjectId, ballot)
-				calculatedA = v.mulP(calculatedA, ballotPad)
-				calculatedB = v.mulP(calculatedB, ballotData)
+				ballotEncryption := findEncryptionForContestAndSelection(contest.ObjectId, selection.ObjectId, ballot)
+				calculatedA = v.mulP(calculatedA, &ballotEncryption.Pad)
+				calculatedB = v.mulP(calculatedB, &ballotEncryption.Data)
 			}
 
 			errorString := "(ContestID:" + contest.ObjectId + ", SelectionID:" + selection.ObjectId + ")"
@@ -41,28 +47,17 @@ func (v *Verifier) validateBallotAggregation(er *schema.ElectionRecord) {
 	v.helpers[helper.VerificationStep] = helper
 }
 
-// TODO: handle error if contest/selection ids not found
-func findEncryptionForContestAndSelection(contestID, selectionID string, ballot schema.SubmittedBallot) (*schema.BigInt, *schema.BigInt) {
+func findEncryptionForContestAndSelection(contestID, selectionID string, ballot schema.SubmittedBallot) *schema.Ciphertext {
 	for _, contest := range ballot.Contests {
 		if contestID == contest.ObjectId {
 			for _, selection := range contest.BallotSelections {
 				if selectionID == selection.ObjectId {
-					return &selection.Ciphertext.Pad, &selection.Ciphertext.Data
+					return &selection.Ciphertext
 				}
 			}
 		}
 	}
 
-	one := schema.MakeBigIntFromString("1", 10)
-	return one, one
-}
-
-// TODO: create set of spoiledBallot names for quicker lookup
-func isBallotSpoiled(ballot schema.SubmittedBallot, er *schema.ElectionRecord) bool {
-	for _, spoiledBallot := range er.SpoiledBallots {
-		if ballot.Code == spoiledBallot.Name {
-			return true
-		}
-	}
-	return false
+	one := *schema.IntToBigInt(1)
+	return &schema.Ciphertext{Pad: one, Data: one}
 }
