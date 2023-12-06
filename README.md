@@ -38,7 +38,7 @@ The verifier also has alternate options which can be set, using the following fl
     - *1* : Logging of information
     - *2* : Logging of debug
 
-The project provides one sample election in the `/data/nov_2023` directory, by courtesy of [ElectionGuard](https://www.electionguard.vote/elections/College_Park_Maryland_2023/). 
+The project provides one sample election in the `/data/nov_2023` directory, courtesy of [ElectionGuard](https://www.electionguard.vote/elections/College_Park_Maryland_2023/). 
 To verify the College Park General Election with logging level set to `information` and output file `output.json` execute one of the following command blocks.
 ```
 $ go run main.go -p="data/nov_2023/election_record/" -v=1 -o="output.json" 
