@@ -19,7 +19,14 @@ type MockBallotSelection struct {
 }
 
 type MockRangeProof struct {
-	Challenge  BigInt               `json:"Challenge"`
-	Proofs     []ChaumPedersenProof `json:"Proofs"`
-	RangeLimit int                  `json:"RangeLimit"`
+	Challenge  BigInt                   `json:"Challenge"`
+	Proofs     []MockChaumPedersenProof `json:"Proofs"`
+	RangeLimit int                      `json:"RangeLimit"`
+}
+
+type MockChaumPedersenProof struct {
+	Pad       BigInt `json:"ProofPad"`
+	Data      BigInt `json:"ProofData"`
+	Challenge BigInt `json:"Challenge"`
+	Response  BigInt `json:"ProofResponse"`
 }
