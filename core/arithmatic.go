@@ -85,6 +85,20 @@ func (v *Verifier) mulP(a, b *schema.BigInt) *schema.BigInt {
 	return &result
 }
 
+func (v *Verifier) mulQ(a, b *schema.BigInt) *schema.BigInt {
+	var result schema.BigInt
+	q := &v.constants.Q.Int
+
+	modOfA := a.Mod(&a.Int, q)
+	modOfB := b.Mod(&b.Int, q)
+
+	// Multiply the two numbers mod n
+	result.Mul(modOfA, modOfB)
+	result.Mod(&result.Int, q)
+
+	return &result
+}
+
 func (v *Verifier) addQ(a, b *schema.BigInt) *schema.BigInt {
 	var result schema.BigInt
 	q := &v.constants.Q.Int

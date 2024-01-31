@@ -9,6 +9,7 @@ type ElectionRecord struct {
 	PlaintextTally            PlaintextTally
 	CoefficientsValidationSet CoefficientsValidationSet
 	SubmittedBallots          []SubmittedBallot
+	MockBallots               []MockBallot
 	SpoiledBallots            []SpoiledBallot
 	EncryptionDevices         []EncryptionDevice
 	Guardians                 []Guardian

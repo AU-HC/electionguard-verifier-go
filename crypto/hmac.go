@@ -3,12 +3,12 @@ package crypto
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"electionguard-verifier-go/schema"
 	"encoding/binary"
-	"math/big"
 	"reflect"
 )
 
-func HMAC(key big.Int, domainSeparator byte, a ...interface{}) *big.Int {
+func HMAC(q schema.BigInt, key schema.BigInt, domainSeparator byte, a ...interface{}) *schema.BigInt {
 	mac := hmac.New(sha256.New, key.Bytes())
 
 	// Add the domain separator first
@@ -37,11 +37,11 @@ func HMAC(key big.Int, domainSeparator byte, a ...interface{}) *big.Int {
 			toBeHashed = append(pad, []byte(xString)...)
 
 		case bigIntType:
-			bigInt := x.(big.Int)
+			bigInt := x.(schema.BigInt)
 			toBeHashed = bigInt.Bytes()
 
 		case bigIntPointerType:
-			bigIntPointer := x.(*big.Int)
+			bigIntPointer := x.(*schema.BigInt)
 			toBeHashed = bigIntPointer.Bytes()
 
 		case fileType:
@@ -58,6 +58,7 @@ func HMAC(key big.Int, domainSeparator byte, a ...interface{}) *big.Int {
 		mac.Write(toBeHashed)
 	}
 
-	hash := new(big.Int).SetBytes(mac.Sum(nil))
-	return mod.ModQ(hash)
+	hash := schema.MakeBigIntFromByteArray(mac.Sum(nil))
+	hash.Mod(&hash.Int, &q.Int)
+	return hash
 }
