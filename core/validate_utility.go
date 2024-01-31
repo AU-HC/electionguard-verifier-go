@@ -44,7 +44,7 @@ func (v *ValidationHelper) addCheck(invariantDescription string, invariant bool,
 	// else append the error message and increment failed invariants
 	v.isValid = false
 	v.Failed += 1
-	errorMessage := invariantDescription + " "
+	errorMessage := invariantDescription
 	for _, s := range errorString { // only zero or one string is supplied (done as an optional argument)
 		errorMessage += s
 	}
