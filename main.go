@@ -35,7 +35,7 @@ func main() {
 			fmt.Println("Election is invalid")
 		}
 	} else {
-		verifier.Benchmark(path, samples)
-		// verifier.BenchmarkDeserialization(samples)
+		// verifier.Benchmark(path, samples)
+		verifier.BenchmarkDeserialization(samples)
 	}
 }

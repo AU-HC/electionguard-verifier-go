@@ -117,13 +117,14 @@ func (v *Verifier) Benchmark(path string, amountOfSamples int) {
 }
 
 func (v *Verifier) BenchmarkDeserialization(amountOfSamples int) {
-	paths := make([]string, 6)
-	paths[0] = "data/benchmark-10/election_record/"
-	paths[1] = "data/benchmark-25/election_record/"
-	paths[2] = "data/benchmark-50/election_record/"
-	paths[3] = "data/benchmark-100/election_record/"
-	paths[4] = "data/benchmark-200/election_record/"
-	paths[5] = "data/benchmark-500/election_record/"
+	paths := make([]string, 7)
+	paths[0] = "data/sandbox_25/election_record/"
+	paths[1] = "data/sandbox_50/election_record/"
+	paths[2] = "data/sandbox_100/election_record/"
+	paths[3] = "data/sandbox_250/election_record/"
+	paths[4] = "data/sandbox_500/election_record/"
+	paths[5] = "data/sandbox_1000/election_record/"
+	paths[6] = "data/sandbox/election_record/"
 
 	for _, path := range paths {
 		var totalTime int64
@@ -136,5 +137,4 @@ func (v *Verifier) BenchmarkDeserialization(amountOfSamples int) {
 		totalTimeInMs := int(totalTime) / amountOfSamples
 		fmt.Println(fmt.Sprintf("\"%s\" had mean time of: %d ms", path, totalTimeInMs))
 	}
-
 }
