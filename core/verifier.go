@@ -3,6 +3,7 @@ package core
 import (
 	"electionguard-verifier-go/deserialize"
 	"electionguard-verifier-go/schema"
+	"fmt"
 	"go.uber.org/zap"
 	"strconv"
 	"sync"
@@ -115,4 +116,28 @@ func (v *Verifier) Benchmark(path string, amountOfSamples int) {
 
 	// Output the data to a json file
 	v.outputStrategy.OutputBenchmark(amountOfSamples, runs)
+}
+
+func (v *Verifier) BenchmarkDeserialization(amountOfSamples int) {
+	paths := make([]string, 8)
+	paths[0] = "data/sandbox_25/election_record/"
+	paths[1] = "data/sandbox_50/election_record/"
+	paths[2] = "data/sandbox_100/election_record/"
+	paths[3] = "data/sandbox_250/election_record/"
+	paths[4] = "data/sandbox_500/election_record/"
+	paths[4] = "data/sandbox_750/election_record/"
+	paths[5] = "data/sandbox_1000/election_record/"
+	paths[6] = "data/sandbox/election_record/"
+
+	for _, path := range paths {
+		var totalTime int64
+		for i := 0; i < amountOfSamples; i++ {
+			start := time.Now()
+			_, _ = v.getElectionRecord(path)
+			totalTime += time.Since(start).Milliseconds()
+		}
+
+		totalTimeInMs := int(totalTime) / amountOfSamples
+		fmt.Println(fmt.Sprintf("\"%s\" had mean time of: %d ms", path, totalTimeInMs))
+	}
 }
