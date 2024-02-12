@@ -34,7 +34,7 @@ func (p *Parser) ParseElectionRecord(path string) (*schema.ElectionRecord, strin
 	// Directory of file(s)
 	electionRecord.EncryptionDevices = parseJsonToSlice(p.logger, p.errorMsg, path+"/encryption_devices/", schema.EncryptionDevice{})
 	electionRecord.SpoiledBallots = parseJsonToSlice(p.logger, p.errorMsg, path+"/spoiled_ballots/", schema.SpoiledBallot{})
-	electionRecord.SubmittedBallots = parseJsonToSlice(p.logger, p.errorMsg, path+"/submitted_ballots/", schema.SubmittedBallot{})
+	// electionRecord.SubmittedBallots = parseJsonToSlice(p.logger, p.errorMsg, path+"/submitted_ballots/", schema.SubmittedBallot{})
 	electionRecord.MockBallots = parseJsonToSlice(p.logger, p.errorMsg, path+"/mock_ballots/", schema.MockBallot{})
 	electionRecord.Guardians = parseJsonToSlice(p.logger, p.errorMsg, path+"/guardians/", schema.Guardian{})
 

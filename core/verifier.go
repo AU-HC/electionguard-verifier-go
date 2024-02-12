@@ -125,9 +125,9 @@ func (v *Verifier) BenchmarkDeserialization(amountOfSamples int) {
 	paths[2] = "data/sandbox_100/election_record/"
 	paths[3] = "data/sandbox_250/election_record/"
 	paths[4] = "data/sandbox_500/election_record/"
-	paths[4] = "data/sandbox_750/election_record/"
-	paths[5] = "data/sandbox_1000/election_record/"
-	paths[6] = "data/sandbox/election_record/"
+	paths[5] = "data/sandbox_750/election_record/"
+	paths[6] = "data/sandbox_1000/election_record/"
+	paths[7] = "data/sandbox/election_record/"
 
 	for _, path := range paths {
 		var totalTime int64
