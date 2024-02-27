@@ -101,7 +101,7 @@ func (v *Verifier) Benchmark(path string, amountOfSamples int) {
 	runs := make([]float64, amountOfSamples)
 	for i := 0; i < amountOfSamples; i++ {
 		// Setting up synchronization (Will have to even if using one thread)
-		v.wg.Add(19)
+		v.wg.Add(13)
 
 		// Starting time and verifying election using supplied strategy
 		start := time.Now()
